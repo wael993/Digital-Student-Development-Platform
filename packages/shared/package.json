@@ -1,0 +1,6 @@
+{
+  "name": "@digital-student/shared",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Reserved for shared types and utilities used by the API and other services."
+}

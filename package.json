@@ -1,0 +1,20 @@
+{
+  "name": "digital-student",
+  "private": true,
+  "description": "Digital Student education platform monorepo",
+  "workspaces": [
+    "apps/api",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @digital-student/api",
+    "build": "npm run build -w @digital-student/api",
+    "lint": "npm run lint -w @digital-student/api",
+    "format": "npm run format -w @digital-student/api",
+    "test": "npm run test -w @digital-student/api",
+    "typecheck": "npm run typecheck -w @digital-student/api"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

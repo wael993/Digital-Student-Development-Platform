@@ -1,0 +1,16 @@
+.git
+.github
+.idea
+.vscode
+.cursor
+**/.DS_Store
+**/.env
+**/.env.*
+!**/.env.example
+node_modules
+**/dist
+**/coverage
+apps/mobile
+docs
+*.md
+!packages/shared/README.md
