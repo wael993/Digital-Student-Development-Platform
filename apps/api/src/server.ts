@@ -1,13 +1,14 @@
 import { createApp } from './app';
 import { env, isTest } from './config/env';
 import { connectMongo } from './config/mongodb';
-import { connectRedis } from './config/redis';
+// import { connectRedis } from './config/redis';
 import { logger } from './utils/logger';
 
 async function start(): Promise<void> {
   if (!isTest) {
     await connectMongo();
-    await connectRedis();
+    // TODO: Connect Redis after making redis service
+    // await connectRedis();
   }
 
   const app = createApp();

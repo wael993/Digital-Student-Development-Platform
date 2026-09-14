@@ -2,6 +2,13 @@
 
 Project documentation for the Digital Student platform.
 
+## how to run simulator
+
+- flutter devices
+- for android: flutter emulators --launch Medium_Phone
+- for ios : flutter emulators --launch apple_ios_simulator
+- flutter run -d <id>
+
 ## Product
 
 - [DOC-001 Product Vision](DOC-001-product-vision.md) — what we are building and for whom

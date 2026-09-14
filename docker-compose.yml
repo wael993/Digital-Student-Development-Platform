@@ -15,8 +15,6 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     volumes:
       - ./apps/api/src:/app/apps/api/src
     command: npm run dev -w @digital-student/api
