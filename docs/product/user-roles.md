@@ -8,7 +8,7 @@ Canonical roles:
 
 A user may hold more than one role in the same organization (teacher who is also a parent). Services union the scopes. Empty scope for a role still means no access through that role.
 
-Details of JWT and middleware land in AUTH-001 / TENANT-001. This file is the permission design they must implement.
+Details of JWT and middleware: AUTH-001 implements a single `role` per user. TENANT-001 adds permission checks. A user may hold more than one role later if needed.
 
 ## High-level scope
 

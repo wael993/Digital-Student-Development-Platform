@@ -10,7 +10,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3000
-      MONGODB_URI: mongodb://mongo:27017/digital-student
+      MONGODB_URI: mongodb://mongo:27017/dev-platform
       REDIS_URL: redis://redis:6379
     depends_on:
       mongo:

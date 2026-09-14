@@ -1,8 +1,10 @@
 import type { Request, Response } from 'express';
 
-export function notFoundHandler(req: Request, res: Response): void {
+export function notFoundHandler(_req: Request, res: Response): void {
   res.status(404).json({
-    error: 'Not Found',
-    path: req.path,
+    error: {
+      code: 'NOT_FOUND',
+      message: 'Not Found',
+    },
   });
 }

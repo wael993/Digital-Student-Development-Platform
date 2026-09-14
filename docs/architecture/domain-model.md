@@ -1,8 +1,8 @@
 # Domain Model & MongoDB Strategy
 
-ARCH-001 source of truth for entities, relationships, and the initial collection plan.
+ARCH-001 source of truth for entities, relationships, and the collection plan.
 
-Do not create these collections or business APIs in this ticket. AUTH-001 and later tickets implement them.
+AUTH-001 implemented `users` and `refresh_tokens`. Do not create the remaining collections until their tickets.
 
 ## Design decisions
 
@@ -15,7 +15,9 @@ Do not create these collections or business APIs in this ticket. AUTH-001 and la
 | Student–guardian link | `student_guardians` (many-to-many) | — |
 | Student accounts | Students are **not** authenticated users in v1 | Student login if a later stage needs it |
 | User tenancy | A user belongs to **one** `organizationId` | `memberships` if a parent has children at two orgs |
-| Roles | `roles: Role[]` on the user (a teacher may also be a guardian) | — |
+| Roles | AUTH-001 stores a single `role`. | `roles[]` if TENANT-001 needs teacher+guardian on one account |
+| User name | `firstName` + `lastName` | — |
+| User status | `ACTIVE` \| `INACTIVE` | Invites / suspend in a later ticket |
 | Daily status | Derived from `student_events`. Optional denormalized cache on `students` | Cache is never the source of truth |
 | Events | Append-only. Correct with `voidedAt`, do not delete | — |
 | Attendance | Separate daily roll-up in `attendance`, not a flag on the student | Written alongside arrival events in ATTENDANCE-001 |
@@ -139,17 +141,13 @@ Authenticated person. Students are not users.
 | --- | --- | --- |
 | organizationId | ObjectId | v1: exactly one org |
 | email | string | Unique globally in v1 |
-| passwordHash | string | AUTH-001 |
-| name | string | |
-| phone | string? | |
-| roles | enum[] | `ADMIN`, `SUPERVISOR`, `TEACHER`, `DRIVER`, `GUARDIAN` |
-| status | enum | `INVITED`, `ACTIVE`, `SUSPENDED`, `DISABLED` |
-| campusIds | ObjectId[] | SUPERVISOR operational scope |
-| classroomIds | ObjectId[] | TEACHER scope |
-| routeIds | ObjectId[] | DRIVER scope |
-| deletedAt | Date? | Soft-delete |
+| passwordHash | string | Never returned by the API |
+| firstName | string | |
+| lastName | string | |
+| role | enum | `ADMIN`, `SUPERVISOR`, `TEACHER`, `DRIVER`, `GUARDIAN` |
+| status | enum | `ACTIVE`, `INACTIVE` |
 
-Guardian child access is **not** stored only on the user. It lives in `student_guardians`.
+TENANT-001 adds assignment scope (`campusIds`, `classroomIds`, `routeIds`). Guardian child access is **not** stored on the user. It lives in `student_guardians`.
 
 ### Student
 
@@ -313,7 +311,8 @@ Implement collections when the matching ticket lands, not all at once.
 | `organizations` | n/a (root) | archive via status | TENANT-001 |
 | `campuses` | organizationId | status / optional deletedAt | TENANT-001 |
 | `classrooms` | organizationId | status | STUDENT-001 |
-| `users` | organizationId | deletedAt | AUTH-001 |
+| `users` | organizationId | no (INACTIVE status) | AUTH-001 |
+| `refresh_tokens` | organizationId | revoke via `revokedAt` | AUTH-001 |
 | `students` | organizationId | deletedAt | STUDENT-001 |
 | `student_guardians` | organizationId | hard-remove link | STUDENT-001 |
 | `student_events` | organizationId | void only | JOURNEY-001 |
@@ -333,7 +332,9 @@ All tenant collections: `{ organizationId: 1 }` is never enough alone. Prefer co
 | Collection | Index | Purpose |
 | --- | --- | --- |
 | users | unique `{ email: 1 }` | Login |
-| users | `{ organizationId: 1, roles: 1 }` | Staff lists |
+| users | `{ organizationId: 1, role: 1 }` | Staff lists |
+| refresh_tokens | unique `{ jti: 1 }` | Refresh lookup |
+| refresh_tokens | `{ userId: 1 }` | Logout / revoke |
 | campuses | `{ organizationId: 1, name: 1 }` | List |
 | classrooms | `{ organizationId: 1, campusId: 1 }` | List by campus |
 | students | unique `{ organizationId: 1, qrToken: 1 }` | QR lookup |

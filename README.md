@@ -66,7 +66,7 @@ Root `.env` is used by the API and Docker Compose. Placeholders:
 
 - `NODE_ENV`, `PORT`
 - `MONGODB_URI`, `REDIS_URL`
-- `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` (reserved; unused for now)
+- `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `JWT_ACCESS_EXPIRES_IN`, `JWT_REFRESH_EXPIRES_IN`
 - `STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY` (reserved)
 - `AI_API_KEY` (reserved)
 
@@ -115,6 +115,14 @@ npm run dev
 
 The API listens on `http://localhost:3000`.
 
+Create a local teacher you can log in with:
+
+```bash
+npm run seed
+```
+
+Credentials: `teacher@example.com` / `Password123!`
+
 Useful commands (run from the repository root):
 
 | Command | Description |
@@ -124,6 +132,7 @@ Useful commands (run from the repository root):
 | `npm run lint` | Run ESLint |
 | `npm run format` | Format API sources with Prettier |
 | `npm test` | Run API tests |
+| `npm run seed` | Upsert the local teacher login (`teacher@example.com`) |
 | `npm run typecheck` | TypeScript strict check (`tsc --noEmit`) |
 
 ### Flutter application

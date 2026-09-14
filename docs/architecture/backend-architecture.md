@@ -148,7 +148,7 @@ Cross-tenant ids return **404**, not 403, so callers cannot probe other organiza
 }
 ```
 
-`details` only for 422. Current health/error middleware may still return `{ "error": "Internal Server Error" }` until AUTH-001 replaces it.
+`details` only for 422.
 
 ### Pagination
 
@@ -191,11 +191,12 @@ Sort: `sort=-occurredAt` or `sort=name`. Allow-list fields. Default `-createdAt`
 ### Authentication and authorization
 
 - `Authorization: Bearer <accessToken>`
-- Unauthenticated routes: health, login, refresh, invite accept (AUTH-001)
-- JWT claims: `sub` (userId), `organizationId`, `roles`
-- Refresh tokens in Flutter secure storage; API stores a hash, not the raw token
-- Every business route: authenticate → tenant context → permission check → scoped query
-- The mobile app never authorizes by itself. Hidden UI is not a security control.
+- Unauthenticated routes: health, `POST /api/v1/auth/login`, `POST /api/v1/auth/refresh`, `POST /api/v1/auth/logout`
+- JWT access claims: `sub` (userId), `organizationId`, `role`, `type: "access"`
+- Refresh tokens are JWTs with `jti`; logout sets `revokedAt` on that session
+- Access token default lifetime `15m` (`JWT_ACCESS_EXPIRES_IN`); refresh default `7d` (`JWT_REFRESH_EXPIRES_IN`)
+- `GET /api/v1/auth/me` requires a valid access token
+- TENANT-001 adds permission checks. The mobile app never authorizes by itself.
 
 Versioning: URL prefix `/api/v1`. Breaking changes go to `/api/v2`. Additive fields are allowed in v1.
 
@@ -204,14 +205,12 @@ Versioning: URL prefix `/api/v1`. Breaking changes go to `/api/v2`. Additive fie
 See [domain-model.md](./domain-model.md) for collections and indexes.
 
 - One database, many tenants via `organizationId` on documents
-- No production collections in ARCH-001
-- Indexes listed in the domain model are required when the collection is created
+- AUTH-001 created `users` and `refresh_tokens`. Other collections wait for their tickets.
 
 ## Next implementation tickets
 
-1. **AUTH-001** — users, password hashing, JWT, refresh, replace error envelope
-2. **TENANT-001** — organizations, campuses, tenant middleware, RBAC helpers
-3. **STUDENT-001** — students, classrooms, student_guardians
-4. **ATTENDANCE-001** — attendance + QR
-5. **JOURNEY-001** — student_events + timeline
-6. **PARENT-001** — parent-facing reads of that data
+1. **TENANT-001** — organizations, campuses, tenant middleware, RBAC helpers
+2. **STUDENT-001** — students, classrooms, student_guardians
+3. **ATTENDANCE-001** — attendance + QR
+4. **JOURNEY-001** — student_events + timeline
+5. **PARENT-001** — parent-facing reads of that data

@@ -22,7 +22,7 @@ v1: a user has exactly one `organizationId`. A parent with children at two schoo
 
 ```
 Authenticated user
-  → JWT (sub, organizationId, roles)
+- JWT (`sub`, `organizationId`, `role`)
   → Middleware copies claims onto req.auth
   → Authorization (role + scope)
   → Repository query { organizationId: auth.organizationId, ... }

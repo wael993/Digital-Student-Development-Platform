@@ -1,11 +1,18 @@
 type LogMeta = unknown;
 
+function serializeMeta(meta: LogMeta): unknown {
+  if (meta instanceof Error) {
+    return { name: meta.name, message: meta.message, stack: meta.stack };
+  }
+  return meta;
+}
+
 function write(level: 'info' | 'warn' | 'error', message: string, meta?: LogMeta): void {
   const entry = {
     level,
     message,
     time: new Date().toISOString(),
-    ...(meta === undefined ? {} : { meta }),
+    ...(meta === undefined ? {} : { meta: serializeMeta(meta) }),
   };
 
   if (level === 'error') {

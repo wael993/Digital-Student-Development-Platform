@@ -9,9 +9,9 @@ The platform stores children's names, photos, attendance, and daily events. The 
 | Who is a user | Staff and guardians. Students are not accounts in v1 |
 | Proof | JWT access token + refresh token |
 | Storage (mobile) | Secure storage only, never shared prefs / logs |
-| Storage (API) | Password hash (argon2id or bcrypt). Refresh token **hash** |
+| Storage (API) | Password hash (bcryptjs). Refresh session row with `jti` / `revokedAt` |
 | Transport | HTTPS in non-local environments |
-| Claims | `sub`, `organizationId`, `roles` — not a shopping list of student ids (those change) |
+| Claims | `sub`, `organizationId`, `role` — not a shopping list of student ids (those change) |
 
 Public routes: health, login, token refresh, invite acceptance. Everything else requires a valid user.
 

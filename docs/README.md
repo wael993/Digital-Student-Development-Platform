@@ -34,4 +34,4 @@ Local environment and how to run the stack: root [README](../README.md).
 
 ## What to implement next
 
-ARCH-001 is documentation only. Next tickets: AUTH-001 → TENANT-001 → STUDENT-001 → ATTENDANCE-001 → JOURNEY-001 → PARENT-001.
+ARCH-001 and AUTH-001 are done. Next: TENANT-001 → STUDENT-001 → ATTENDANCE-001 → JOURNEY-001 → PARENT-001.
