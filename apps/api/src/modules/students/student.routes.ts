@@ -4,6 +4,7 @@ import { authorize } from '../../middlewares/authorize';
 import { tenantContext } from '../../middlewares/tenantContext';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { journeyRouter } from '../journey/journey.routes';
+import { studentMediaRouter } from '../media/media.routes';
 import {
   deleteStudentGuardian,
   getStudent,
@@ -18,6 +19,7 @@ export const studentsRouter = Router();
 
 studentsRouter.use(authenticate, tenantContext);
 studentsRouter.use(journeyRouter);
+studentsRouter.use(studentMediaRouter);
 
 studentsRouter.get('/', authorize('students.read'), asyncHandler(getStudents));
 studentsRouter.get('/:id', authorize('students.read'), asyncHandler(getStudent));

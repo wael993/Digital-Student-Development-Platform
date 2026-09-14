@@ -25,6 +25,9 @@ class User {
   bool get canRecordJourneyEvents =>
       role == 'ADMIN' || role == 'SUPERVISOR' || role == 'TEACHER';
 
+  bool get canUploadStudentPhoto =>
+      role == 'ADMIN' || role == 'SUPERVISOR' || role == 'TEACHER';
+
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,
@@ -37,11 +40,11 @@ class User {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'organizationId': organizationId,
-        'firstName': firstName,
-        'lastName': lastName,
-        'email': email,
-        'role': role,
-      };
+    'id': id,
+    'organizationId': organizationId,
+    'firstName': firstName,
+    'lastName': lastName,
+    'email': email,
+    'role': role,
+  };
 }

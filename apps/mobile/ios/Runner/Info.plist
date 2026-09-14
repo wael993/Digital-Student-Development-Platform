@@ -27,7 +27,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera access is used to scan student attendance QR codes.</string>
+	<string>Camera access is used to scan student attendance QR codes and take student photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo library access is used to attach an existing student photo.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Photo library access is used to attach an existing student photo.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

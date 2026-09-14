@@ -9,7 +9,6 @@ import 'package:digital_student/features/auth/data/auth_repository.dart';
 import 'package:digital_student/features/auth/models/user.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:digital_student/features/parent/models/parent_labels.dart';
-import 'package:digital_student/features/parent/providers/parent_providers.dart';
 import 'package:digital_student/features/parent/repositories/parent_repository.dart';
 import 'package:digital_student/features/parent/screens/child_journey_screen.dart';
 import 'package:digital_student/features/parent/screens/parent_dashboard_screen.dart';
@@ -182,6 +181,7 @@ void main() {
     await tester.pump();
     await tester.idle();
     await tester.pump();
+    await tester.idle();
   }
 
   test('maps parent-friendly labels and greetings', () {
@@ -217,6 +217,9 @@ void main() {
       if (options.path.contains('/journey/today')) {
         return _json(200, _journeyJson());
       }
+      if (options.path.contains('/media')) {
+        return _json(200, {'items': <dynamic>[]});
+      }
       return _json(404, {
         'error': {'code': 'NOT_FOUND', 'message': 'Not Found'},
       });
@@ -247,6 +250,9 @@ void main() {
   testWidgets('shows empty children and no-attendance states', (tester) async {
     final dio = _dio((options) async {
       if (options.path.endsWith('/parent/children')) {
+        return _json(200, {'items': <dynamic>[]});
+      }
+      if (options.path.contains('/media')) {
         return _json(200, {'items': <dynamic>[]});
       }
       return _json(404, {
@@ -317,6 +323,9 @@ void main() {
         if (options.path.contains('/journey/today')) {
           return _json(200, _journeyJson());
         }
+        if (options.path.contains('/media')) {
+          return _json(200, {'items': <dynamic>[]});
+        }
         return _json(404, {
           'error': {'code': 'NOT_FOUND', 'message': 'Not Found'},
         });
@@ -331,6 +340,7 @@ void main() {
       await tester.pump();
       await tester.idle();
       await tester.pump();
+      await tester.idle();
 
       expect(find.text('On the bus'), findsOneWidget);
       expect(find.text('Currently in class'), findsNothing);
@@ -356,6 +366,9 @@ void main() {
           isTrue,
         );
         return _json(200, _journeyJson());
+      }
+      if (options.path.contains('/media')) {
+        return _json(200, {'items': <dynamic>[]});
       }
       return _json(404, {
         'error': {'code': 'NOT_FOUND', 'message': 'Not Found'},
@@ -387,6 +400,9 @@ void main() {
     final dio = _dio((options) async {
       if (options.path.contains('/journey/today')) {
         return _json(200, _journeyJson(currentState: null, events: []));
+      }
+      if (options.path.contains('/media')) {
+        return _json(200, {'items': <dynamic>[]});
       }
       return _json(404, {
         'error': {
@@ -440,6 +456,9 @@ void main() {
         journeyLoads += 1;
         return _json(200, _journeyJson());
       }
+      if (options.path.contains('/media')) {
+        return _json(200, {'items': <dynamic>[]});
+      }
       return _json(404, {
         'error': {'code': 'NOT_FOUND', 'message': 'Not Found'},
       });
@@ -468,6 +487,9 @@ void main() {
           'items': [_childJson()],
         });
       }
+      if (options.path.contains('/media')) {
+        return _json(200, {'items': <dynamic>[]});
+      }
       if (fail) {
         fail = false;
         return _json(500, {
@@ -485,6 +507,7 @@ void main() {
     await tester.pump();
     await tester.idle();
     await tester.pump();
+    await tester.idle();
 
     expect(find.text('Currently in class'), findsOneWidget);
   });

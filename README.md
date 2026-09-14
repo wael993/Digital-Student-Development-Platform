@@ -67,7 +67,8 @@ Root `.env` is used by the API and Docker Compose. Placeholders:
 - `NODE_ENV`, `PORT`
 - `MONGODB_URI`, `REDIS_URL`
 - `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `JWT_ACCESS_EXPIRES_IN`, `JWT_REFRESH_EXPIRES_IN`
-- `STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY` (reserved)
+- `API_PUBLIC_URL`, `MEDIA_MAX_UPLOAD_BYTES`, `MEDIA_SIGNED_URL_TTL_SECONDS`, `MEDIA_STORAGE_DIR` (local private media; HMAC signed URLs)
+- `STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY` (S3-compatible adapter later)
 - `AI_API_KEY` (reserved)
 
 `apps/mobile/.env` contains `API_BASE_URL` for the Flutter app.

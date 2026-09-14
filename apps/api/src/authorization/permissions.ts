@@ -24,6 +24,7 @@ export const PERMISSIONS = [
   'buses.manage',
   'media.read',
   'media.create',
+  'media.delete',
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -55,6 +56,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     'buses.manage',
     'media.read',
     'media.create',
+    'media.delete',
   ],
   TEACHER: [
     'organizations.read',

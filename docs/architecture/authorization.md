@@ -67,9 +67,9 @@ Defined in `apps/api/src/authorization/permissions.ts`. Add a permission when th
 | `attendance.read` / `attendance.create` | Daily attendance |
 | `student_events.read` / `student_events.create` | Journey events |
 | `buses.read` / `buses.manage` | Buses and routes |
-| `media.read` / `media.create` | Photos / files |
+| `media.read` / `media.create` / `media.delete` | Photos / files |
 
-TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATCH /api/v1/organizations/current`. STUDENT-001 uses `campuses.*`, `classrooms.*`, `students.*`, and `guardians.*`. ATTENDANCE-001 uses `attendance.read` and `attendance.create`. JOURNEY-001 uses `student_events.read` and `student_events.create`.
+TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATCH /api/v1/organizations/current`. STUDENT-001 uses `campuses.*`, `classrooms.*`, `students.*`, and `guardians.*`. ATTENDANCE-001 uses `attendance.read` and `attendance.create`. JOURNEY-001 uses `student_events.read` and `student_events.create`. MEDIA-001 uses `media.read`, `media.create`, and `media.delete`.
 
 ## Role × permission matrix
 
@@ -86,6 +86,7 @@ TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATC
 | View own children | n/a | n/a | n/a | n/a | yes |
 | Manage buses / routes | yes | yes | no | assigned route (read) | no |
 | Media create | yes | yes | yes | no | no |
+| Media delete | yes | yes | no | no | no |
 
 “Assigned” and “own children” are **resource-level** rules, not extra permissions. A teacher with `students.read` still must fail closed on another class’s student.
 
@@ -124,7 +125,7 @@ Session already includes `id`, `organizationId`, and `role` from `/auth/login` a
 
 ## Testing
 
-See `apps/api/tests/tenant.test.ts`, `apps/api/tests/authorization.test.ts`, `apps/api/tests/students.test.ts`, `apps/api/tests/attendance.test.ts`, and `apps/api/tests/journey.test.ts`. Minimum coverage:
+See `apps/api/tests/tenant.test.ts`, `apps/api/tests/authorization.test.ts`, `apps/api/tests/students.test.ts`, `apps/api/tests/attendance.test.ts`, `apps/api/tests/journey.test.ts`, and `apps/api/tests/media.test.ts`. Minimum coverage:
 
 - unauthenticated / invalid / expired → 401
 - teacher `PATCH /organizations/current` → 403; admin → 200

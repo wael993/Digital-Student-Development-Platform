@@ -1,6 +1,12 @@
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:digital_student/features/guardians/presentation/add_guardian_page.dart';
 import 'package:digital_student/features/journey/presentation/journey_page.dart';
+import 'package:digital_student/features/media/models/student_media.dart';
+import 'package:digital_student/features/media/providers/media_providers.dart';
+import 'package:digital_student/features/media/screens/photo_capture_screen.dart';
+import 'package:digital_student/features/media/screens/photo_gallery_screen.dart';
+import 'package:digital_student/features/media/screens/photo_viewer_screen.dart';
+import 'package:digital_student/features/media/widgets/photo_grid.dart';
 import 'package:digital_student/features/students/student_providers.dart';
 import 'package:digital_student/features/students/student_repository.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +37,8 @@ class StudentDetailsPage extends ConsumerWidget {
                 Text(error.toString(), textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 FilledButton(
-                  onPressed: () => ref.invalidate(studentDetailsProvider(studentId)),
+                  onPressed: () =>
+                      ref.invalidate(studentDetailsProvider(studentId)),
                   child: const Text('Retry'),
                 ),
               ],
@@ -43,7 +50,10 @@ class StudentDetailsPage extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(24),
             children: [
-              Text(data.displayName, style: Theme.of(context).textTheme.headlineSmall),
+              Text(
+                data.displayName,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
               const SizedBox(height: 16),
               ListTile(
                 key: const Key('studentJourneyButton'),
@@ -57,13 +67,46 @@ class StudentDetailsPage extends ConsumerWidget {
                   ),
                 ),
               ),
+              if (user?.canUploadStudentPhoto ?? false) ...[
+                const SizedBox(height: 8),
+                FilledButton(
+                  key: const Key('studentTakePhotoButton'),
+                  onPressed: () async {
+                    final uploaded = await Navigator.of(context).push<bool>(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            PhotoCaptureScreen(studentId: studentId),
+                      ),
+                    );
+                    if (uploaded == true) {
+                      ref.invalidate(
+                        studentMediaProvider(
+                          MediaListArgs(
+                            studentId: studentId,
+                            audience: MediaAudience.staff,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text('Take Photo'),
+                ),
+              ],
+              const SizedBox(height: 16),
+              _StudentPhotos(studentId: studentId),
               const SizedBox(height: 8),
               _row('Class', data.classroomName ?? data.classroomId),
-              _row('Date of Birth', localizations.formatFullDate(data.dateOfBirth.toLocal())),
+              _row(
+                'Date of Birth',
+                localizations.formatFullDate(data.dateOfBirth.toLocal()),
+              ),
               _row('Status', data.status),
               if (data.qrToken != null) ...[
                 const SizedBox(height: 16),
-                Text('Attendance QR', style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  'Attendance QR',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 8),
                 Center(
                   child: QrImageView(
@@ -76,14 +119,18 @@ class StudentDetailsPage extends ConsumerWidget {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  Text('Guardians', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Guardians',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const Spacer(),
                   if (canManage)
                     TextButton(
                       onPressed: () async {
                         final added = await Navigator.of(context).push<bool>(
                           MaterialPageRoute(
-                            builder: (_) => AddGuardianPage(studentId: studentId),
+                            builder: (_) =>
+                                AddGuardianPage(studentId: studentId),
                           ),
                         );
                         if (added == true) {
@@ -95,7 +142,10 @@ class StudentDetailsPage extends ConsumerWidget {
                 ],
               ),
               if (data.guardians.isEmpty)
-                const ListTile(contentPadding: EdgeInsets.zero, title: Text('No guardians yet')),
+                const ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text('No guardians yet'),
+                ),
               for (final guardian in data.guardians)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
@@ -106,7 +156,9 @@ class StudentDetailsPage extends ConsumerWidget {
                           icon: const Icon(Icons.link_off),
                           onPressed: () async {
                             try {
-                              await ref.read(studentRepositoryProvider).removeGuardian(
+                              await ref
+                                  .read(studentRepositoryProvider)
+                                  .removeGuardian(
                                     studentId: studentId,
                                     userId: guardian.userId,
                                   );
@@ -139,6 +191,61 @@ class StudentDetailsPage extends ConsumerWidget {
           Text(value),
         ],
       ),
+    );
+  }
+}
+
+class _StudentPhotos extends ConsumerWidget {
+  const _StudentPhotos({required this.studentId});
+
+  final String studentId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final args = MediaListArgs(
+      studentId: studentId,
+      audience: MediaAudience.staff,
+    );
+    final photos = ref.watch(studentMediaProvider(args));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text('Photos', style: Theme.of(context).textTheme.titleMedium),
+            const Spacer(),
+            TextButton(
+              key: const Key('studentViewAllPhotosButton'),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => PhotoGalleryScreen(
+                    studentId: studentId,
+                    audience: MediaAudience.staff,
+                    title: 'Photos',
+                  ),
+                ),
+              ),
+              child: const Text('View all'),
+            ),
+          ],
+        ),
+        photos.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (error, _) => Text(error.toString()),
+          data: (items) => PhotoGrid(
+            items: items.take(4).toList(),
+            emptyLabel: 'No photos yet',
+            onOpen: (media) => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => PhotoViewerScreen(media: media),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

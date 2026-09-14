@@ -70,9 +70,9 @@ Neither role crosses `organizationId`.
 
 ## Media
 
-- Bytes in object storage; Mongo holds metadata and `studentIds`
+- Bytes in private object storage; Mongo holds metadata and `studentId`
 - Download path: API checks tenant + student scope, then issues a short-lived signed URL
-- Class photos: each guardian only receives media whose `studentIds` include their child, unless a later ticket defines a class-feed permission
+- Student photos only in MEDIA-001. Class photos: each guardian only receives media for their child, unless a later ticket defines a class-feed permission
 - Soft-delete media; do not leave public keys around
 - QR codes are not media of identity documents and must not encode PII
 
@@ -83,7 +83,7 @@ Minimum when write APIs exist:
 | What | How |
 | --- | --- |
 | Who recorded an event | `student_events.recordedBy` + `occurredAt` |
-| Who marked attendance | `attendance.scannedBy` |
+| Who uploaded media | `media.uploadedBy` + `createdAt`. Upload/delete also log org, user, student, media id |
 | Corrections | Event void fields; do not rewrite history silently |
 | Authz failures | Log org, user, route, target id — not tokens or passwords |
 
@@ -110,4 +110,4 @@ Do not put names, medical notes, or addresses in QR payloads or unauthenticated 
 - Driver or teacher "because the app only shows my list"
 - Permanent public object-storage URLs
 
-Automated checks: `apps/api/tests/tenant.test.ts`, `apps/api/tests/students.test.ts`, `apps/api/tests/attendance.test.ts`, and `apps/api/tests/journey.test.ts`.
+Automated checks: `apps/api/tests/tenant.test.ts`, `apps/api/tests/students.test.ts`, `apps/api/tests/attendance.test.ts`, `apps/api/tests/journey.test.ts`, and `apps/api/tests/media.test.ts`.

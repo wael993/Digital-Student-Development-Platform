@@ -36,6 +36,12 @@ export const env = {
   jwtRefreshSecret: readEnv('JWT_REFRESH_SECRET', isTestEnv ? 'test-refresh-secret' : undefined),
   jwtAccessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? '7d',
+  apiPublicUrl:
+    process.env.API_PUBLIC_URL ?? `http://localhost:${Number(process.env.PORT ?? 3000)}`,
+  mediaMaxUploadBytes: Number(process.env.MEDIA_MAX_UPLOAD_BYTES ?? 10 * 1024 * 1024),
+  mediaSignedUrlTtlSeconds: Number(process.env.MEDIA_SIGNED_URL_TTL_SECONDS ?? 600),
+  mediaStorageDir: process.env.MEDIA_STORAGE_DIR ?? path.resolve(process.cwd(), 'data/media'),
+  storageSecret: process.env.STORAGE_SECRET_KEY ?? '',
 };
 
 export const isTest = env.nodeEnv === 'test';

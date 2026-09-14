@@ -8,6 +8,8 @@ import { findClassroomById, findClassroomsByIds } from '../classrooms/classroom.
 import { listStudentIdsForGuardian } from '../guardians/guardian.repository';
 import { findLatestStudentEvent, listStudentEvents } from '../journey/student-event.repository';
 import type { StudentEvent } from '../journey/student-event.model';
+import { listStudentPhotos } from '../media/media.service';
+import type { MediaType } from '../media/media.model';
 import { findStudentById, findStudentsByIds } from '../students/student.repository';
 import type { Student } from '../students/student.model';
 
@@ -112,4 +114,14 @@ export async function getChildJourneyToday(auth: AuthContext, studentId: string,
     currentState: latest?.eventType ?? null,
     events: events.map(toParentEventJson),
   };
+}
+
+export async function getChildMedia(
+  auth: AuthContext,
+  studentId: string,
+  opts: { date?: string; mediaType?: MediaType; page: number; limit: number; skip: number },
+  timeZone: string,
+) {
+  await requireLinkedChild(auth, studentId);
+  return listStudentPhotos(auth, studentId, opts, timeZone);
 }

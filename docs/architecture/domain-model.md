@@ -2,7 +2,7 @@
 
 ARCH-001 source of truth for entities, relationships, and the collection plan.
 
-AUTH-001 implemented `users` and `refresh_tokens`. TENANT-001 implemented `organizations`. STUDENT-001 implemented `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 implemented `attendance`. JOURNEY-001 implemented `student_events`. Do not create the remaining collections until their tickets.
+AUTH-001 implemented `users` and `refresh_tokens`. TENANT-001 implemented `organizations`. STUDENT-001 implemented `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 implemented `attendance`. JOURNEY-001 implemented `student_events`. MEDIA-001 implemented `media`. Do not create the remaining collections until their tickets.
 
 ## Design decisions
 
@@ -270,21 +270,27 @@ Classroom or learning activity.
 
 ### Media
 
-Metadata only. Bytes live in object storage.
+Metadata only. Bytes live in private object storage. MEDIA-001 stores **student-specific photos**. Class/activity galleries wait for a later ticket.
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| organizationId | ObjectId | |
-| studentIds | ObjectId[] | Who may be shown this file |
-| activityId | ObjectId? | |
-| eventId | ObjectId? | |
-| uploadedBy | ObjectId | |
-| storageKey | string | Object storage path |
-| contentType | string | |
-| visibility | enum | `STUDENT`, `CLASS`, `STAFF` |
-| deletedAt | Date? | Soft-delete |
+| organizationId | ObjectId | From auth, never from the client |
+| studentId | ObjectId | Subject of this photo |
+| uploadedBy | ObjectId | Acting staff user |
+| mediaType | enum | `PHOTO` in v1. No video. |
+| storageKey | string | `organizations/{orgId}/students/{studentId}/photos/{randomId}/original.jpg` |
+| thumbnailStorageKey | string | Same prefix, `thumbnail.jpg` |
+| contentType | string | Stored as `image/jpeg` after processing |
+| size | number | Bytes of the stored original |
+| width / height | number | Display version |
+| capturedAt | Date | Client clock, validated |
+| deletedAt | Date? | Soft-delete. Storage objects are removed. |
 
-Never serve a permanent public URL. AUTH later: short-lived signed URLs after an authorization check.
+Never serve a permanent public URL. After tenant + student authorization, the API returns a short-lived signed URL. Do not persist signed URLs. Do not expose `storageKey` to clients.
+
+Retention (org policy, parent consent/revocation, automatic deletion) is **not** implemented yet. Soft-delete keeps an audit row until that ticket.
+
+Class photos may later use `studentIds[]` / `visibility`. Do not add those fields until that ticket.
 
 ### Notification
 
@@ -349,7 +355,7 @@ All tenant collections: `{ organizationId: 1 }` is never enough alone. Prefer co
 | attendance | `{ organizationId: 1, scannedAt: -1 }` | Daily staff list |
 | attendance | `{ organizationId: 1, classroomId: 1, date: 1 }` | Class roll |
 | routes | `{ organizationId: 1, busId: 1 }` | Bus routes |
-| media | `{ organizationId: 1, studentIds: 1 }` | Child photos |
+| media | `{ organizationId: 1, studentId: 1, capturedAt: -1 }` | Child photo gallery |
 | notifications | `{ organizationId: 1, userId: 1, createdAt: -1 }` | Inbox |
 
 ## Repository rule

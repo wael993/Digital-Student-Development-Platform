@@ -54,6 +54,14 @@ describe('permissions', () => {
     expect(hasPermission('GUARDIAN', 'student_events.read')).toBe(true);
     expect(hasPermission('DRIVER', 'student_events.create')).toBe(true);
     expect(hasPermission('DRIVER', 'student_events.read')).toBe(true);
+    expect(hasPermission('TEACHER', 'media.create')).toBe(true);
+    expect(hasPermission('TEACHER', 'media.read')).toBe(true);
+    expect(hasPermission('TEACHER', 'media.delete')).toBe(false);
+    expect(hasPermission('GUARDIAN', 'media.read')).toBe(true);
+    expect(hasPermission('GUARDIAN', 'media.create')).toBe(false);
+    expect(hasPermission('DRIVER', 'media.read')).toBe(false);
+    expect(hasPermission('ADMIN', 'media.delete')).toBe(true);
+    expect(hasPermission('SUPERVISOR', 'media.delete')).toBe(true);
   });
 });
 
