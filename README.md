@@ -123,15 +123,17 @@ npm run seed
 
 Password for every seed user: `Password123!`
 
-| Email | Org | Role |
-| --- | --- | --- |
-| `admin.a@example.com` | Nursery A | ADMIN |
-| `supervisor.a@example.com` | Nursery A | SUPERVISOR |
-| `teacher@example.com` | Nursery A | TEACHER |
-| `guardian.a@example.com` | Nursery A | GUARDIAN |
-| `admin.b@example.com` | Nursery B | ADMIN |
-| `teacher.b@example.com` | Nursery B | TEACHER |
-| `guardian.b@example.com` | Nursery B | GUARDIAN |
+| Email | Org | Role | What you’ll see |
+| --- | --- | --- | --- |
+| `guardian.a@example.com` | Nursery A | GUARDIAN | Sarah’s children: Emma (full day), Noah (on the bus), Liam (not started) |
+| `guardian.empty@example.com` | Nursery A | GUARDIAN | Empty children state |
+| `guardian.b@example.com` | Nursery B | GUARDIAN | Emma Jones arrived at school |
+| `teacher@example.com` | Nursery A | TEACHER | Nursery A roster (Emma, Noah, Liam, inactive Mia) |
+| `supervisor.a@example.com` | Nursery A | SUPERVISOR | Assigned campus |
+| `admin.a@example.com` | Nursery A | ADMIN | Org A |
+| `driver.a@example.com` | Nursery A | DRIVER | Empty student list until bus routes |
+| `admin.b@example.com` | Nursery B | ADMIN | Org B |
+| `teacher.b@example.com` | Nursery B | TEACHER | Nursery B roster |
 
 Useful commands (run from the repository root):
 
