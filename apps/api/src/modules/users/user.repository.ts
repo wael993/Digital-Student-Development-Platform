@@ -1,4 +1,5 @@
 import type { UserRole, UserStatus, PublicUser } from '../../types';
+import { tenantFilter } from '../../data/tenant';
 import { UserModel, type User } from './user.model';
 
 export function toPublicUser(user: User & { id: string }): PublicUser {
@@ -17,7 +18,7 @@ export async function findUserByEmailWithPassword(email: string) {
 }
 
 export async function findUserById(id: string, organizationId: string) {
-  return UserModel.findOne({ _id: id, organizationId });
+  return UserModel.findOne(tenantFilter(organizationId, { _id: id }));
 }
 
 export async function createUser(input: {

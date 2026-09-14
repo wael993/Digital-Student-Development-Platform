@@ -115,13 +115,22 @@ npm run dev
 
 The API listens on `http://localhost:3000`.
 
-Create a local teacher you can log in with:
+Create two local organizations and users you can log in with:
 
 ```bash
 npm run seed
 ```
 
-Credentials: `teacher@example.com` / `Password123!`
+Password for every seed user: `Password123!`
+
+| Email | Org | Role |
+| --- | --- | --- |
+| `admin.a@example.com` | Nursery A | ADMIN |
+| `teacher@example.com` | Nursery A | TEACHER |
+| `guardian.a@example.com` | Nursery A | GUARDIAN |
+| `admin.b@example.com` | Nursery B | ADMIN |
+| `teacher.b@example.com` | Nursery B | TEACHER |
+| `guardian.b@example.com` | Nursery B | GUARDIAN |
 
 Useful commands (run from the repository root):
 
@@ -132,7 +141,7 @@ Useful commands (run from the repository root):
 | `npm run lint` | Run ESLint |
 | `npm run format` | Format API sources with Prettier |
 | `npm test` | Run API tests |
-| `npm run seed` | Upsert the local teacher login (`teacher@example.com`) |
+| `npm run seed` | Upsert Nursery A/B and admin/teacher/guardian logins |
 | `npm run typecheck` | TypeScript strict check (`tsc --noEmit`) |
 
 ### Flutter application

@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { AppError } from '../../utils/appError';
 import { findUserByEmailWithPassword, findUserById, toPublicUser } from '../users/user.repository';
+import { findOrganizationById } from '../organizations/organization.repository';
 import type { PublicUser } from '../../types';
 import { RefreshTokenModel } from './refresh-token.model';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from './jwt';
@@ -15,6 +16,13 @@ function invalidCredentials(): AppError {
 
 function asNonEmptyString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined;
+}
+
+async function requireActiveOrganization(organizationId: string): Promise<void> {
+  const organization = await findOrganizationById(organizationId);
+  if (!organization || organization.status !== 'ACTIVE') {
+    throw new AppError(403, 'FORBIDDEN', 'You do not have permission to perform this action');
+  }
 }
 
 export async function login(
@@ -41,6 +49,8 @@ export async function login(
   if (user.status !== 'ACTIVE') {
     throw new AppError(403, 'ACCOUNT_INACTIVE', 'Account inactive');
   }
+
+  await requireActiveOrganization(String(user.organizationId));
 
   const claims = {
     sub: user.id,
@@ -88,6 +98,8 @@ export async function refresh(refreshTokenRaw: unknown): Promise<{ accessToken: 
     throw new AppError(401, 'INVALID_REFRESH_TOKEN', 'Invalid refresh token');
   }
 
+  await requireActiveOrganization(String(user.organizationId));
+
   return {
     accessToken: signAccessToken({
       sub: user.id,
@@ -117,7 +129,7 @@ export async function logout(refreshTokenRaw: unknown): Promise<void> {
 export async function getMe(userId: string, organizationId: string): Promise<PublicUser> {
   const user = await findUserById(userId, organizationId);
   if (!user || user.status !== 'ACTIVE') {
-    throw new AppError(401, 'UNAUTHORIZED', 'Unauthorized');
+    throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
   }
   return toPublicUser(user);
 }

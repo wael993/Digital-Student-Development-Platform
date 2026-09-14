@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { requireAuth } from '../../utils/requireAuth';
 import * as authService from './auth.service';
 
 export async function postLogin(req: Request, res: Response): Promise<void> {
@@ -20,10 +21,7 @@ export async function postLogout(req: Request, res: Response): Promise<void> {
 }
 
 export async function getMe(req: Request, res: Response): Promise<void> {
-  if (!req.auth) {
-    res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } });
-    return;
-  }
-  const result = await authService.getMe(req.auth.userId, req.auth.organizationId);
+  const auth = requireAuth(req);
+  const result = await authService.getMe(auth.userId, auth.organizationId);
   res.status(200).json(result);
 }

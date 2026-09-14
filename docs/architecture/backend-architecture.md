@@ -47,7 +47,9 @@ apps/api/src/
 │   ├── activities/
 │   ├── media/
 │   └── notifications/
-├── middlewares/            # auth, tenant, rbac, error, notFound
+├── authorization/          # permissions, resource-scope helpers
+├── data/                   # tenantFilter / withTenant
+├── middlewares/            # authenticate, tenantContext, authorize, error, notFound
 ├── services/               # cross-module only (keep rare)
 ├── utils/
 ├── types/
@@ -195,8 +197,8 @@ Sort: `sort=-occurredAt` or `sort=name`. Allow-list fields. Default `-createdAt`
 - JWT access claims: `sub` (userId), `organizationId`, `role`, `type: "access"`
 - Refresh tokens are JWTs with `jti`; logout sets `revokedAt` on that session
 - Access token default lifetime `15m` (`JWT_ACCESS_EXPIRES_IN`); refresh default `7d` (`JWT_REFRESH_EXPIRES_IN`)
-- `GET /api/v1/auth/me` requires a valid access token
-- TENANT-001 adds permission checks. The mobile app never authorizes by itself.
+- `GET /api/v1/auth/me` requires a valid access token and an ACTIVE organization
+- Permission checks: `authorize('organizations.read')` (see [authorization.md](./authorization.md)). The mobile app never authorizes by itself.
 
 Versioning: URL prefix `/api/v1`. Breaking changes go to `/api/v2`. Additive fields are allowed in v1.
 
@@ -205,12 +207,11 @@ Versioning: URL prefix `/api/v1`. Breaking changes go to `/api/v2`. Additive fie
 See [domain-model.md](./domain-model.md) for collections and indexes.
 
 - One database, many tenants via `organizationId` on documents
-- AUTH-001 created `users` and `refresh_tokens`. Other collections wait for their tickets.
+- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations` and a temporary `scoped_items` probe. Other collections wait for their tickets.
 
 ## Next implementation tickets
 
-1. **TENANT-001** — organizations, campuses, tenant middleware, RBAC helpers
-2. **STUDENT-001** — students, classrooms, student_guardians
-3. **ATTENDANCE-001** — attendance + QR
-4. **JOURNEY-001** — student_events + timeline
-5. **PARENT-001** — parent-facing reads of that data
+1. **STUDENT-001** — students, classrooms, campuses, student_guardians (reuse TENANT-001 filters and `authorize`)
+2. **ATTENDANCE-001** — attendance + QR
+3. **JOURNEY-001** — student_events + timeline
+4. **PARENT-001** — parent-facing reads of that data

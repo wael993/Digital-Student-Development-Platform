@@ -79,6 +79,8 @@ Keep providers close to the feature. Do not build a global "god" provider.
 
 Auth interceptor (AUTH-001): read access token from secure storage, attach `Authorization`, on 401 attempt refresh once, then send the user to login. Concurrent 401s share one refresh via Dio's `QueuedInterceptor`.
 
+Session `User` already carries `id`, `organizationId`, and `role`. Use `role` to pick Admin / Teacher / Driver / Parent screens later. The API still enforces tenant + RBAC on every call.
+
 ## Routing
 
 GoRouter hosts `AuthGate`. Unauthenticated users see the login screen. Authenticated users see a placeholder home until role dashboards exist.

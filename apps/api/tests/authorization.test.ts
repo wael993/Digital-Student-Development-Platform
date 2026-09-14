@@ -1,0 +1,78 @@
+import { describe, expect, it } from 'vitest';
+import { hasPermission } from '../src/authorization/permissions';
+import { assertAssigned, assertSameTenant } from '../src/authorization/scope';
+import { tenantFilter, withTenant } from '../src/data/tenant';
+import { AppError } from '../src/utils/appError';
+import type { AuthContext } from '../src/types';
+
+const teacher: AuthContext = {
+  userId: 'u1',
+  organizationId: 'org-a',
+  role: 'TEACHER',
+};
+
+const guardian: AuthContext = {
+  userId: 'u2',
+  organizationId: 'org-a',
+  role: 'GUARDIAN',
+};
+
+const admin: AuthContext = {
+  userId: 'u3',
+  organizationId: 'org-a',
+  role: 'ADMIN',
+};
+
+describe('permissions', () => {
+  it('allows admins to update the organization and blocks teachers and supervisors', () => {
+    expect(hasPermission('ADMIN', 'organizations.update')).toBe(true);
+    expect(hasPermission('SUPERVISOR', 'organizations.update')).toBe(false);
+    expect(hasPermission('TEACHER', 'organizations.update')).toBe(false);
+    expect(hasPermission('GUARDIAN', 'students.read')).toBe(true);
+    expect(hasPermission('GUARDIAN', 'students.create')).toBe(false);
+  });
+});
+
+describe('tenant helpers', () => {
+  it('always puts organizationId from auth into the filter', () => {
+    expect(tenantFilter('org-a', { _id: 'item-1' })).toEqual({
+      organizationId: 'org-a',
+      _id: 'item-1',
+    });
+  });
+
+  it('does not let extra overwrite the tenant key', () => {
+    expect(tenantFilter('org-a', { organizationId: 'org-b', _id: 'x' })).toEqual({
+      _id: 'x',
+      organizationId: 'org-a',
+    });
+  });
+
+  it('discards a client-supplied organizationId on write', () => {
+    expect(withTenant({ name: 'Sarah', organizationId: 'org-b' }, 'org-a')).toEqual({
+      name: 'Sarah',
+      organizationId: 'org-a',
+    });
+  });
+});
+
+describe('resource-level scope', () => {
+  it('hides cross-tenant ids as not found, including ObjectId-like values', () => {
+    expect(() => assertSameTenant(teacher, 'org-b')).toThrow(AppError);
+    try {
+      assertSameTenant(teacher, 'org-b');
+    } catch (err) {
+      expect(err).toMatchObject({ statusCode: 404, code: 'NOT_FOUND' });
+    }
+    expect(() => assertSameTenant(teacher, 'org-a')).not.toThrow();
+  });
+
+  it('lets non-admins reach only assigned resources; empty list denies', () => {
+    expect(() => assertAssigned(guardian, 'child-1', ['child-1'])).not.toThrow();
+    expect(() => assertAssigned(guardian, 'child-3', ['child-1', 'child-2'])).toThrow(AppError);
+    expect(() => assertAssigned(guardian, 'child-1', [])).toThrow(AppError);
+    expect(() => assertAssigned(teacher, 'child-3', [])).toThrow(AppError);
+    expect(() => assertAssigned(teacher, 'class-1', ['class-1'])).not.toThrow();
+    expect(() => assertAssigned(admin, 'child-3', [])).not.toThrow();
+  });
+});

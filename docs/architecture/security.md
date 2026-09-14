@@ -17,12 +17,18 @@ Public routes: health, login, token refresh, invite acceptance. Everything else 
 
 ## Authorization
 
-Enforced in this order:
+Enforced in this order (see [authorization.md](./authorization.md)):
 
-1. Authenticated
-2. Correct tenant (see [multi-tenancy.md](./multi-tenancy.md))
-3. Role allowed to call this endpoint
+1. Authenticated (`authenticate`)
+2. Correct tenant (`tenantContext` — see [multi-tenancy.md](./multi-tenancy.md))
+3. Role allowed to call this endpoint (`authorize(permission)`)
 4. Row is in the caller's scope (campus / classroom / route / linked children)
+
+| Case | HTTP |
+| --- | --- |
+| No / invalid / expired token | 401 `UNAUTHORIZED` |
+| Authenticated, missing permission | 403 `FORBIDDEN` |
+| Wrong tenant or outside scope | 404 `NOT_FOUND` |
 
 UI that hides a button is convenience. A forged Dio call must still get 403/404.
 
@@ -81,7 +87,7 @@ Minimum when write APIs exist:
 | Corrections | Event void fields; do not rewrite history silently |
 | Authz failures | Log org, user, route, target id — not tokens or passwords |
 
-A dedicated `audit_logs` collection is not required for AUTH-001. Add it when admin user mutations need a trail (TENANT-001 / later).
+A dedicated `audit_logs` collection is not required yet. Add it when admin user mutations need a trail.
 
 ## Sensitive data
 
@@ -98,8 +104,10 @@ Do not put names, medical notes, or addresses in QR payloads or unauthenticated 
 
 ## Threats this architecture rejects
 
-- Trusting the client `organizationId`
-- Looking up students by `_id` without tenant filter
+- Trusting the client `organizationId` (body, query, or `X-Organization-Id`)
+- Looking up tenant rows by `_id` without `organizationId`
 - Treating 403 vs 404 as a way to discover other orgs (use 404)
 - Driver or teacher "because the app only shows my list"
 - Permanent public object-storage URLs
+
+Automated checks: `apps/api/tests/tenant.test.ts`.

@@ -354,6 +354,7 @@ Domain, tenancy, API, mobile, security, roles, and the student journey event con
 - [Backend architecture](architecture/backend-architecture.md)
 - [Mobile architecture](architecture/mobile-architecture.md)
 - [Multi-tenancy](architecture/multi-tenancy.md)
+- [Authorization](architecture/authorization.md)
 - [Security](architecture/security.md)
 - [User roles](product/user-roles.md)
 - [Student journey](product/student-journey.md)

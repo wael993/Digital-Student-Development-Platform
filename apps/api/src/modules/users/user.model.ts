@@ -15,7 +15,7 @@ export interface User {
 
 const userSchema = new Schema<User>(
   {
-    organizationId: { type: Schema.Types.ObjectId, required: true, index: true },
+    organizationId: { type: Schema.Types.ObjectId, required: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, required: true, select: false },
     firstName: { type: String, required: true, trim: true },

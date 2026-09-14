@@ -104,8 +104,8 @@ School / company / tenant.
 | Field | Type | Notes |
 | --- | --- | --- |
 | name | string | |
-| type | enum | `NURSERY`, `KINDERGARTEN`, `PRIMARY`, `MIDDLE`, `HIGH`, `MIXED` |
-| status | enum | `ACTIVE`, `SUSPENDED`, `ARCHIVED` |
+| type | enum | Planned (`NURSERY`, `KINDERGARTEN`, `PRIMARY`, `MIDDLE`, `HIGH`, `MIXED`). Not stored in TENANT-001. |
+| status | enum | `ACTIVE`, `INACTIVE` |
 
 Not tenant-scoped (it **is** the tenant). No `organizationId` on this document.
 
@@ -147,7 +147,7 @@ Authenticated person. Students are not users.
 | role | enum | `ADMIN`, `SUPERVISOR`, `TEACHER`, `DRIVER`, `GUARDIAN` |
 | status | enum | `ACTIVE`, `INACTIVE` |
 
-TENANT-001 adds assignment scope (`campusIds`, `classroomIds`, `routeIds`). Guardian child access is **not** stored on the user. It lives in `student_guardians`.
+Assignment scope (`campusIds`, `classroomIds`, `routeIds`) is applied in STUDENT-001 / BUS-001. TENANT-001 already defines the helpers that receive those ids. Guardian child access is **not** stored on the user. It lives in `student_guardians`.
 
 ### Student
 
@@ -308,8 +308,8 @@ Implement collections when the matching ticket lands, not all at once.
 
 | Collection | Tenant field | Soft-delete | First ticket |
 | --- | --- | --- | --- |
-| `organizations` | n/a (root) | archive via status | TENANT-001 |
-| `campuses` | organizationId | status / optional deletedAt | TENANT-001 |
+| `organizations` | n/a (root) | inactive via status | TENANT-001 |
+| `campuses` | organizationId | status / optional deletedAt | STUDENT-001 |
 | `classrooms` | organizationId | status | STUDENT-001 |
 | `users` | organizationId | no (INACTIVE status) | AUTH-001 |
 | `refresh_tokens` | organizationId | revoke via `revokedAt` | AUTH-001 |
@@ -335,6 +335,7 @@ All tenant collections: `{ organizationId: 1 }` is never enough alone. Prefer co
 | users | `{ organizationId: 1, role: 1 }` | Staff lists |
 | refresh_tokens | unique `{ jti: 1 }` | Refresh lookup |
 | refresh_tokens | `{ userId: 1 }` | Logout / revoke |
+| scoped_items | `{ organizationId: 1, createdAt: -1 }` | TENANT-001 probe (temporary) |
 | campuses | `{ organizationId: 1, name: 1 }` | List |
 | classrooms | `{ organizationId: 1, campusId: 1 }` | List by campus |
 | students | unique `{ organizationId: 1, qrToken: 1 }` | QR lookup |

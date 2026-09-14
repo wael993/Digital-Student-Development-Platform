@@ -8,7 +8,7 @@ Canonical roles:
 
 A user may hold more than one role in the same organization (teacher who is also a parent). Services union the scopes. Empty scope for a role still means no access through that role.
 
-Details of JWT and middleware: AUTH-001 implements a single `role` per user. TENANT-001 adds permission checks. A user may hold more than one role later if needed.
+Details of JWT and middleware: AUTH-001 implements a single `role` per user. TENANT-001 enforces permissions via `authorize()`. A user may hold more than one role later if needed.
 
 ## High-level scope
 
@@ -27,7 +27,7 @@ R = read, W = create/update in scope, — = no.
 
 | Resource | ADMIN | SUPERVISOR | TEACHER | DRIVER | GUARDIAN |
 | --- | --- | --- | --- | --- | --- |
-| Organization profile | R/W | R | R | R | R (name only) |
+| Organization profile | R/W | R | R | R | R |
 | Campuses | R/W | R (assigned) | R (own campus) | R (own campus) | — |
 | Classrooms | R/W | R (campus) | R (assigned) | — | — |
 | Users / invites | R/W | R (campus staff) | — | — | — |

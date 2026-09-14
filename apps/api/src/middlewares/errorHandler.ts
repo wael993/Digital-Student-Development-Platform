@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import mongoose from 'mongoose';
 import { AppError } from '../utils/appError';
 import { logger } from '../utils/logger';
 
@@ -14,6 +15,16 @@ export function errorHandler(
         code: err.code,
         message: err.message,
         ...(err.details === undefined ? {} : { details: err.details }),
+      },
+    });
+    return;
+  }
+
+  if (err instanceof mongoose.Error.CastError && err.kind === 'ObjectId') {
+    res.status(404).json({
+      error: {
+        code: 'NOT_FOUND',
+        message: 'Not Found',
       },
     });
     return;

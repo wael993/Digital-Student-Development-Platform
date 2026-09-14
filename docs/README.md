@@ -33,6 +33,7 @@ Redis / Object Storage / FCM  (supporting)
 - [Backend architecture](architecture/backend-architecture.md) — modules, layers, API conventions
 - [Mobile architecture](architecture/mobile-architecture.md) — Flutter, Riverpod, Dio
 - [Multi-tenancy](architecture/multi-tenancy.md) — organizationId, repository isolation
+- [Authorization](architecture/authorization.md) — roles, permissions, 401 vs 403, resource scope
 - [Security](architecture/security.md) — authn/authz boundaries, media, audit
 
 ## Local setup
@@ -41,4 +42,4 @@ Local environment and how to run the stack: root [README](../README.md).
 
 ## What to implement next
 
-ARCH-001 and AUTH-001 are done. Next: TENANT-001 → STUDENT-001 → ATTENDANCE-001 → JOURNEY-001 → PARENT-001.
+ARCH-001, AUTH-001, and TENANT-001 are done. Next: STUDENT-001 → ATTENDANCE-001 → JOURNEY-001 → PARENT-001.

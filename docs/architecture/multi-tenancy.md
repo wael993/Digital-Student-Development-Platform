@@ -16,93 +16,91 @@ Shared MongoDB, tenant key on documents:
 
 `organizations` has no `organizationId`. Users and all operational data do.
 
+Organization fields in v1: `_id`, `name`, `status` (`ACTIVE` | `INACTIVE`), `createdAt`, `updatedAt`.
+
 v1: a user has exactly one `organizationId`. A parent with children at two schools is not supported until a `memberships` collection exists.
 
 ## Request path
 
 ```
-Authenticated user
-- JWT (`sub`, `organizationId`, `role`)
-  → Middleware copies claims onto req.auth
-  → Authorization (role + scope)
-  → Repository query { organizationId: auth.organizationId, ... }
+HTTP request
+  → authenticate()         JWT verified; user loaded by { _id, organizationId }
+  → req.auth               { userId, organizationId, role } from the user row
+  → tenantContext()        organization ACTIVE
+  → authorize(permission)  see authorization.md
+  → repository             tenantFilter(auth.organizationId, …)
   → MongoDB
 ```
 
 ```mermaid
 flowchart TD
   A[Bearer token] --> B[Verify JWT]
-  B --> C["auth.organizationId from claims"]
-  C --> D[RBAC / scope]
-  D --> E["Query must include organizationId"]
-  E --> F[(MongoDB)]
+  B --> C[Load user in claimed org]
+  C --> D["req.auth from user row"]
+  D --> E[Organization ACTIVE]
+  E --> F[RBAC / scope]
+  F --> G["Query includes organizationId"]
+  G --> H[(MongoDB)]
 ```
 
 ### How tenant context is obtained
 
-From the access token after AUTH-001 / TENANT-001. Not from:
+From the authenticated user after AUTH-001. Not from:
 
-- `X-Organization-Id` headers the client can spoof
-- `organizationId` in the JSON body as the sole source
+- `X-Organization-Id` (ignored)
+- `organizationId` in JSON body or query string
 - Flutter environment variables
 
-Body `organizationId` is ignored for scoping. The service uses `auth.organizationId`.
+Writes use `withTenant(input, auth.organizationId)`, which discards any client `organizationId`.
 
-Invite/accept and login are the exceptions: they establish the tenant, then issue a token that already contains it.
+Invite/accept and login establish the tenant, then issue a token that already contains it. Login also refuses users whose organization is missing or `INACTIVE`.
 
 ### How it is validated
 
 1. JWT signature and expiry
-2. User exists, `status === ACTIVE`, `deletedAt` is null
-3. `user.organizationId` equals the claim
-4. Organization `status === ACTIVE`
+2. User exists with `{ _id: sub, organizationId: claim }`, `status === ACTIVE`
+3. `req.auth.organizationId` is taken from that user row (claim mismatch → 401)
+4. Organization exists and `status === ACTIVE`
 
-Failures: 401 (bad/missing token or disabled user) or 403 (org suspended).
+Failures: 401 (bad/missing token or disabled/mismatched user) or 403 (org missing or inactive).
 
 ## Which collections require `organizationId`
 
-Required: `campuses`, `classrooms`, `users`, `students`, `student_guardians`, `student_events`, `attendance`, `buses`, `routes`, `activities`, `media`, `notifications`.
+Required: `users`, `refresh_tokens`, `scoped_items` (TENANT-001 probe), and later `campuses`, `classrooms`, `students`, `student_guardians`, `student_events`, `attendance`, `buses`, `routes`, `activities`, `media`, `notifications`.
 
 Not required: `organizations` (the tenant row).
 
+Campuses are not created in TENANT-001; STUDENT-001 introduces campus/classroom documents.
+
 ## How repositories enforce isolation
 
-Every tenant repository method takes `organizationId` as a required argument (first parameter, not optional).
+`apps/api/src/data/tenant.ts`:
 
 ```ts
-findById(organizationId: ObjectId, id: ObjectId)
+findById(organizationId, id)
+// filter: tenantFilter(organizationId, { _id: id })
 ```
 
-The Mongo filter is always `{ _id: id, organizationId }`. Never `{ _id: id }` alone.
+Never `{ _id: id }` alone for tenant-owned rows.
 
-List methods start from `{ organizationId, deletedAt: null }` and then add role scope (`classroomId: { $in: auth.classroomIds }`, etc.).
+List methods start from `{ organizationId }` (and `deletedAt: null` when that field exists) and then add role scope (`classroomId: { $in: assignedIds }`, etc.).
 
-No generic `admin` bypass that omits `organizationId` in v1. There is no platform superuser in this architecture.
+No platform superuser. No admin bypass that omits `organizationId`.
 
 ## How cross-tenant access is prevented
 
 | Control | Rule |
 | --- | --- |
-| Token | `organizationId` is a signed claim |
-| Writes | Inserts set `organizationId` from `auth`, never from the client |
+| Token | `organizationId` is a signed claim; user lookup includes it |
+| Writes | Inserts set `organizationId` from `auth` via `withTenant` |
 | Reads | Filter includes `organizationId` |
-| Unknown id | Return 404 even if the id exists in another org |
-| QR | Lookup `{ organizationId, qrToken }`. A token from another org is 404 |
-| Media | Signed URL issued only after a tenant + student-scope check |
-| Indexes | Compound indexes start with `organizationId` so isolation is the access path |
+| Unknown id | Return **404** even if the id exists in another org |
+| Query / body / header | Client `organizationId` and `X-Organization-Id` are not used for scoping |
+| QR (later) | Lookup `{ organizationId, qrToken }`. Other-org token → 404 |
+| Indexes | Tenant collections: compound indexes that start with `organizationId` |
 
-Automated tests in TENANT-001 must include: user A cannot GET/PATCH user B's student by id.
+Proof in TENANT-001: org A cannot GET/PATCH/DELETE org B rows in `scoped_items`. Student CRUD is STUDENT-001, using the same helpers.
 
 ## Scope inside a tenant
 
-Tenant isolation is necessary but not sufficient. After the org filter:
-
-| Role | Extra filter |
-| --- | --- |
-| ADMIN | Organization |
-| SUPERVISOR | `campusId ∈ user.campusIds` (empty campusIds = no rows, not all rows) |
-| TEACHER | `classroomId ∈ user.classroomIds` |
-| DRIVER | Students on `user.routeIds` |
-| GUARDIAN | Students in `student_guardians` for `userId` |
-
-Empty assignment lists mean **no access**, not full-org access. Only `ADMIN` sees the whole organization.
+Tenant isolation is necessary but not sufficient. After the org filter, [authorization.md](./authorization.md) applies role scope. Empty assignment lists mean **no access**. Only `ADMIN` sees the whole organization.
