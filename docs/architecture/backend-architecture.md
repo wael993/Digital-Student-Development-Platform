@@ -43,7 +43,7 @@ apps/api/src/
 │   ├── classrooms/
 │   ├── guardians/          # student–guardian links, not a second identity
 │   ├── attendance/
-│   ├── student-events/
+│   ├── journey/            # student_events
 │   ├── buses/
 │   ├── activities/
 │   ├── media/
@@ -208,11 +208,13 @@ Versioning: URL prefix `/api/v1`. Breaking changes go to `/api/v2`. Additive fie
 See [domain-model.md](./domain-model.md) for collections and indexes.
 
 - One database, many tenants via `organizationId` on documents
-- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations`. STUDENT-001 added `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 added `attendance`. Other collections wait for their tickets.
+- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations`. STUDENT-001 added `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 added `attendance`. JOURNEY-001 added `student_events`. Other collections wait for their tickets.
 
-QR scan: `POST /api/v1/attendance/scan` with `{ "qrToken" }`. Lookup is `{ organizationId, qrToken }`. History: `GET /api/v1/attendance?date=&classroomId=&studentId=`.
+QR scan: `POST /api/v1/attendance/scan` with `{ "qrToken" }`. Lookup is `{ organizationId, qrToken }`. History: `GET /api/v1/attendance?date=&classroomId=&studentId=`. A successful PRESENT scan also inserts `ATTENDANCE_PRESENT`.
+
+Journey: `POST /api/v1/students/:studentId/events`, `GET /api/v1/students/:studentId/events?date=`, `GET /api/v1/students/:studentId/journey/today`.
 
 ## Next implementation tickets
 
-1. **JOURNEY-001** — student_events + timeline
-2. **PARENT-001** — parent-facing reads of that data
+1. **PARENT-001** — parent-facing dashboard on top of the journey
+2. **MEDIA-001** — photos

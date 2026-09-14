@@ -46,10 +46,10 @@ Guardian **W** on events/attendance is not allowed. Parents observe; staff recor
 
 | Types | Who writes |
 | --- | --- |
+| `ATTENDANCE_PRESENT` | Attendance QR flow (not `POST /events`) |
 | `BUS_BOARDING`, `BUS_DEPARTURE`, `HOME_DROPOFF` | DRIVER, SUPERVISOR, ADMIN |
-| `SCHOOL_ARRIVAL`, attendance present/absent | TEACHER, SUPERVISOR, ADMIN (QR flows) |
-| `CLASS_STARTED`, `BREAK_STARTED`, `ACTIVITY_STARTED`, `MEAL`, `SKILL_SESSION`, `NOTE` | TEACHER, SUPERVISOR, ADMIN |
-| `PARENT_PICKUP` | TEACHER, SUPERVISOR, ADMIN |
+| `SCHOOL_ARRIVAL` | TEACHER, SUPERVISOR, ADMIN |
+| `CLASS_STARTED`, `BREAK_STARTED`, `ACTIVITY_STARTED`, `MEAL`, `SKILL_SESSION` | TEACHER, SUPERVISOR, ADMIN |
 
 ## Data rules
 

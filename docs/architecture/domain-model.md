@@ -2,7 +2,7 @@
 
 ARCH-001 source of truth for entities, relationships, and the collection plan.
 
-AUTH-001 implemented `users` and `refresh_tokens`. TENANT-001 implemented `organizations`. STUDENT-001 implemented `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 implemented `attendance`. Do not create the remaining collections until their tickets.
+AUTH-001 implemented `users` and `refresh_tokens`. TENANT-001 implemented `organizations`. STUDENT-001 implemented `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 implemented `attendance`. JOURNEY-001 implemented `student_events`. Do not create the remaining collections until their tickets.
 
 ## Design decisions
 
@@ -20,8 +20,8 @@ AUTH-001 implemented `users` and `refresh_tokens`. TENANT-001 implemented `organ
 | User name | `firstName` + `lastName` | — |
 | User status | `ACTIVE` \| `INACTIVE` | Invites / suspend in a later ticket |
 | Daily status | Derived from `student_events`. Optional denormalized cache on `students` | Cache is never the source of truth |
-| Events | Append-only. Correct with `voidedAt`, do not delete | — |
-| Attendance | Separate daily roll-up in `attendance`, not a flag on the student | QR scan writes PRESENT for the org-local date. Journey events wait for JOURNEY-001 |
+| Events | Append-only. Correct later with an explicit workflow, do not delete | — |
+| Attendance | Separate daily roll-up in `attendance`, not a flag on the student | QR scan writes PRESENT for the org-local date and inserts `ATTENDANCE_PRESENT` |
 | QR payload | Rotatable `qrToken` on the student. Random 32-char hex identifier only, never PII. QR scanning is ATTENDANCE-001. | Rotate token without changing `_id` |
 
 ## Relationship overview
@@ -169,7 +169,7 @@ Enrolled child. Must belong to an organization. Campus and classroom are require
 | studentNumber | string | Unique per organization |
 | qrToken | string | Random, unique per org, rotatable. Never contains PII. |
 | status | enum | `ACTIVE`, `INACTIVE`, `TRANSFERRED`, `GRADUATED` |
-| currentStatus | string? | Denormalized latest event type. Cache only. JOURNEY-001. |
+| currentStatus | string? | Denormalized latest event type. Cache only. Not written in JOURNEY-001. |
 | currentStatusAt | Date? | Cache only |
 
 No hard delete. Historical attendance/journey tickets will keep referencing these rows.
@@ -200,22 +200,14 @@ See [student-journey.md](../product/student-journey.md) for event types and the 
 | --- | --- | --- |
 | organizationId | ObjectId | |
 | studentId | ObjectId | |
-| type | enum | Closed list; see journey doc |
+| eventType | enum | Closed list; see journey doc |
 | occurredAt | Date | Event time (not insert time) |
+| recordedAt | Date | When the system stored it |
 | recordedBy | ObjectId | Acting user |
-| campusId | ObjectId? | Query convenience |
-| classroomId | ObjectId? | |
-| busId | ObjectId? | |
-| routeId | ObjectId? | |
-| activityId | ObjectId? | |
-| mediaIds | ObjectId[] | |
+| source | enum | `MANUAL`, `QR`, `SYSTEM` |
 | metadata | object | Type-specific payload |
-| clientRequestId | string? | Idempotency (QR double-scan) |
-| voidedAt | Date? | Correction; not a delete |
-| voidedBy | ObjectId? | |
-| voidReason | string? | |
 
-No `deletedAt`. Void instead.
+No `deletedAt`. No client updates after insert. A later ticket can add an explicit correction workflow.
 
 ### Attendance
 
@@ -233,7 +225,7 @@ School-day roll-up for reporting. Complements events; does not replace them. Imp
 | scannedBy | ObjectId | Authenticated user |
 | source | enum | `QR` in v1. Later: `MANUAL`, `IMPORT`, `SYSTEM` |
 
-Unique: one document per student per org date. Repeat QR scans for that date return `ALREADY_RECORDED`. Journey `SCHOOL_ARRIVAL` events wait for JOURNEY-001.
+Unique: one document per student per org date. Repeat QR scans for that date return `ALREADY_RECORDED`. Successful PRESENT also inserts `ATTENDANCE_PRESENT` on `student_events`.
 
 ### Bus
 
@@ -323,7 +315,7 @@ Implement collections when the matching ticket lands, not all at once.
 | `refresh_tokens` | organizationId | revoke via `revokedAt` | AUTH-001 |
 | `students` | organizationId | status (`INACTIVE` / `TRANSFERRED` / `GRADUATED`) | STUDENT-001 |
 | `student_guardians` | organizationId | hard-remove link | STUDENT-001 |
-| `student_events` | organizationId | void only | JOURNEY-001 |
+| `student_events` | organizationId | append-only | JOURNEY-001 |
 | `attendance` | organizationId | no | ATTENDANCE-001 |
 | `buses` | organizationId | status | BUS-001 |
 | `routes` | organizationId | status | BUS-001 |
@@ -350,8 +342,8 @@ All tenant collections: `{ organizationId: 1 }` is never enough alone. Prefer co
 | students | `{ organizationId: 1, classroomId: 1 }` | Class roster |
 | student_guardians | unique `{ organizationId: 1, studentId: 1, userId: 1 }` | Link |
 | student_guardians | `{ organizationId: 1, userId: 1 }` | Parent's children |
-| student_events | `{ organizationId: 1, studentId: 1, occurredAt: -1 }` | Timeline / latest |
-| student_events | unique sparse `{ organizationId: 1, clientRequestId: 1 }` | Idempotency |
+| `student_events` | `{ organizationId: 1, studentId: 1, occurredAt: -1 }` | Timeline / latest |
+| `student_events` | `{ organizationId: 1, studentId: 1, eventType: 1, occurredAt: -1 }` | Type-specific queries |
 | attendance | unique `{ organizationId: 1, studentId: 1, date: 1 }` | Daily roll-up |
 | attendance | `{ organizationId: 1, studentId: 1, scannedAt: -1 }` | Student history |
 | attendance | `{ organizationId: 1, scannedAt: -1 }` | Daily staff list |

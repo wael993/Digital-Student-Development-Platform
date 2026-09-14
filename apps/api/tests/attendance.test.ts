@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app';
-import { calendarDateInTimeZone, isDateOnly } from '../src/utils/timezone';
+import { calendarDateInTimeZone, isDateOnly, utcRangeForCalendarDate } from '../src/utils/timezone';
 import {
   clearAuthData,
   connectTestDb,
@@ -53,6 +53,12 @@ describe('calendar date in organization timezone', () => {
     expect(calendarDateInTimeZone(at, 'America/Los_Angeles')).toBe('2026-09-14');
     expect(isDateOnly('2026-09-14')).toBe(true);
     expect(isDateOnly('2026-13-40')).toBe(false);
+    const utcDay = utcRangeForCalendarDate('2026-09-14', 'UTC');
+    expect(utcDay.start.toISOString()).toBe('2026-09-14T00:00:00.000Z');
+    expect(utcDay.endExclusive.toISOString()).toBe('2026-09-15T00:00:00.000Z');
+    const aucklandDay = utcRangeForCalendarDate('2026-09-14', 'Pacific/Auckland');
+    expect(aucklandDay.start.toISOString()).toBe('2026-09-13T12:00:00.000Z');
+    expect(aucklandDay.endExclusive.toISOString()).toBe('2026-09-14T12:00:00.000Z');
   });
 });
 

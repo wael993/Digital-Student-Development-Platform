@@ -10,6 +10,7 @@ import { StudentGuardianModel } from '../src/modules/guardians/guardian.model';
 import { OrganizationModel } from '../src/modules/organizations/organization.model';
 import { createOrganization } from '../src/modules/organizations/organization.repository';
 import { AttendanceModel } from '../src/modules/attendance/attendance.model';
+import { StudentEventModel } from '../src/modules/journey/student-event.model';
 import { StudentModel } from '../src/modules/students/student.model';
 import { createStudent } from '../src/modules/students/student.repository';
 import { createUser } from '../src/modules/users/user.repository';
@@ -35,6 +36,7 @@ export async function clearAuthData(): Promise<void> {
     StudentModel.deleteMany({}),
     StudentGuardianModel.deleteMany({}),
     AttendanceModel.deleteMany({}),
+    StudentEventModel.deleteMany({}),
   ]);
 }
 

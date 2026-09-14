@@ -69,7 +69,7 @@ Defined in `apps/api/src/authorization/permissions.ts`. Add a permission when th
 | `buses.read` / `buses.manage` | Buses and routes |
 | `media.read` / `media.create` | Photos / files |
 
-TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATCH /api/v1/organizations/current`. STUDENT-001 uses `campuses.*`, `classrooms.*`, `students.*`, and `guardians.*`. ATTENDANCE-001 uses `attendance.read` and `attendance.create`.
+TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATCH /api/v1/organizations/current`. STUDENT-001 uses `campuses.*`, `classrooms.*`, `students.*`, and `guardians.*`. ATTENDANCE-001 uses `attendance.read` and `attendance.create`. JOURNEY-001 uses `student_events.read` and `student_events.create`.
 
 ## Role × permission matrix
 
@@ -124,7 +124,7 @@ Session already includes `id`, `organizationId`, and `role` from `/auth/login` a
 
 ## Testing
 
-See `apps/api/tests/tenant.test.ts`, `apps/api/tests/authorization.test.ts`, `apps/api/tests/students.test.ts`, and `apps/api/tests/attendance.test.ts`. Minimum coverage:
+See `apps/api/tests/tenant.test.ts`, `apps/api/tests/authorization.test.ts`, `apps/api/tests/students.test.ts`, `apps/api/tests/attendance.test.ts`, and `apps/api/tests/journey.test.ts`. Minimum coverage:
 
 - unauthenticated / invalid / expired → 401
 - teacher `PATCH /organizations/current` → 403; admin → 200

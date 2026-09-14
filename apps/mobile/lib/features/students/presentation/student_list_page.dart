@@ -1,4 +1,5 @@
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
+import 'package:digital_student/features/journey/presentation/journey_page.dart';
 import 'package:digital_student/features/students/presentation/student_details_page.dart';
 import 'package:digital_student/features/students/student_providers.dart';
 import 'package:digital_student/features/students/student_repository.dart';
@@ -79,7 +80,9 @@ class _StudentListPageState extends ConsumerState<StudentListPage> {
               subtitle: Text(student.classroomName ?? widget.classroomName ?? student.status),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => StudentDetailsPage(studentId: student.id),
+                  builder: (_) => user?.role == 'GUARDIAN'
+                      ? JourneyPage(studentId: student.id)
+                      : StudentDetailsPage(studentId: student.id),
                 ),
               ),
             );

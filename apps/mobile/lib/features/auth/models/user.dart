@@ -22,6 +22,9 @@ class User {
   bool get canRecordAttendance =>
       role == 'ADMIN' || role == 'SUPERVISOR' || role == 'TEACHER';
 
+  bool get canRecordJourneyEvents =>
+      role == 'ADMIN' || role == 'SUPERVISOR' || role == 'TEACHER';
+
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,

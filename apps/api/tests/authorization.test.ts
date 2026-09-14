@@ -48,6 +48,12 @@ describe('permissions', () => {
     expect(hasPermission('GUARDIAN', 'attendance.read')).toBe(true);
     expect(hasPermission('DRIVER', 'attendance.create')).toBe(false);
     expect(hasPermission('DRIVER', 'attendance.read')).toBe(false);
+    expect(hasPermission('TEACHER', 'student_events.create')).toBe(true);
+    expect(hasPermission('TEACHER', 'student_events.read')).toBe(true);
+    expect(hasPermission('GUARDIAN', 'student_events.create')).toBe(false);
+    expect(hasPermission('GUARDIAN', 'student_events.read')).toBe(true);
+    expect(hasPermission('DRIVER', 'student_events.create')).toBe(true);
+    expect(hasPermission('DRIVER', 'student_events.read')).toBe(true);
   });
 });
 

@@ -1,5 +1,6 @@
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:digital_student/features/guardians/presentation/add_guardian_page.dart';
+import 'package:digital_student/features/journey/presentation/journey_page.dart';
 import 'package:digital_student/features/students/student_providers.dart';
 import 'package:digital_student/features/students/student_repository.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +45,19 @@ class StudentDetailsPage extends ConsumerWidget {
             children: [
               Text(data.displayName, style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 16),
+              ListTile(
+                key: const Key('studentJourneyButton'),
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.timeline),
+                title: const Text("Today's Journey"),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => JourneyPage(studentId: studentId),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
               _row('Class', data.classroomName ?? data.classroomId),
               _row('Date of Birth', localizations.formatFullDate(data.dateOfBirth.toLocal())),
               _row('Status', data.status),

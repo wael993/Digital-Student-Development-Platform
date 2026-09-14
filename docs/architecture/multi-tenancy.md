@@ -66,11 +66,11 @@ Failures: 401 (bad/missing token or disabled/mismatched user) or 403 (org missin
 
 ## Which collections require `organizationId`
 
-Required: `users`, `refresh_tokens`, `campuses`, `classrooms`, `students`, `student_guardians`, `attendance`, and later `student_events`, `buses`, `routes`, `activities`, `media`, `notifications`.
+Required: `users`, `refresh_tokens`, `campuses`, `classrooms`, `students`, `student_guardians`, `attendance`, `student_events`, and later `buses`, `routes`, `activities`, `media`, `notifications`.
 
 Not required: `organizations` (the tenant row).
 
-Campuses, classrooms, students, and student–guardian links are created in STUDENT-001. Attendance is created in ATTENDANCE-001.
+Campuses, classrooms, students, and student–guardian links are created in STUDENT-001. Attendance is created in ATTENDANCE-001. Student journey events are created in JOURNEY-001.
 
 ## How repositories enforce isolation
 

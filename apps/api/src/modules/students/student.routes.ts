@@ -3,6 +3,7 @@ import { authenticate } from '../../middlewares/authenticate';
 import { authorize } from '../../middlewares/authorize';
 import { tenantContext } from '../../middlewares/tenantContext';
 import { asyncHandler } from '../../utils/asyncHandler';
+import { journeyRouter } from '../journey/journey.routes';
 import {
   deleteStudentGuardian,
   getStudent,
@@ -16,6 +17,7 @@ import {
 export const studentsRouter = Router();
 
 studentsRouter.use(authenticate, tenantContext);
+studentsRouter.use(journeyRouter);
 
 studentsRouter.get('/', authorize('students.read'), asyncHandler(getStudents));
 studentsRouter.get('/:id', authorize('students.read'), asyncHandler(getStudent));

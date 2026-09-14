@@ -11,6 +11,7 @@ import {
   findStudentsByIds,
 } from '../students/student.repository';
 import type { Student } from '../students/student.model';
+import { ensureAttendancePresentEvent } from '../journey/journey.service';
 import {
   createAttendance,
   findAttendanceByStudentDate,
@@ -77,6 +78,7 @@ export async function scan(auth: AuthContext, qrToken: string, timeZone: string)
   const date = calendarDateInTimeZone(scannedAt, timeZone);
   const existing = await findAttendanceByStudentDate(auth.organizationId, student.id, date);
   if (existing) {
+    await recordAttendanceJourney(auth, student, existing, timeZone);
     return toAttendanceScanJson('ALREADY_RECORDED', existing, student);
   }
 
@@ -95,6 +97,8 @@ export async function scan(auth: AuthContext, qrToken: string, timeZone: string)
       scannedBy: auth.userId,
       source: 'QR',
     });
+    // note: standalone Mongo has no multi-doc transactions. Event insert follows attendance; ALREADY_RECORDED repairs a missing event. Use a replica-set transaction when the cluster supports it.
+    await recordAttendanceJourney(auth, student, attendance, timeZone);
     return toAttendanceScanJson('RECORDED', attendance, student);
   } catch (err) {
     if (!isDuplicateKeyError(err)) {
@@ -104,8 +108,25 @@ export async function scan(auth: AuthContext, qrToken: string, timeZone: string)
     if (!raced) {
       throw err;
     }
+    await recordAttendanceJourney(auth, student, raced, timeZone);
     return toAttendanceScanJson('ALREADY_RECORDED', raced, student);
   }
+}
+
+async function recordAttendanceJourney(
+  auth: AuthContext,
+  student: Student & { id: string },
+  attendance: Attendance & { id: string },
+  timeZone: string,
+): Promise<void> {
+  await ensureAttendancePresentEvent(
+    auth.organizationId,
+    student.id,
+    attendance.id,
+    attendance.scannedAt,
+    auth.userId,
+    timeZone,
+  );
 }
 
 export async function list(
