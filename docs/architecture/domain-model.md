@@ -2,7 +2,7 @@
 
 ARCH-001 source of truth for entities, relationships, and the collection plan.
 
-AUTH-001 implemented `users` and `refresh_tokens`. TENANT-001 implemented `organizations`. STUDENT-001 implemented `campuses`, `classrooms`, `students`, and `student_guardians`. Do not create the remaining collections until their tickets.
+AUTH-001 implemented `users` and `refresh_tokens`. TENANT-001 implemented `organizations`. STUDENT-001 implemented `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 implemented `attendance`. Do not create the remaining collections until their tickets.
 
 ## Design decisions
 
@@ -21,7 +21,7 @@ AUTH-001 implemented `users` and `refresh_tokens`. TENANT-001 implemented `organ
 | User status | `ACTIVE` \| `INACTIVE` | Invites / suspend in a later ticket |
 | Daily status | Derived from `student_events`. Optional denormalized cache on `students` | Cache is never the source of truth |
 | Events | Append-only. Correct with `voidedAt`, do not delete | — |
-| Attendance | Separate daily roll-up in `attendance`, not a flag on the student | Written alongside arrival events in ATTENDANCE-001 |
+| Attendance | Separate daily roll-up in `attendance`, not a flag on the student | QR scan writes PRESENT for the org-local date. Journey events wait for JOURNEY-001 |
 | QR payload | Rotatable `qrToken` on the student. Random 32-char hex identifier only, never PII. QR scanning is ATTENDANCE-001. | Rotate token without changing `_id` |
 
 ## Relationship overview
@@ -107,6 +107,7 @@ School / company / tenant.
 | name | string | |
 | type | enum | Planned (`NURSERY`, `KINDERGARTEN`, `PRIMARY`, `MIDDLE`, `HIGH`, `MIXED`). Not stored in TENANT-001. |
 | status | enum | `ACTIVE`, `INACTIVE` |
+| timezone | string | IANA timezone. Default `UTC`. ATTENDANCE-001 uses this for “today”. |
 
 Not tenant-scoped (it **is** the tenant). No `organizationId` on this document.
 
@@ -218,20 +219,21 @@ No `deletedAt`. Void instead.
 
 ### Attendance
 
-School-day roll-up for reporting. Complements events; does not replace them.
+School-day roll-up for reporting. Complements events; does not replace them. Implemented in ATTENDANCE-001.
 
 | Field | Type | Notes |
 | --- | --- | --- |
 | organizationId | ObjectId | |
 | studentId | ObjectId | |
-| campusId | ObjectId | |
-| classroomId | ObjectId | |
-| date | string | `YYYY-MM-DD` in org local date |
-| status | enum | `PRESENT`, `ABSENT`, `LATE`, `EXCUSED` |
-| sourceEventId | ObjectId? | Event that marked presence |
-| recordedBy | ObjectId | |
+| campusId | ObjectId | Copied from the student at scan time |
+| classroomId | ObjectId | Copied from the student at scan time |
+| date | string | `YYYY-MM-DD` in the organization timezone |
+| attendanceType | enum | `PRESENT`, `ABSENT` (QR scan writes `PRESENT`) |
+| scannedAt | Date | UTC. Set by the server, never the client |
+| scannedBy | ObjectId | Authenticated user |
+| source | enum | `QR` in v1. Later: `MANUAL`, `IMPORT`, `SYSTEM` |
 
-Unique: one document per student per org date.
+Unique: one document per student per org date. Repeat QR scans for that date return `ALREADY_RECORDED`. Journey `SCHOOL_ARRIVAL` events wait for JOURNEY-001.
 
 ### Bus
 
@@ -351,6 +353,9 @@ All tenant collections: `{ organizationId: 1 }` is never enough alone. Prefer co
 | student_events | `{ organizationId: 1, studentId: 1, occurredAt: -1 }` | Timeline / latest |
 | student_events | unique sparse `{ organizationId: 1, clientRequestId: 1 }` | Idempotency |
 | attendance | unique `{ organizationId: 1, studentId: 1, date: 1 }` | Daily roll-up |
+| attendance | `{ organizationId: 1, studentId: 1, scannedAt: -1 }` | Student history |
+| attendance | `{ organizationId: 1, scannedAt: -1 }` | Daily staff list |
+| attendance | `{ organizationId: 1, classroomId: 1, date: 1 }` | Class roll |
 | routes | `{ organizationId: 1, busId: 1 }` | Bus routes |
 | media | `{ organizationId: 1, studentIds: 1 }` | Child photos |
 | notifications | `{ organizationId: 1, userId: 1, createdAt: -1 }` | Inbox |

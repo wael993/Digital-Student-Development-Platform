@@ -95,11 +95,11 @@ Deep links are not required for ARCH-001.
 | Capability | Used for | Ticket |
 | --- | --- | --- |
 | Secure storage | Tokens | AUTH-001 |
-| Camera / QR | Attendance, boarding | ATTENDANCE-001, BUS-001 |
+| Camera / QR | Attendance, boarding | ATTENDANCE-001 (school arrival), BUS-001 |
 | FCM | Push | NOTIF-001 |
 | Image picker / camera | Media | MEDIA-001 |
 
-QR codes encode only the student's `qrToken`. The app never embeds names, dates of birth, or guardian data in the code.
+QR codes encode only the student's `qrToken`. The app never embeds names, dates of birth, or guardian data in the code. Staff scan from `features/attendance`; the API remains the security boundary.
 
 ## Models vs API
 

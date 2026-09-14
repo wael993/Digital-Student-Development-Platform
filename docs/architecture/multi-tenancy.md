@@ -66,11 +66,11 @@ Failures: 401 (bad/missing token or disabled/mismatched user) or 403 (org missin
 
 ## Which collections require `organizationId`
 
-Required: `users`, `refresh_tokens`, `campuses`, `classrooms`, `students`, `student_guardians`, and later `student_events`, `attendance`, `buses`, `routes`, `activities`, `media`, `notifications`.
+Required: `users`, `refresh_tokens`, `campuses`, `classrooms`, `students`, `student_guardians`, `attendance`, and later `student_events`, `buses`, `routes`, `activities`, `media`, `notifications`.
 
 Not required: `organizations` (the tenant row).
 
-Campuses, classrooms, students, and student–guardian links are created in STUDENT-001.
+Campuses, classrooms, students, and student–guardian links are created in STUDENT-001. Attendance is created in ATTENDANCE-001.
 
 ## How repositories enforce isolation
 
@@ -96,7 +96,7 @@ No platform superuser. No admin bypass that omits `organizationId`.
 | Reads | Filter includes `organizationId` |
 | Unknown id | Return **404** even if the id exists in another org |
 | Query / body / header | Client `organizationId` and `X-Organization-Id` are not used for scoping |
-| QR (later) | Lookup `{ organizationId, qrToken }`. Other-org token → 404 |
+| QR | Lookup `{ organizationId, qrToken }`. Other-org token → 404 |
 | Indexes | Tenant collections: compound indexes that start with `organizationId` |
 
 Proof: org A cannot GET/PATCH org B campuses or students (404). The same `tenantFilter` / `withTenant` helpers apply.

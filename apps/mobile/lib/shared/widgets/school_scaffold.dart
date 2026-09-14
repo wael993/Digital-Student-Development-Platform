@@ -1,3 +1,4 @@
+import 'package:digital_student/features/attendance/presentation/attendance_page.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,19 +10,31 @@ class SchoolScaffold extends ConsumerWidget {
     required this.body,
     this.floatingActionButton,
     this.bottom,
+    this.showAttendanceShortcut = true,
   });
 
   final String title;
   final Widget body;
   final Widget? floatingActionButton;
   final Widget? bottom;
+  final bool showAttendanceShortcut;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authProvider).user;
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
         actions: [
+          if (showAttendanceShortcut && (user?.canRecordAttendance ?? false))
+            IconButton(
+              key: const Key('attendanceButton'),
+              tooltip: 'Attendance',
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const AttendancePage()),
+              ),
+              icon: const Icon(Icons.qr_code_scanner),
+            ),
           TextButton(
             key: const Key('logoutButton'),
             onPressed: () => ref.read(authProvider.notifier).logout(),

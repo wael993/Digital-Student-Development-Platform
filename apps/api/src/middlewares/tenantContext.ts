@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import { DEFAULT_TIMEZONE } from '../modules/organizations/organization.model';
 import { findOrganizationById } from '../modules/organizations/organization.repository';
 import { AppError } from '../utils/appError';
 
@@ -15,4 +16,6 @@ async function loadTenant(req: Request): Promise<void> {
   if (!organization || organization.status !== 'ACTIVE') {
     throw new AppError(403, 'FORBIDDEN', 'You do not have permission to perform this action');
   }
+
+  req.tenantTimezone = organization.timezone || DEFAULT_TIMEZONE;
 }

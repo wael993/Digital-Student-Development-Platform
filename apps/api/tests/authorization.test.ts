@@ -42,6 +42,12 @@ describe('permissions', () => {
     expect(hasPermission('SUPERVISOR', 'campuses.manage')).toBe(true);
     expect(hasPermission('TEACHER', 'guardians.manage')).toBe(false);
     expect(hasPermission('ADMIN', 'guardians.manage')).toBe(true);
+    expect(hasPermission('TEACHER', 'attendance.create')).toBe(true);
+    expect(hasPermission('TEACHER', 'attendance.read')).toBe(true);
+    expect(hasPermission('GUARDIAN', 'attendance.create')).toBe(false);
+    expect(hasPermission('GUARDIAN', 'attendance.read')).toBe(true);
+    expect(hasPermission('DRIVER', 'attendance.create')).toBe(false);
+    expect(hasPermission('DRIVER', 'attendance.read')).toBe(false);
   });
 });
 

@@ -17,7 +17,11 @@ import type { Student, StudentGender, StudentStatus } from './student.model';
 
 export function toStudentJson(
   student: Student & { id: string },
-  extras?: { classroomName?: string; guardians?: ReturnType<typeof toGuardianSummary>[] },
+  extras?: {
+    classroomName?: string;
+    guardians?: ReturnType<typeof toGuardianSummary>[];
+    includeQrToken?: boolean;
+  },
 ) {
   return {
     id: student.id,
@@ -31,11 +35,15 @@ export function toStudentJson(
     gender: student.gender,
     studentNumber: student.studentNumber,
     status: student.status,
-    qrToken: student.qrToken,
+    ...(extras?.includeQrToken ? { qrToken: student.qrToken } : {}),
     createdAt: student.createdAt,
     updatedAt: student.updatedAt,
     ...(extras?.guardians ? { guardians: extras.guardians } : {}),
   };
+}
+
+export function shouldExposeQrToken(role: AuthContext['role']): boolean {
+  return role !== 'GUARDIAN' && role !== 'DRIVER';
 }
 
 export function toGuardianSummary(link: {
@@ -102,6 +110,7 @@ export async function getById(auth: AuthContext, id: string) {
   const byId = new Map(users.map((user) => [user.id, user]));
   return toStudentJson(student, {
     classroomName: classroom?.name,
+    includeQrToken: shouldExposeQrToken(auth.role),
     guardians: links.map((link) => {
       const user = byId.get(String(link.userId));
       return toGuardianSummary({
@@ -143,7 +152,10 @@ export async function list(
   const names = new Map(classrooms.map((classroom) => [classroom.id, classroom.name]));
   return {
     items: result.items.map((student) =>
-      toStudentJson(student, { classroomName: names.get(String(student.classroomId)) }),
+      toStudentJson(student, {
+        classroomName: names.get(String(student.classroomId)),
+        includeQrToken: shouldExposeQrToken(auth.role),
+      }),
     ),
     total: result.total,
     page: opts.page,
@@ -228,7 +240,7 @@ async function studentListFilter(
   return null;
 }
 
-async function assertStudentReadable(
+export async function assertStudentReadable(
   auth: AuthContext,
   student: Student & { id: string },
 ): Promise<void> {

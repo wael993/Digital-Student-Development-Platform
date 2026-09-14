@@ -208,10 +208,11 @@ Versioning: URL prefix `/api/v1`. Breaking changes go to `/api/v2`. Additive fie
 See [domain-model.md](./domain-model.md) for collections and indexes.
 
 - One database, many tenants via `organizationId` on documents
-- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations`. STUDENT-001 added `campuses`, `classrooms`, `students`, and `student_guardians`. Other collections wait for their tickets.
+- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations`. STUDENT-001 added `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 added `attendance`. Other collections wait for their tickets.
+
+QR scan: `POST /api/v1/attendance/scan` with `{ "qrToken" }`. Lookup is `{ organizationId, qrToken }`. History: `GET /api/v1/attendance?date=&classroomId=&studentId=`.
 
 ## Next implementation tickets
 
-1. **ATTENDANCE-001** — attendance + QR (uses `students.qrToken`)
-2. **JOURNEY-001** — student_events + timeline
-3. **PARENT-001** — parent-facing reads of that data
+1. **JOURNEY-001** — student_events + timeline
+2. **PARENT-001** — parent-facing reads of that data

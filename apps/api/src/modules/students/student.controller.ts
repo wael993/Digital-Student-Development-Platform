@@ -8,7 +8,11 @@ import { parseAssociateGuardian } from '../guardians/guardian.validation';
 
 export async function postStudent(req: Request, res: Response): Promise<void> {
   const student = await studentService.create(requireAuth(req), parseCreateStudent(req.body));
-  res.status(201).json(studentService.toStudentJson(student));
+  res.status(201).json(
+    studentService.toStudentJson(student, {
+      includeQrToken: studentService.shouldExposeQrToken(requireAuth(req).role),
+    }),
+  );
 }
 
 export async function getStudents(req: Request, res: Response): Promise<void> {
@@ -28,7 +32,11 @@ export async function patchStudent(req: Request, res: Response): Promise<void> {
     req.params.id,
     parsePatchStudent(req.body),
   );
-  res.status(200).json(studentService.toStudentJson(student));
+  res.status(200).json(
+    studentService.toStudentJson(student, {
+      includeQrToken: studentService.shouldExposeQrToken(requireAuth(req).role),
+    }),
+  );
 }
 
 export async function getStudentGuardians(req: Request, res: Response): Promise<void> {

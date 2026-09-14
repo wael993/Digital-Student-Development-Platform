@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { attendanceRouter } from '../modules/attendance/attendance.routes';
 import { authRouter } from '../modules/auth/auth.routes';
 import { campusesRouter } from '../modules/campuses/campus.routes';
 import { classroomsRouter } from '../modules/classrooms/classroom.routes';
@@ -16,3 +17,4 @@ v1Router.use('/campuses', campusesRouter);
 v1Router.use('/classrooms', classroomsRouter);
 v1Router.use('/students', studentsRouter);
 v1Router.use('/guardians', guardiansRouter);
+v1Router.use('/attendance', attendanceRouter);

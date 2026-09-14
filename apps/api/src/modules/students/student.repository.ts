@@ -27,6 +27,10 @@ export async function findStudentById(organizationId: string, id: string) {
   return StudentModel.findOne(tenantFilter(organizationId, { _id: id }));
 }
 
+export async function findStudentByQrToken(organizationId: string, qrToken: string) {
+  return StudentModel.findOne(tenantFilter(organizationId, { qrToken }));
+}
+
 export async function findStudentsByIds(organizationId: string, ids: string[]) {
   if (ids.length === 0) {
     return [];

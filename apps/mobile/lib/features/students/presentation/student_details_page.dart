@@ -4,6 +4,7 @@ import 'package:digital_student/features/students/student_providers.dart';
 import 'package:digital_student/features/students/student_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class StudentDetailsPage extends ConsumerWidget {
   const StudentDetailsPage({super.key, required this.studentId});
@@ -46,6 +47,18 @@ class StudentDetailsPage extends ConsumerWidget {
               _row('Class', data.classroomName ?? data.classroomId),
               _row('Date of Birth', localizations.formatFullDate(data.dateOfBirth.toLocal())),
               _row('Status', data.status),
+              if (data.qrToken != null) ...[
+                const SizedBox(height: 16),
+                Text('Attendance QR', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                Center(
+                  child: QrImageView(
+                    data: data.qrToken!,
+                    size: 180,
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
               Row(
                 children: [

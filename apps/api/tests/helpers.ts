@@ -9,6 +9,7 @@ import { createClassroom } from '../src/modules/classrooms/classroom.repository'
 import { StudentGuardianModel } from '../src/modules/guardians/guardian.model';
 import { OrganizationModel } from '../src/modules/organizations/organization.model';
 import { createOrganization } from '../src/modules/organizations/organization.repository';
+import { AttendanceModel } from '../src/modules/attendance/attendance.model';
 import { StudentModel } from '../src/modules/students/student.model';
 import { createStudent } from '../src/modules/students/student.repository';
 import { createUser } from '../src/modules/users/user.repository';
@@ -33,6 +34,7 @@ export async function clearAuthData(): Promise<void> {
     ClassroomModel.deleteMany({}),
     StudentModel.deleteMany({}),
     StudentGuardianModel.deleteMany({}),
+    AttendanceModel.deleteMany({}),
   ]);
 }
 

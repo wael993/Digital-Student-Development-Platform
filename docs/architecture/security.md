@@ -83,7 +83,7 @@ Minimum when write APIs exist:
 | What | How |
 | --- | --- |
 | Who recorded an event | `student_events.recordedBy` + `occurredAt` |
-| Who marked attendance | `attendance.recordedBy` |
+| Who marked attendance | `attendance.scannedBy` |
 | Corrections | Event void fields; do not rewrite history silently |
 | Authz failures | Log org, user, route, target id — not tokens or passwords |
 
@@ -110,4 +110,4 @@ Do not put names, medical notes, or addresses in QR payloads or unauthenticated 
 - Driver or teacher "because the app only shows my list"
 - Permanent public object-storage URLs
 
-Automated checks: `apps/api/tests/tenant.test.ts` and `apps/api/tests/students.test.ts`.
+Automated checks: `apps/api/tests/tenant.test.ts`, `apps/api/tests/students.test.ts`, and `apps/api/tests/attendance.test.ts`.

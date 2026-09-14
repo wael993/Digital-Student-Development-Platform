@@ -11,6 +11,7 @@ class Student {
     required this.studentNumber,
     required this.status,
     this.classroomName,
+    this.qrToken,
     this.guardians = const [],
   });
 
@@ -25,6 +26,7 @@ class Student {
   final String studentNumber;
   final String status;
   final String? classroomName;
+  final String? qrToken;
   final List<StudentGuardian> guardians;
 
   String get displayName => '$firstName $lastName'.trim();
@@ -42,6 +44,7 @@ class Student {
       studentNumber: json['studentNumber'] as String,
       status: json['status'] as String,
       classroomName: json['classroomName'] as String?,
+      qrToken: json['qrToken'] as String?,
       guardians: (json['guardians'] as List<dynamic>? ?? [])
           .map((row) => StudentGuardian.fromJson(row as Map<String, dynamic>))
           .toList(),

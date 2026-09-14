@@ -8,6 +8,6 @@ export async function createOrganization(input: { name: string; status?: Organiz
   return OrganizationModel.create(input);
 }
 
-export async function updateOrganizationName(id: string, name: string) {
-  return OrganizationModel.findByIdAndUpdate(id, { name }, { new: true });
+export async function updateOrganization(id: string, patch: { name?: string; timezone?: string }) {
+  return OrganizationModel.findByIdAndUpdate(id, patch, { new: true });
 }
