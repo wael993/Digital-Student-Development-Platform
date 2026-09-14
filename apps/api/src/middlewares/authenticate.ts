@@ -25,6 +25,8 @@ async function authenticateRequest(req: Request): Promise<void> {
       userId: user.id,
       organizationId: String(user.organizationId),
       role: user.role,
+      campusIds: (user.campusIds ?? []).map(String),
+      classroomIds: (user.classroomIds ?? []).map(String),
     };
   } catch (err) {
     if (err instanceof AppError) {

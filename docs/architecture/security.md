@@ -110,4 +110,4 @@ Do not put names, medical notes, or addresses in QR payloads or unauthenticated 
 - Driver or teacher "because the app only shows my list"
 - Permanent public object-storage URLs
 
-Automated checks: `apps/api/tests/tenant.test.ts`.
+Automated checks: `apps/api/tests/tenant.test.ts` and `apps/api/tests/students.test.ts`.

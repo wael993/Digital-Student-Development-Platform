@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:digital_student/core/network/api_client.dart';
 import 'package:digital_student/core/storage/token_store.dart';
 import 'package:digital_student/features/auth/data/auth_api.dart';
 import 'package:digital_student/features/auth/data/auth_repository.dart';
@@ -64,8 +65,9 @@ void main() {
   });
 
   Future<void> pumpApp(WidgetTester tester, {Dio? dio}) async {
+    final client = dio ?? _dio((_) async => ResponseBody.fromString('', 500));
     final repo = AuthRepository(
-      AuthApi(dio ?? _dio((_) async => ResponseBody.fromString('', 500))),
+      AuthApi(client),
       tokens,
     );
 
@@ -74,6 +76,7 @@ void main() {
         overrides: [
           tokenStoreProvider.overrideWithValue(tokens),
           authRepositoryProvider.overrideWithValue(repo),
+          apiClientProvider.overrideWithValue(client),
         ],
         child: const MaterialApp(home: AuthGate()),
       ),
@@ -122,20 +125,35 @@ void main() {
   });
 
   testWidgets('navigates to home after a successful login', (tester) async {
-    final dio = _dio(
-      (_) async => _json(200, {
-        'user': {
-          'id': 'u1',
-          'organizationId': 'o1',
-          'firstName': 'John',
-          'lastName': 'Smith',
-          'email': 'teacher@example.com',
-          'role': 'TEACHER',
-        },
-        'accessToken': 'access',
-        'refreshToken': 'refresh',
-      }),
-    );
+    final dio = _dio((options) async {
+      if (options.path.contains('/auth/login') || options.uri.path.contains('/auth/login')) {
+        return _json(200, {
+          'user': {
+            'id': 'u1',
+            'organizationId': 'o1',
+            'firstName': 'John',
+            'lastName': 'Smith',
+            'email': 'teacher@example.com',
+            'role': 'TEACHER',
+          },
+          'accessToken': 'access',
+          'refreshToken': 'refresh',
+        });
+      }
+      return _json(200, {
+        'data': [
+          {
+            'id': 'c1',
+            'organizationId': 'o1',
+            'campusId': 'p1',
+            'name': 'Nursery A',
+            'level': 'NURSERY',
+            'status': 'ACTIVE',
+          },
+        ],
+        'meta': {'page': 1, 'limit': 20, 'total': 1},
+      });
+    });
 
     await pumpApp(tester, dio: dio);
     await tester.enterText(find.byKey(const Key('emailField')), 'teacher@example.com');
@@ -144,8 +162,11 @@ void main() {
     await tester.pump();
     await tester.idle();
     await tester.pump();
+    await tester.idle();
+    await tester.pump();
 
-    expect(find.textContaining('Signed in as John Smith'), findsOneWidget);
+    expect(find.text('My Classes'), findsOneWidget);
+    expect(find.text('Nursery A'), findsOneWidget);
     expect(find.byKey(const Key('logoutButton')), findsOneWidget);
   });
 }

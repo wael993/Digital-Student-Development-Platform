@@ -42,4 +42,4 @@ Local environment and how to run the stack: root [README](../README.md).
 
 ## What to implement next
 
-ARCH-001, AUTH-001, and TENANT-001 are done. Next: STUDENT-001 → ATTENDANCE-001 → JOURNEY-001 → PARENT-001.
+ARCH-001, AUTH-001, TENANT-001, and STUDENT-001 are done. Next: ATTENDANCE-001 → JOURNEY-001 → PARENT-001.

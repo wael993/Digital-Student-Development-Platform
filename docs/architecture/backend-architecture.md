@@ -38,6 +38,7 @@ apps/api/src/
 │   ├── auth/
 │   ├── organizations/
 │   ├── users/
+│   ├── campuses/
 │   ├── students/
 │   ├── classrooms/
 │   ├── guardians/          # student–guardian links, not a second identity
@@ -207,11 +208,10 @@ Versioning: URL prefix `/api/v1`. Breaking changes go to `/api/v2`. Additive fie
 See [domain-model.md](./domain-model.md) for collections and indexes.
 
 - One database, many tenants via `organizationId` on documents
-- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations` and a temporary `scoped_items` probe. Other collections wait for their tickets.
+- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations`. STUDENT-001 added `campuses`, `classrooms`, `students`, and `student_guardians`. Other collections wait for their tickets.
 
 ## Next implementation tickets
 
-1. **STUDENT-001** — students, classrooms, campuses, student_guardians (reuse TENANT-001 filters and `authorize`)
-2. **ATTENDANCE-001** — attendance + QR
-3. **JOURNEY-001** — student_events + timeline
-4. **PARENT-001** — parent-facing reads of that data
+1. **ATTENDANCE-001** — attendance + QR (uses `students.qrToken`)
+2. **JOURNEY-001** — student_events + timeline
+3. **PARENT-001** — parent-facing reads of that data

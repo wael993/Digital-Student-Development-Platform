@@ -165,7 +165,9 @@ describe('auth', () => {
       { algorithm: 'HS256', expiresIn: '15m' },
     );
 
-    const response = await request(app).get('/api/v1/auth/me').set('Authorization', `Bearer ${token}`);
+    const response = await request(app)
+      .get('/api/v1/auth/me')
+      .set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(401);
     expect(response.body.error.code).toBe('UNAUTHORIZED');

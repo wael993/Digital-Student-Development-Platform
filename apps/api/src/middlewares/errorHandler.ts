@@ -30,6 +30,16 @@ export function errorHandler(
     return;
   }
 
+  if (isDuplicateKeyError(err)) {
+    res.status(409).json({
+      error: {
+        code: 'UNIQUE_CONFLICT',
+        message: 'Resource already exists',
+      },
+    });
+    return;
+  }
+
   if (err instanceof SyntaxError) {
     res.status(400).json({
       error: {
@@ -48,4 +58,8 @@ export function errorHandler(
       message: 'Internal Server Error',
     },
   });
+}
+
+function isDuplicateKeyError(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && 'code' in err && err.code === 11000;
 }

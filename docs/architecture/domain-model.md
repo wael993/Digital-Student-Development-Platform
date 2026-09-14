@@ -2,16 +2,17 @@
 
 ARCH-001 source of truth for entities, relationships, and the collection plan.
 
-AUTH-001 implemented `users` and `refresh_tokens`. Do not create the remaining collections until their tickets.
+AUTH-001 implemented `users` and `refresh_tokens`. TENANT-001 implemented `organizations`. STUDENT-001 implemented `campuses`, `classrooms`, `students`, and `student_guardians`. Do not create the remaining collections until their tickets.
 
 ## Design decisions
 
 | Decision | Choice | Ceiling / later upgrade |
 | --- | --- | --- |
 | Tenant root | `Organization` | — |
-| Physical location | Every org has at least one `Campus`. Single-site nurseries still store one campus. | Multi-campus already modeled |
+| Physical location | Every org has at least one `Campus`. Single-site nurseries still store one campus. Status `ACTIVE` \| `INACTIVE` (no hard delete). | Multi-campus already modeled |
 | Class membership | A student has one primary `classroomId` | `enrollments` collection if a student joins multiple classes |
-| Guardian identity | A guardian is a `User` with role `GUARDIAN`. No separate `guardians` collection | — |
+| Classroom stage | `level` enum: `NURSERY`, `KINDERGARTEN`, `PRIMARY`, `MIDDLE_SCHOOL`, `HIGH_SCHOOL` | Add values when a new stage is needed |
+| Guardian identity | A guardian is a `User` with role `GUARDIAN`. No separate `guardians` collection. Links live in `student_guardians`. | — |
 | Student–guardian link | `student_guardians` (many-to-many) | — |
 | Student accounts | Students are **not** authenticated users in v1 | Student login if a later stage needs it |
 | User tenancy | A user belongs to **one** `organizationId` | `memberships` if a parent has children at two orgs |
@@ -21,7 +22,7 @@ AUTH-001 implemented `users` and `refresh_tokens`. Do not create the remaining c
 | Daily status | Derived from `student_events`. Optional denormalized cache on `students` | Cache is never the source of truth |
 | Events | Append-only. Correct with `voidedAt`, do not delete | — |
 | Attendance | Separate daily roll-up in `attendance`, not a flag on the student | Written alongside arrival events in ATTENDANCE-001 |
-| QR payload | Rotatable `qrToken` on the student. Random identifier only, never PII | Rotate token without changing `_id` |
+| QR payload | Rotatable `qrToken` on the student. Random 32-char hex identifier only, never PII. QR scanning is ATTENDANCE-001. | Rotate token without changing `_id` |
 
 ## Relationship overview
 
@@ -118,7 +119,7 @@ Physical site of an organization.
 | organizationId | ObjectId | |
 | name | string | |
 | address | string? | |
-| status | enum | `ACTIVE`, `ARCHIVED` |
+| status | enum | `ACTIVE`, `INACTIVE` |
 
 ### Classroom
 
@@ -129,9 +130,9 @@ Class / group inside a campus.
 | organizationId | ObjectId | |
 | campusId | ObjectId | |
 | name | string | |
-| stage | string? | Free-text or later enum; nursery class vs grade |
-| teacherIds | ObjectId[] | Users with TEACHER (denormalized assignment) |
-| status | enum | `ACTIVE`, `ARCHIVED` |
+| level | enum | `NURSERY`, `KINDERGARTEN`, `PRIMARY`, `MIDDLE_SCHOOL`, `HIGH_SCHOOL` |
+| teacherIds | ObjectId[] | Users with TEACHER (denormalized; `users.classroomIds` is the authz source) |
+| status | enum | `ACTIVE`, `INACTIVE` |
 
 ### User
 
@@ -146,8 +147,10 @@ Authenticated person. Students are not users.
 | lastName | string | |
 | role | enum | `ADMIN`, `SUPERVISOR`, `TEACHER`, `DRIVER`, `GUARDIAN` |
 | status | enum | `ACTIVE`, `INACTIVE` |
+| campusIds | ObjectId[] | SUPERVISOR assignment; empty = no campuses |
+| classroomIds | ObjectId[] | TEACHER assignment; empty = no classes |
 
-Assignment scope (`campusIds`, `classroomIds`, `routeIds`) is applied in STUDENT-001 / BUS-001. TENANT-001 already defines the helpers that receive those ids. Guardian child access is **not** stored on the user. It lives in `student_guardians`.
+Assignment scope: `campusIds` (supervisor) and `classroomIds` (teacher) are stored on the user. `routeIds` wait for BUS-001. Guardian child access is **not** stored on the user. It lives in `student_guardians`. Empty assignment lists mean no rows.
 
 ### Student
 
@@ -160,12 +163,15 @@ Enrolled child. Must belong to an organization. Campus and classroom are require
 | classroomId | ObjectId | Primary class |
 | firstName | string | |
 | lastName | string | |
-| dateOfBirth | Date? | |
-| qrToken | string | Random, unique per org, rotatable |
-| status | enum | `ACTIVE`, `INACTIVE` |
-| currentStatus | string? | Denormalized latest event type. Cache only |
+| dateOfBirth | Date | |
+| gender | enum | `MALE`, `FEMALE`, `OTHER` |
+| studentNumber | string | Unique per organization |
+| qrToken | string | Random, unique per org, rotatable. Never contains PII. |
+| status | enum | `ACTIVE`, `INACTIVE`, `TRANSFERRED`, `GRADUATED` |
+| currentStatus | string? | Denormalized latest event type. Cache only. JOURNEY-001. |
 | currentStatusAt | Date? | Cache only |
-| deletedAt | Date? | Soft-delete |
+
+No hard delete. Historical attendance/journey tickets will keep referencing these rows.
 
 ### student_guardians
 
@@ -176,7 +182,7 @@ Join between a student and a guardian user.
 | organizationId | ObjectId | |
 | studentId | ObjectId | |
 | userId | ObjectId | User with `GUARDIAN` |
-| relationship | enum | `MOTHER`, `FATHER`, `GUARDIAN`, `OTHER` |
+| relationship | enum | `MOTHER`, `FATHER`, `LEGAL_GUARDIAN`, `OTHER` |
 | isPrimary | boolean | |
 | canPickup | boolean | Authorized to collect the child |
 | receivesNotifications | boolean | |
@@ -309,11 +315,11 @@ Implement collections when the matching ticket lands, not all at once.
 | Collection | Tenant field | Soft-delete | First ticket |
 | --- | --- | --- | --- |
 | `organizations` | n/a (root) | inactive via status | TENANT-001 |
-| `campuses` | organizationId | status / optional deletedAt | STUDENT-001 |
-| `classrooms` | organizationId | status | STUDENT-001 |
+| `campuses` | organizationId | status (`INACTIVE`) | STUDENT-001 |
+| `classrooms` | organizationId | status (`INACTIVE`) | STUDENT-001 |
 | `users` | organizationId | no (INACTIVE status) | AUTH-001 |
 | `refresh_tokens` | organizationId | revoke via `revokedAt` | AUTH-001 |
-| `students` | organizationId | deletedAt | STUDENT-001 |
+| `students` | organizationId | status (`INACTIVE` / `TRANSFERRED` / `GRADUATED`) | STUDENT-001 |
 | `student_guardians` | organizationId | hard-remove link | STUDENT-001 |
 | `student_events` | organizationId | void only | JOURNEY-001 |
 | `attendance` | organizationId | no | ATTENDANCE-001 |
@@ -335,11 +341,11 @@ All tenant collections: `{ organizationId: 1 }` is never enough alone. Prefer co
 | users | `{ organizationId: 1, role: 1 }` | Staff lists |
 | refresh_tokens | unique `{ jti: 1 }` | Refresh lookup |
 | refresh_tokens | `{ userId: 1 }` | Logout / revoke |
-| scoped_items | `{ organizationId: 1, createdAt: -1 }` | TENANT-001 probe (temporary) |
 | campuses | `{ organizationId: 1, name: 1 }` | List |
 | classrooms | `{ organizationId: 1, campusId: 1 }` | List by campus |
 | students | unique `{ organizationId: 1, qrToken: 1 }` | QR lookup |
-| students | `{ organizationId: 1, classroomId: 1, deletedAt: 1 }` | Class roster |
+| students | unique `{ organizationId: 1, studentNumber: 1 }` | Org student number |
+| students | `{ organizationId: 1, classroomId: 1 }` | Class roster |
 | student_guardians | unique `{ organizationId: 1, studentId: 1, userId: 1 }` | Link |
 | student_guardians | `{ organizationId: 1, userId: 1 }` | Parent's children |
 | student_events | `{ organizationId: 1, studentId: 1, occurredAt: -1 }` | Timeline / latest |

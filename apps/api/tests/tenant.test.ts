@@ -35,7 +35,7 @@ describe('tenant isolation and RBAC', () => {
   });
 
   it('returns 401 for unauthenticated, invalid, and expired tokens', async () => {
-    const missing = await request(app).get('/api/v1/test/tenant');
+    const missing = await request(app).get('/api/v1/campuses');
     expect(missing.status).toBe(401);
     expect(missing.body.error).toEqual({
       code: 'UNAUTHORIZED',
@@ -43,7 +43,7 @@ describe('tenant isolation and RBAC', () => {
     });
 
     const invalid = await request(app)
-      .get('/api/v1/test/tenant')
+      .get('/api/v1/campuses')
       .set('Authorization', 'Bearer not-a-token');
     expect(invalid.status).toBe(401);
     expect(invalid.body.error.code).toBe('UNAUTHORIZED');
@@ -62,7 +62,7 @@ describe('tenant isolation and RBAC', () => {
     await new Promise((resolve) => setTimeout(resolve, 5));
 
     const expiredRes = await request(app)
-      .get('/api/v1/test/tenant')
+      .get('/api/v1/campuses')
       .set('Authorization', `Bearer ${expired}`);
     expect(expiredRes.status).toBe(401);
     expect(expiredRes.body.error.code).toBe('ACCESS_TOKEN_EXPIRED');
@@ -80,14 +80,14 @@ describe('tenant isolation and RBAC', () => {
     const token = await login('teacher.a@example.com');
 
     const response = await request(app)
-      .get('/api/v1/test/tenant')
+      .get('/api/v1/auth/me')
       .set('Authorization', `Bearer ${token}`)
       .set('X-Organization-Id', orgB.id)
       .query({ organizationId: orgB.id });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      userId: teacher.id,
+    expect(response.body).toMatchObject({
+      id: teacher.id,
       organizationId: orgA.id,
       role: 'TEACHER',
     });
@@ -113,7 +113,7 @@ describe('tenant isolation and RBAC', () => {
     );
 
     const response = await request(app)
-      .get('/api/v1/test/tenant')
+      .get('/api/v1/campuses')
       .set('Authorization', `Bearer ${forged}`);
 
     expect(response.status).toBe(401);
@@ -177,22 +177,22 @@ describe('tenant isolation and RBAC', () => {
     const tokenB = await login('admin.b@example.com');
 
     const createdB = await request(app)
-      .post('/api/v1/test/items')
+      .post('/api/v1/campuses')
       .set('Authorization', `Bearer ${tokenB}`)
-      .send({ name: 'Org B item' });
+      .send({ name: 'Org B campus' });
     expect(createdB.status).toBe(201);
-    const itemBId = createdB.body.id as string;
+    const campusBId = createdB.body.id as string;
 
     const createdA = await request(app)
-      .post('/api/v1/test/items')
+      .post('/api/v1/campuses')
       .set('Authorization', `Bearer ${tokenA}`)
       .set('X-Organization-Id', orgB.id)
-      .send({ name: 'Org A item', organizationId: orgB.id });
+      .send({ name: 'Org A campus', organizationId: orgB.id });
     expect(createdA.status).toBe(201);
     expect(createdA.body.organizationId).toBe(orgA.id);
 
     const listWithQuery = await request(app)
-      .get('/api/v1/test/items')
+      .get('/api/v1/campuses')
       .set('Authorization', `Bearer ${tokenA}`)
       .query({ organizationId: orgB.id });
     expect(listWithQuery.status).toBe(200);
@@ -200,27 +200,22 @@ describe('tenant isolation and RBAC', () => {
     expect(listWithQuery.body.data[0].id).toBe(createdA.body.id);
 
     const crossGet = await request(app)
-      .get(`/api/v1/test/items/${itemBId}`)
+      .get(`/api/v1/campuses/${campusBId}`)
       .set('Authorization', `Bearer ${tokenA}`);
     expect(crossGet.status).toBe(404);
     expect(crossGet.body.error.code).toBe('NOT_FOUND');
 
     const crossPatch = await request(app)
-      .patch(`/api/v1/test/items/${itemBId}`)
+      .patch(`/api/v1/campuses/${campusBId}`)
       .set('Authorization', `Bearer ${tokenA}`)
       .send({ name: 'Hijacked', organizationId: orgB.id });
     expect(crossPatch.status).toBe(404);
 
-    const crossDelete = await request(app)
-      .delete(`/api/v1/test/items/${itemBId}`)
-      .set('Authorization', `Bearer ${tokenA}`);
-    expect(crossDelete.status).toBe(404);
-
     const stillB = await request(app)
-      .get(`/api/v1/test/items/${itemBId}`)
+      .get(`/api/v1/campuses/${campusBId}`)
       .set('Authorization', `Bearer ${tokenB}`);
     expect(stillB.status).toBe(200);
-    expect(stillB.body.name).toBe('Org B item');
+    expect(stillB.body.name).toBe('Org B campus');
   });
 
   it('rejects login when the organization is inactive', async () => {
@@ -288,7 +283,7 @@ describe('tenant isolation and RBAC', () => {
     await setOrganizationStatus(org.id, 'INACTIVE');
 
     const probe = await request(app)
-      .get('/api/v1/test/tenant')
+      .get('/api/v1/campuses')
       .set('Authorization', `Bearer ${accessToken}`);
     expect(probe.status).toBe(403);
     expect(probe.body.error.code).toBe('FORBIDDEN');
@@ -314,7 +309,7 @@ describe('tenant isolation and RBAC', () => {
     const token = await login('admin.a@example.com');
 
     const response = await request(app)
-      .get('/api/v1/test/items/not-an-id')
+      .get('/api/v1/campuses/not-an-id')
       .set('Authorization', `Bearer ${token}`);
 
     expect(response.status).toBe(404);

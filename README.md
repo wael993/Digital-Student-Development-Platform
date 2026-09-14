@@ -126,6 +126,7 @@ Password for every seed user: `Password123!`
 | Email | Org | Role |
 | --- | --- | --- |
 | `admin.a@example.com` | Nursery A | ADMIN |
+| `supervisor.a@example.com` | Nursery A | SUPERVISOR |
 | `teacher@example.com` | Nursery A | TEACHER |
 | `guardian.a@example.com` | Nursery A | GUARDIAN |
 | `admin.b@example.com` | Nursery B | ADMIN |

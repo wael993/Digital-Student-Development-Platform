@@ -17,6 +17,8 @@ class User {
 
   String get displayName => '$firstName $lastName'.trim();
 
+  bool get canManageSchool => role == 'ADMIN' || role == 'SUPERVISOR';
+
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,

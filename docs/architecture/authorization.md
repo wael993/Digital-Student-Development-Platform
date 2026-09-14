@@ -60,14 +60,16 @@ Defined in `apps/api/src/authorization/permissions.ts`. Add a permission when th
 | `organizations.read` | Read current org profile |
 | `organizations.update` | Update current org profile |
 | `users.read` / `users.create` / `users.update` | Staff user administration |
-| `students.read` / `create` / `update` / `delete` | Student records |
+| `campuses.read` / `campuses.manage` | Campuses |
 | `classrooms.read` / `classrooms.manage` | Classrooms |
+| `students.read` / `create` / `update` / `delete` | Student records |
+| `guardians.read` / `guardians.manage` | Guardian users and student links |
 | `attendance.read` / `attendance.create` | Daily attendance |
 | `student_events.read` / `student_events.create` | Journey events |
 | `buses.read` / `buses.manage` | Buses and routes |
 | `media.read` / `media.create` | Photos / files |
 
-TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATCH /api/v1/organizations/current`. Other permissions exist so STUDENT-001+ can pass them to `authorize()` without inventing a second matrix.
+TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATCH /api/v1/organizations/current`. STUDENT-001 uses `campuses.*`, `classrooms.*`, `students.*`, and `guardians.*`.
 
 ## Role × permission matrix
 
@@ -91,14 +93,14 @@ Empty assignment lists mean **no rows**, not the whole organization. Only `ADMIN
 
 ## Resource-level authorization
 
-`apps/api/src/authorization/scope.ts` is the hook STUDENT-001 / BUS-001 call after RBAC:
+`apps/api/src/authorization/scope.ts` is the resource-scope hook after RBAC:
 
 | Helper | Rule |
 | --- | --- |
 | `assertSameTenant` | `String(document.organizationId)` must equal `auth.organizationId` |
 | `assertAssigned(auth, resourceId, assignedIds)` | `ADMIN` is org-wide. Every other role must include the id. Empty `assignedIds` means **no access**. |
 
-STUDENT-001 computes `assignedIds` from the role (guardian → `student_guardians`, teacher → assigned classrooms’ students, driver → assigned routes). Do not call a role-specific helper that returns early for other roles — that fails open.
+STUDENT-001 computes `assignedIds` from the role (guardian → `student_guardians`, teacher → `users.classroomIds`, supervisor → `users.campusIds`). Drivers have no education-domain assignment until BUS-001 (`routeIds`); their student lists are empty. Do not call a role-specific helper that returns early for other roles — that fails open.
 
 ## MongoDB tenant filtering
 
@@ -114,13 +116,7 @@ withTenant(body, auth.organizationId)
 
 Every tenant repository method takes `organizationId` as a required argument. Lookups are `findOne({ _id, organizationId })`, never `{ _id }` alone.
 
-Temporary proof collection: `scoped_items` behind `/api/v1/test/items` (remove after STUDENT-001). Index: `{ organizationId: 1, createdAt: -1 }`.
-
-`users`: `{ organizationId: 1, role: 1 }` plus unique `{ email: 1 }`.
-
-## Probe
-
-`GET /api/v1/test/tenant` and `/api/v1/test/items` exist only when `NODE_ENV !== 'production'`. Authenticated response for the probe: `{ userId, organizationId, role }` from `req.auth`. Remove the module in STUDENT-001.
+`users`: `{ organizationId: 1, role: 1 }` plus unique `{ email: 1 }`. Teacher/supervisor assignment lives on `classroomIds` / `campusIds`.
 
 ## Flutter
 
@@ -128,11 +124,11 @@ Session already includes `id`, `organizationId`, and `role` from `/auth/login` a
 
 ## Testing
 
-See `apps/api/tests/tenant.test.ts` and `apps/api/tests/authorization.test.ts`. Minimum coverage:
+See `apps/api/tests/tenant.test.ts`, `apps/api/tests/authorization.test.ts`, and `apps/api/tests/students.test.ts`. Minimum coverage:
 
 - unauthenticated / invalid / expired → 401
 - teacher `PATCH /organizations/current` → 403; admin → 200
-- org A cannot GET/PATCH/DELETE org B `scoped_items` (404)
+- org A cannot GET/PATCH org B campuses or students (404)
 - `?organizationId=`, body `organizationId`, and `X-Organization-Id` cannot switch tenant
 - JWT `organizationId` that does not match the user row → 401
-- guardian helper allows linked child ids only
+- guardian helper allows linked child ids only; teacher sees assigned classrooms only

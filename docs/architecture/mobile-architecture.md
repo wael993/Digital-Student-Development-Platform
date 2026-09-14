@@ -19,7 +19,10 @@ apps/mobile/lib/
 ├── features/
 │   ├── auth/
 │   ├── home/
+│   ├── campuses/
+│   ├── classrooms/
 │   ├── students/
+│   ├── guardians/
 │   ├── attendance/
 │   ├── journey/
 │   ├── notifications/
@@ -83,7 +86,7 @@ Session `User` already carries `id`, `organizationId`, and `role`. Use `role` to
 
 ## Routing
 
-GoRouter hosts `AuthGate`. Unauthenticated users see the login screen. Authenticated users see a placeholder home until role dashboards exist.
+GoRouter hosts `AuthGate`. Unauthenticated users see the login screen. Authenticated users see a role-scoped home: campuses (admin/supervisor), my classes (teacher), or my children (guardian).
 
 Deep links are not required for ARCH-001.
 

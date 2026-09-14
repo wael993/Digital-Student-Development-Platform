@@ -66,11 +66,11 @@ Failures: 401 (bad/missing token or disabled/mismatched user) or 403 (org missin
 
 ## Which collections require `organizationId`
 
-Required: `users`, `refresh_tokens`, `scoped_items` (TENANT-001 probe), and later `campuses`, `classrooms`, `students`, `student_guardians`, `student_events`, `attendance`, `buses`, `routes`, `activities`, `media`, `notifications`.
+Required: `users`, `refresh_tokens`, `campuses`, `classrooms`, `students`, `student_guardians`, and later `student_events`, `attendance`, `buses`, `routes`, `activities`, `media`, `notifications`.
 
 Not required: `organizations` (the tenant row).
 
-Campuses are not created in TENANT-001; STUDENT-001 introduces campus/classroom documents.
+Campuses, classrooms, students, and student–guardian links are created in STUDENT-001.
 
 ## How repositories enforce isolation
 
@@ -99,7 +99,7 @@ No platform superuser. No admin bypass that omits `organizationId`.
 | QR (later) | Lookup `{ organizationId, qrToken }`. Other-org token → 404 |
 | Indexes | Tenant collections: compound indexes that start with `organizationId` |
 
-Proof in TENANT-001: org A cannot GET/PATCH/DELETE org B rows in `scoped_items`. Student CRUD is STUDENT-001, using the same helpers.
+Proof: org A cannot GET/PATCH org B campuses or students (404). The same `tenantFilter` / `withTenant` helpers apply.
 
 ## Scope inside a tenant
 

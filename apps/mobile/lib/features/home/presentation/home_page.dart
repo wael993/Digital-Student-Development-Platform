@@ -1,4 +1,7 @@
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
+import 'package:digital_student/features/campuses/presentation/campus_list_page.dart';
+import 'package:digital_student/features/classrooms/presentation/classroom_list_page.dart';
+import 'package:digital_student/features/students/presentation/student_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,27 +10,26 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authProvider).user;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Digital Student'),
-        actions: [
-          TextButton(
-            key: const Key('logoutButton'),
-            onPressed: () => ref.read(authProvider.notifier).logout(),
-            child: const Text('Log out'),
-          ),
-        ],
-      ),
-      body: Center(
-        child: Text(
-          user == null
-              ? 'Signed in'
-              : 'Signed in as ${user.displayName}\n${user.email}\n${user.role}',
-          textAlign: TextAlign.center,
-        ),
-      ),
+    final role = ref.watch(authProvider).user?.role;
+    return Navigator(
+      onGenerateRoute: (_) {
+        return MaterialPageRoute<void>(
+          builder: (_) => _roleHome(role),
+        );
+      },
     );
+  }
+
+  Widget _roleHome(String? role) {
+    switch (role) {
+      case 'TEACHER':
+        return const ClassroomListPage();
+      case 'GUARDIAN':
+        return const StudentListPage(title: 'My Children');
+      case 'DRIVER':
+        return const StudentListPage(title: 'Students');
+      default:
+        return const CampusListPage();
+    }
   }
 }

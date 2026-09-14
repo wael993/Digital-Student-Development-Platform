@@ -9,18 +9,24 @@ const teacher: AuthContext = {
   userId: 'u1',
   organizationId: 'org-a',
   role: 'TEACHER',
+  campusIds: [],
+  classroomIds: [],
 };
 
 const guardian: AuthContext = {
   userId: 'u2',
   organizationId: 'org-a',
   role: 'GUARDIAN',
+  campusIds: [],
+  classroomIds: [],
 };
 
 const admin: AuthContext = {
   userId: 'u3',
   organizationId: 'org-a',
   role: 'ADMIN',
+  campusIds: [],
+  classroomIds: [],
 };
 
 describe('permissions', () => {
@@ -30,6 +36,12 @@ describe('permissions', () => {
     expect(hasPermission('TEACHER', 'organizations.update')).toBe(false);
     expect(hasPermission('GUARDIAN', 'students.read')).toBe(true);
     expect(hasPermission('GUARDIAN', 'students.create')).toBe(false);
+    expect(hasPermission('GUARDIAN', 'campuses.read')).toBe(false);
+    expect(hasPermission('TEACHER', 'campuses.read')).toBe(true);
+    expect(hasPermission('TEACHER', 'campuses.manage')).toBe(false);
+    expect(hasPermission('SUPERVISOR', 'campuses.manage')).toBe(true);
+    expect(hasPermission('TEACHER', 'guardians.manage')).toBe(false);
+    expect(hasPermission('ADMIN', 'guardians.manage')).toBe(true);
   });
 });
 
