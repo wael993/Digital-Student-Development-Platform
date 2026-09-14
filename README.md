@@ -166,8 +166,16 @@ apps/api/                 Express + TypeScript API
 packages/shared/          Reserved for shared types
 infrastructure/docker/    Dockerfiles
 infrastructure/scripts/   Helper scripts
-docs/                     Project documentation
+docs/                     Product + architecture documentation
 .github/workflows/        CI
 ```
 
 API versioning uses the `/api/v1` prefix (for example `GET /api/v1/health`).
+
+## Documentation
+
+- [docs/README.md](docs/README.md) — index
+- [DOC-001 Product vision](docs/DOC-001-product-vision.md)
+- [Domain model](docs/architecture/domain-model.md) (ARCH-001)
+- [Backend architecture](docs/architecture/backend-architecture.md)
+- [Mobile architecture](docs/architecture/mobile-architecture.md)

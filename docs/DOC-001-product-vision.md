@@ -344,3 +344,16 @@ Bus Routes & Boarding / Drop-off
 AI-001
 AI-Assisted Daily Reports / Teacher Assistance
 ```
+
+## Related documentation (ARCH-001)
+
+Domain, tenancy, API, mobile, security, roles, and the student journey event contract:
+
+- [Documentation index](README.md)
+- [Domain model](architecture/domain-model.md)
+- [Backend architecture](architecture/backend-architecture.md)
+- [Mobile architecture](architecture/mobile-architecture.md)
+- [Multi-tenancy](architecture/multi-tenancy.md)
+- [Security](architecture/security.md)
+- [User roles](product/user-roles.md)
+- [Student journey](product/student-journey.md)
