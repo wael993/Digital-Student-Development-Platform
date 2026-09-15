@@ -55,9 +55,7 @@ export async function upsertDeviceToken(
 }
 
 export async function listActiveDeviceTokens(organizationId: string, userId: string) {
-  return DeviceTokenModel.find(
-    tenantFilter(organizationId, { userId, status: 'ACTIVE' }),
-  );
+  return DeviceTokenModel.find(tenantFilter(organizationId, { userId, status: 'ACTIVE' }));
 }
 
 export async function deactivateDeviceToken(

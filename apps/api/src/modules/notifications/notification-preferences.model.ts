@@ -38,7 +38,4 @@ notificationPreferencesSchema.index({ organizationId: 1, userId: 1 }, { unique: 
 
 export const NotificationPreferencesModel =
   mongoose.models.NotificationPreferences ??
-  mongoose.model<NotificationPreferences>(
-    'NotificationPreferences',
-    notificationPreferencesSchema,
-  );
+  mongoose.model<NotificationPreferences>('NotificationPreferences', notificationPreferencesSchema);

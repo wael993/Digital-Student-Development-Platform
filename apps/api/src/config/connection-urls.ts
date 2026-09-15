@@ -26,9 +26,7 @@ export function buildMongoUri(vars: NodeJS.Dict<string>): string {
   }
 
   const protocol = host.includes('mongodb.net') ? 'mongodb+srv' : 'mongodb';
-  const auth = username
-    ? `${encodeURIComponent(username)}:${encodeURIComponent(password)}@`
-    : '';
+  const auth = username ? `${encodeURIComponent(username)}:${encodeURIComponent(password)}@` : '';
   const query = protocol === 'mongodb+srv' ? '?appName=Cluster0' : '';
   return `${protocol}://${auth}${host}/${database}${query}`;
 }

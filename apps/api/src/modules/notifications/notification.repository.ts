@@ -1,5 +1,9 @@
 import { tenantFilter, withTenant } from '../../data/tenant';
-import { NotificationModel, type NotificationStatus, type NotificationType } from './notification.model';
+import {
+  NotificationModel,
+  type NotificationStatus,
+  type NotificationType,
+} from './notification.model';
 
 export async function createNotification(
   organizationId: string,

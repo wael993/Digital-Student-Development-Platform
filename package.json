@@ -14,7 +14,8 @@
     "format": "npm run format -w @digital-student/api",
     "test": "npm run test -w @digital-student/api",
     "typecheck": "npm run typecheck -w @digital-student/api",
-    "seed": "npm run seed -w @digital-student/api"
+    "seed": "npm run seed -w @digital-student/api",
+    "flow": "npm run lint &  npm run format & npm run test"
   },
   "engines": {
     "node": ">=20"

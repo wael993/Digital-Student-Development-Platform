@@ -6,11 +6,7 @@ import { listLinksByStudentIds } from '../guardians/guardian.repository';
 import { findStudentById } from '../students/student.repository';
 import type { StudentEventType } from '../journey/student-event.model';
 import { notFound } from '../../utils/validate';
-import {
-  NOTIFICATION_TYPES,
-  type Notification,
-  type NotificationType,
-} from './notification.model';
+import { NOTIFICATION_TYPES, type Notification, type NotificationType } from './notification.model';
 import {
   createNotification,
   findNotificationById,
@@ -81,9 +77,7 @@ export function toDeviceJson(device: {
   };
 }
 
-export function toPreferencesJson(
-  prefs: Awaited<ReturnType<typeof getOrCreatePreferences>>,
-) {
+export function toPreferencesJson(prefs: Awaited<ReturnType<typeof getOrCreatePreferences>>) {
   return {
     journeyUpdates: prefs.journeyUpdates,
     studentArrival: prefs.studentArrival,
@@ -137,7 +131,12 @@ export async function listForUser(
   const result = await listNotifications(auth.organizationId, auth.userId, opts.skip, opts.limit);
   return {
     data: result.items.map((item) => toNotificationJson(item as Notification & { id: string })),
-    meta: { page: opts.page, limit: opts.limit, total: result.total, unreadCount: result.unreadCount },
+    meta: {
+      page: opts.page,
+      limit: opts.limit,
+      total: result.total,
+      unreadCount: result.unreadCount,
+    },
   };
 }
 

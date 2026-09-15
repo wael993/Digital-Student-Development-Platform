@@ -6,7 +6,11 @@ import { StudentGuardianModel } from '../src/modules/guardians/guardian.model';
 import { DeviceTokenModel } from '../src/modules/notifications/device-token.model';
 import { NotificationModel } from '../src/modules/notifications/notification.model';
 import { NotificationPreferencesModel } from '../src/modules/notifications/notification-preferences.model';
-import { resetFcmSender, setFcmSender, type FcmSendResult } from '../src/modules/notifications/fcm/fcm.service';
+import {
+  resetFcmSender,
+  setFcmSender,
+  type FcmSendResult,
+} from '../src/modules/notifications/fcm/fcm.service';
 import {
   flushNotificationJobs,
   resetNotificationQueue,
@@ -49,7 +53,9 @@ async function jpeg(): Promise<Buffer> {
 async function login(email: string): Promise<string> {
   const response = await request(app).post('/api/v1/auth/login').send({ email, password });
   if (response.status !== 200) {
-    throw new Error(`login failed for ${email}: ${response.status} ${JSON.stringify(response.body)}`);
+    throw new Error(
+      `login failed for ${email}: ${response.status} ${JSON.stringify(response.body)}`,
+    );
   }
   return response.body.accessToken as string;
 }
@@ -163,9 +169,9 @@ describe('notifications', () => {
       .set('Authorization', `Bearer ${guardian.token}`)
       .send({ token: 'fcm-ipad', platform: 'IOS', deviceId: 'ipad-1' });
     expect(ipad.status).toBe(201);
-    expect(await DeviceTokenModel.countDocuments({ userId: guardian.user.id, status: 'ACTIVE' })).toBe(
-      2,
-    );
+    expect(
+      await DeviceTokenModel.countDocuments({ userId: guardian.user.id, status: 'ACTIVE' }),
+    ).toBe(2);
 
     const removed = await request(app)
       .delete('/api/v1/notifications/devices/iphone-1')
@@ -277,7 +283,10 @@ describe('notifications', () => {
     const classStarted = await request(app)
       .post(`/api/v1/students/${student.id}/events`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ eventType: 'CLASS_STARTED', occurredAt: new Date(Date.now() - 60_000).toISOString() });
+      .send({
+        eventType: 'CLASS_STARTED',
+        occurredAt: new Date(Date.now() - 60_000).toISOString(),
+      });
     expect(classStarted.status).toBe(201);
 
     const departure = await request(app)
@@ -357,7 +366,10 @@ describe('notifications', () => {
     await request(app)
       .post(`/api/v1/students/${student.id}/events`)
       .set('Authorization', `Bearer ${token}`)
-      .send({ eventType: 'SCHOOL_ARRIVAL', occurredAt: new Date(Date.now() - 120_000).toISOString() });
+      .send({
+        eventType: 'SCHOOL_ARRIVAL',
+        occurredAt: new Date(Date.now() - 120_000).toISOString(),
+      });
     await request(app)
       .post(`/api/v1/students/${student.id}/events`)
       .set('Authorization', `Bearer ${token}`)
