@@ -73,7 +73,7 @@ Root `.env` is used by the API and Docker Compose. Placeholders:
 - `FCM_PROJECT_ID`, `FCM_CLIENT_EMAIL`, `FCM_PRIVATE_KEY` (Firebase Admin for push; leave empty in local/dev)
 - `AI_API_KEY` (reserved)
 
-`apps/mobile/.env` contains `API_BASE_URL` for the Flutter app. Optional Firebase keys (`FIREBASE_PROJECT_ID`, `FIREBASE_API_KEY`, `FIREBASE_APP_ID`, `FIREBASE_MESSAGING_SENDER_ID`) enable FCM; without them the app still works and in-app notifications remain available.
+`apps/mobile/.env` contains `API_BASE_URL`. The live API is `https://digital-student-development-platform.onrender.com/api/v1`. Optional Firebase keys (`FIREBASE_PROJECT_ID`, `FIREBASE_API_KEY`, `FIREBASE_APP_ID`, `FIREBASE_MESSAGING_SENDER_ID`) enable FCM; without them the app still works and in-app notifications remain available.
 
 ## Running the project
 
@@ -184,6 +184,18 @@ Android debug build:
 cd apps/mobile
 flutter build apk --debug
 ```
+
+Android release (رحلتي, live API):
+
+```bash
+cd apps/mobile
+flutter build apk --release \
+  --dart-define=API_BASE_URL=https://digital-student-development-platform.onrender.com/api/v1
+```
+
+APK: `apps/mobile/build/app/outputs/flutter-apk/app-release.apk`. Sideload that, or use Play internal testing with `flutter build appbundle --release` and the same `--dart-define`.
+
+Release signing uses the debug keystore until you add `apps/mobile/android/key.properties` (gitignored) and a `.jks`. Play Console needs that upload key before a store listing.
 
 iOS is configured in `apps/mobile/ios` (iPhone and iPad). Open the Xcode workspace on macOS when you need to run on a simulator or device:
 

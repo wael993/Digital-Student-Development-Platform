@@ -37,5 +37,23 @@ void main() {
       ),
       'http://192.168.1.10:3000/api/v1',
     );
+    expect(
+      AppEnv.resolveApiBaseUrl(
+        'https://digital-student-development-platform.onrender.com/api/v1',
+        isAndroid: true,
+      ),
+      'https://digital-student-development-platform.onrender.com/api/v1',
+    );
+  });
+
+  test('release builds do not rewrite localhost', () {
+    expect(
+      AppEnv.resolveApiBaseUrl(
+        'http://localhost:3000/api/v1',
+        isAndroid: true,
+        rewriteEmulatorLocalhost: false,
+      ),
+      'http://localhost:3000/api/v1',
+    );
   });
 }

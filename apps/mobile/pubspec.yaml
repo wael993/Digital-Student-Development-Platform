@@ -1,5 +1,5 @@
 name: digital_student
-description: Digital Student mobile and tablet application.
+description: رحلتي mobile and tablet application.
 publish_to: "none"
 version: 1.0.0+1
 
@@ -30,6 +30,14 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.4.15
   json_serializable: ^6.9.5
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: ../../logo.jpeg
+  adaptive_icon_background: "#0288D1"
+  adaptive_icon_foreground: ../../logo.jpeg
 
 flutter:
   uses-material-design: true

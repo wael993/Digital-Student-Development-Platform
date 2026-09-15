@@ -9,7 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppEnv.load();
-  appLogger.i('Digital Student starting');
+  appLogger.i('رحلتي starting');
   final push = await createPushClient();
   runApp(
     ProviderScope(
