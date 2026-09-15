@@ -15,6 +15,13 @@ import { MediaModel } from '../src/modules/media/media.model';
 import { NotificationModel } from '../src/modules/notifications/notification.model';
 import { DeviceTokenModel } from '../src/modules/notifications/device-token.model';
 import { NotificationPreferencesModel } from '../src/modules/notifications/notification-preferences.model';
+import { BusModel } from '../src/modules/buses/bus.model';
+import { BusRouteModel } from '../src/modules/buses/bus-route.model';
+import { BusStopModel } from '../src/modules/buses/bus-stop.model';
+import { RouteSegmentModel } from '../src/modules/buses/route-segment.model';
+import { StudentTransportAssignmentModel } from '../src/modules/buses/student-transport-assignment.model';
+import { DailyTransportPlanModel } from '../src/modules/buses/daily-transport-plan.model';
+import { RouteProgressModel } from '../src/modules/buses/route-progress.model';
 import { StudentModel } from '../src/modules/students/student.model';
 import { createStudent } from '../src/modules/students/student.repository';
 import { createUser } from '../src/modules/users/user.repository';
@@ -49,6 +56,13 @@ export async function clearAuthData(): Promise<void> {
     NotificationModel.deleteMany({}),
     DeviceTokenModel.deleteMany({}),
     NotificationPreferencesModel.deleteMany({}),
+    BusModel.deleteMany({}),
+    BusRouteModel.deleteMany({}),
+    BusStopModel.deleteMany({}),
+    RouteSegmentModel.deleteMany({}),
+    StudentTransportAssignmentModel.deleteMany({}),
+    DailyTransportPlanModel.deleteMany({}),
+    RouteProgressModel.deleteMany({}),
   ]);
 }
 
@@ -73,6 +87,7 @@ export async function insertUser(input: {
   organizationId?: string;
   campusIds?: string[];
   classroomIds?: string[];
+  routeIds?: string[];
 }) {
   const organizationId =
     input.organizationId ?? (await insertOrganization({ name: `Org ${input.email}` })).id;
@@ -87,6 +102,7 @@ export async function insertUser(input: {
     status: input.status ?? 'ACTIVE',
     campusIds: input.campusIds,
     classroomIds: input.classroomIds,
+    routeIds: input.routeIds,
   });
 }
 

@@ -27,7 +27,7 @@ apps/mobile/lib/
 │   ├── journey/
 │   ├── media/
 │   ├── notifications/
-│   └── profile/
+│   └── transport/
 ├── shared/
 │   ├── widgets/
 │   ├── models/
@@ -87,7 +87,7 @@ Session `User` already carries `id`, `organizationId`, and `role`. Use `role` to
 
 ## Routing
 
-GoRouter hosts `AuthGate`. Unauthenticated users see the login screen. Authenticated users see a role-scoped home: campuses (admin/supervisor), my classes (teacher), or my children (guardian).
+GoRouter hosts `AuthGate`. Unauthenticated users see the login screen. Authenticated users see a role-scoped home: campuses (admin/supervisor), my classes (teacher), my route (driver), or my children (guardian).
 
 Deep links from FCM are handled in NOTIF-001: arrival opens the child dashboard, departure/home drop-off open the journey, media opens photos.
 
@@ -100,7 +100,7 @@ Deep links from FCM are handled in NOTIF-001: arrival opens the child dashboard,
 | FCM | Push | NOTIF-001 |
 | Image picker / camera | Student photos | MEDIA-001 |
 
-QR codes encode only the student's `qrToken`. The app never embeds names, dates of birth, or guardian data in the code. Staff scan from `features/attendance`; the API remains the security boundary.
+QR codes encode only the student's `qrToken`. The app never embeds names, dates of birth, or guardian data in the code. School arrival scans from `features/attendance`; bus boarding scans from `features/transport`. The API remains the security boundary. v1 transport ETA is stop progress plus configured segment times — never shown as live GPS.
 
 ## Models vs API
 

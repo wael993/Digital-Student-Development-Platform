@@ -2,7 +2,8 @@ import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:digital_student/features/classrooms/classroom_providers.dart';
 import 'package:digital_student/features/classrooms/classroom_repository.dart';
-import 'package:digital_student/features/students/presentation/student_list_page.dart';
+import 'package:digital_student/features/transport/screens/supervisor_buses_screen.dart';
+import 'package:digital_student/features/transport/screens/teacher_arrival_screen.dart';
 import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:digital_student/shared/widgets/school_scaffold.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,20 @@ class ClassroomListPage extends ConsumerWidget {
               child: const Icon(Icons.add),
             )
           : null,
+      bottom: canManage && campusId != null
+          ? Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => SupervisorBusesScreen(campusId: campusId),
+                  ),
+                ),
+                icon: const Icon(Icons.directions_bus_outlined),
+                label: Text(l10n.buses),
+              ),
+            )
+          : null,
       body: AsyncRefreshBody(
         value: classrooms,
         onRefresh: () async {
@@ -56,7 +71,7 @@ class ClassroomListPage extends ConsumerWidget {
               subtitle: Text(classroomLevelLabel(l10n, classroom.level)),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => StudentListPage(
+                  builder: (_) => TeacherArrivalScreen(
                     classroomId: classroom.id,
                     classroomName: classroom.name,
                   ),

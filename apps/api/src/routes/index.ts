@@ -10,6 +10,13 @@ import { parentRouter } from '../modules/parent/parent.routes';
 import { mediaRouter } from '../modules/media/media.routes';
 import { notificationRouter } from '../modules/notifications/notification.routes';
 import { studentsRouter } from '../modules/students/student.routes';
+import {
+  busRouteSegmentsRouter,
+  busRoutesRouter,
+  busStopsRouter,
+  busesRouter,
+  transportRouter,
+} from '../modules/buses/bus.routes';
 
 export const v1Router = Router();
 
@@ -24,3 +31,8 @@ v1Router.use('/attendance', attendanceRouter);
 v1Router.use('/parent', parentRouter);
 v1Router.use('/media', mediaRouter);
 v1Router.use('/notifications', notificationRouter);
+v1Router.use('/buses', busesRouter);
+v1Router.use('/bus-routes', busRoutesRouter);
+v1Router.use('/bus-stops', busStopsRouter);
+v1Router.use('/bus-route-segments', busRouteSegmentsRouter);
+v1Router.use('/transport', transportRouter);

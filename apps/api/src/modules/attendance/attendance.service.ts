@@ -129,6 +129,45 @@ async function recordAttendanceJourney(
   );
 }
 
+export async function ensurePresentAttendance(
+  auth: AuthContext,
+  student: Student & { id: string },
+  occurredAt: Date,
+  timeZone: string,
+  source: Attendance['source'],
+) {
+  const date = calendarDateInTimeZone(occurredAt, timeZone);
+  const existing = await findAttendanceByStudentDate(auth.organizationId, student.id, date);
+  if (existing) {
+    await recordAttendanceJourney(auth, student, existing, timeZone);
+    return existing;
+  }
+  try {
+    const attendance = await createAttendance(auth.organizationId, {
+      studentId: student.id,
+      campusId: String(student.campusId),
+      classroomId: String(student.classroomId),
+      date,
+      attendanceType: 'PRESENT',
+      scannedAt: occurredAt,
+      scannedBy: auth.userId,
+      source,
+    });
+    await recordAttendanceJourney(auth, student, attendance, timeZone);
+    return attendance;
+  } catch (err) {
+    if (!isDuplicateKeyError(err)) {
+      throw err;
+    }
+    const raced = await findAttendanceByStudentDate(auth.organizationId, student.id, date);
+    if (!raced) {
+      throw err;
+    }
+    await recordAttendanceJourney(auth, student, raced, timeZone);
+    return raced;
+  }
+}
+
 export async function list(
   auth: AuthContext,
   opts: {

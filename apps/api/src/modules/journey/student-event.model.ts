@@ -11,10 +11,16 @@ export const STUDENT_EVENT_TYPES = [
   'SKILL_SESSION',
   'BUS_DEPARTURE',
   'HOME_DROPOFF',
+  'ARRIVED_BY_CAR',
+  'PARENT_PICKUP',
+  'AUTHORIZED_PICKUP',
+  'MISSED_BUS',
+  'TRANSPORT_CANCELLED',
+  'NOT_PRESENT_AT_CLASS_CHECK',
 ] as const;
 export type StudentEventType = (typeof STUDENT_EVENT_TYPES)[number];
 
-export const STUDENT_EVENT_SOURCES = ['MANUAL', 'QR', 'SYSTEM'] as const;
+export const STUDENT_EVENT_SOURCES = ['MANUAL', 'QR', 'SYSTEM', 'MANUAL_BULK'] as const;
 export type StudentEventSource = (typeof STUDENT_EVENT_SOURCES)[number];
 
 export const CLASS_EVENT_TYPES: readonly StudentEventType[] = [
@@ -24,12 +30,18 @@ export const CLASS_EVENT_TYPES: readonly StudentEventType[] = [
   'ACTIVITY_STARTED',
   'MEAL',
   'SKILL_SESSION',
+  'ARRIVED_BY_CAR',
+  'PARENT_PICKUP',
+  'AUTHORIZED_PICKUP',
+  'NOT_PRESENT_AT_CLASS_CHECK',
 ];
 
 export const TRANSPORT_EVENT_TYPES: readonly StudentEventType[] = [
   'BUS_BOARDING',
+  'SCHOOL_ARRIVAL',
   'BUS_DEPARTURE',
   'HOME_DROPOFF',
+  'MISSED_BUS',
 ];
 
 export interface StudentEvent {

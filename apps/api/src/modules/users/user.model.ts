@@ -11,6 +11,7 @@ export interface User {
   status: UserStatus;
   campusIds: mongoose.Types.ObjectId[];
   classroomIds: mongoose.Types.ObjectId[];
+  routeIds: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,6 +27,7 @@ const userSchema = new Schema<User>(
     status: { type: String, required: true, enum: USER_STATUSES, default: 'ACTIVE' },
     campusIds: { type: [Schema.Types.ObjectId], required: true, default: [] },
     classroomIds: { type: [Schema.Types.ObjectId], required: true, default: [] },
+    routeIds: { type: [Schema.Types.ObjectId], required: true, default: [] },
   },
   { timestamps: true, collection: 'users' },
 );

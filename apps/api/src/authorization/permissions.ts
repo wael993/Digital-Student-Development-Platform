@@ -72,6 +72,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     'attendance.create',
     'student_events.read',
     'student_events.create',
+    'buses.read',
     'media.read',
     'media.create',
     'notifications.read',

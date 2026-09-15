@@ -42,4 +42,4 @@ Local environment and how to run the stack: root [README](../README.md).
 
 ## What to implement next
 
-ARCH-001 through NOTIF-001 are done. Next: BUS-001.
+ARCH-001 through BUS-001 are done. Remaining order: ACTIVITY-001, PROFILE-001, SCHOOL-001, then AI-001. See [DOC-001](DOC-001-product-vision.md).

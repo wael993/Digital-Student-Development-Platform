@@ -150,8 +150,9 @@ Authenticated person. Students are not users.
 | status | enum | `ACTIVE`, `INACTIVE` |
 | campusIds | ObjectId[] | SUPERVISOR assignment; empty = no campuses |
 | classroomIds | ObjectId[] | TEACHER assignment; empty = no classes |
+| routeIds | ObjectId[] | DRIVER assignment; synced from `buses.driverId`. Empty = no routes |
 
-Assignment scope: `campusIds` (supervisor) and `classroomIds` (teacher) are stored on the user. `routeIds` wait for BUS-001. Guardian child access is **not** stored on the user. It lives in `student_guardians`. Empty assignment lists mean no rows.
+Assignment scope: `campusIds` (supervisor), `classroomIds` (teacher), and `routeIds` (driver) are stored on the user. Guardian child access is **not** stored on the user. It lives in `student_guardians`. Empty assignment lists mean no rows. SCHOOL-001 strengthens this assignment model so permissions scale beyond a single nursery.
 
 ### Student
 
@@ -172,7 +173,7 @@ Enrolled child. Must belong to an organization. Campus and classroom are require
 | currentStatus | string? | Denormalized latest event type. Cache only. Not written in JOURNEY-001. |
 | currentStatusAt | Date? | Cache only |
 
-No hard delete. Historical attendance/journey tickets will keep referencing these rows.
+No hard delete. Historical attendance/journey tickets will keep referencing these rows. Allergies, medication, emergency contacts, and authorized pickup people wait for PROFILE-001.
 
 ### student_guardians
 
@@ -204,7 +205,7 @@ See [student-journey.md](../product/student-journey.md) for event types and the 
 | occurredAt | Date | Event time (not insert time) |
 | recordedAt | Date | When the system stored it |
 | recordedBy | ObjectId | Acting user |
-| source | enum | `MANUAL`, `QR`, `SYSTEM` |
+| source | enum | `MANUAL`, `QR`, `SYSTEM`, `MANUAL_BULK` |
 | metadata | object | Type-specific payload |
 
 No `deletedAt`. No client updates after insert. A later ticket can add an explicit correction workflow.
@@ -223,36 +224,111 @@ School-day roll-up for reporting. Complements events; does not replace them. Imp
 | attendanceType | enum | `PRESENT`, `ABSENT` (QR scan writes `PRESENT`) |
 | scannedAt | Date | UTC. Set by the server, never the client |
 | scannedBy | ObjectId | Authenticated user |
-| source | enum | `QR` in v1. Later: `MANUAL`, `IMPORT`, `SYSTEM` |
+| source | enum | `QR`, `MANUAL`, `MANUAL_BULK` |
 
 Unique: one document per student per org date. Repeat QR scans for that date return `ALREADY_RECORDED`. Successful PRESENT also inserts `ATTENDANCE_PRESENT` on `student_events`.
 
 ### Bus
 
-| Field | Type | Notes |
-| --- | --- | --- |
-| organizationId | ObjectId | |
-| campusId | ObjectId? | |
-| name | string | |
-| plateNumber | string? | |
-| status | enum | `ACTIVE`, `INACTIVE` |
-
-### Route
-
-Ordered transportation plan (morning or afternoon).
+Vehicle assigned to a campus. Driver/supervisor on the bus may change.
 
 | Field | Type | Notes |
 | --- | --- | --- |
 | organizationId | ObjectId | |
-| busId | ObjectId | |
 | campusId | ObjectId | |
 | name | string | |
-| direction | enum | `INBOUND`, `OUTBOUND` |
-| stopStudentIds | ObjectId[] | Ordered students / stops |
-| driverIds | ObjectId[] | |
-| status | enum | `ACTIVE`, `INACTIVE` |
+| registrationNumber | string | |
+| capacity | number | |
+| status | enum | `ACTIVE`, `INACTIVE`, `MAINTENANCE` |
+| driverId | ObjectId? | Sets `users.routeIds` for that driver |
+| supervisorId | ObjectId? | |
 
-GPS live tracking is out of scope until a later bus ticket.
+### BusRoute
+
+One direction of travel. Morning and afternoon are independent rows.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| organizationId | ObjectId | |
+| campusId | ObjectId | Copied from the bus |
+| busId | ObjectId | |
+| name | string | |
+| direction | enum | `HOME_TO_SCHOOL`, `SCHOOL_TO_HOME` |
+| status | enum | `ACTIVE`, `INACTIVE` |
+| estimatedStartTime | string? | |
+| estimatedEndTime | string? | |
+
+### BusStop
+
+Ordered **physical** stop. Multiple children at the same building share one stop. `stopsRemaining` counts these rows, not children.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| organizationId | ObjectId | |
+| routeId | ObjectId | |
+| sequence | number | 1-based order |
+| name | string | |
+| address | string? | |
+| latitude / longitude | number? | Stored for later GPS; v1 ETA does not use them |
+
+### RouteSegment
+
+Travel time between two consecutive stops.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| organizationId | ObjectId | |
+| routeId | ObjectId | |
+| fromStopId | ObjectId | |
+| toStopId | ObjectId | |
+| estimatedMinutes | number | Default 5 when a new stop is added |
+
+### StudentTransportAssignment
+
+Permanent, direction-specific membership. A child can be on a morning route and not on an afternoon route (or the reverse). Classroom membership is separate.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| organizationId | ObjectId | |
+| studentId | ObjectId | |
+| routeId | ObjectId | |
+| stopId | ObjectId | Shared building stop |
+| direction | enum | `HOME_TO_SCHOOL`, `SCHOOL_TO_HOME` |
+| active | boolean | |
+| effectiveFrom / effectiveTo | Date? | |
+
+### DailyTransportPlan
+
+One-day override. Parent cancellation writes `PARENT_CAR` + `CANCELLED` here and does **not** delete the permanent assignment.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| organizationId | ObjectId | |
+| studentId | ObjectId | |
+| date | string | `YYYY-MM-DD` org timezone |
+| direction | enum | `HOME_TO_SCHOOL`, `SCHOOL_TO_HOME` |
+| transportMethod | enum | `BUS`, `PARENT_CAR`, `PARENT_PICKUP`, `AUTHORIZED_PICKUP`, `OTHER` |
+| routeId / stopId | ObjectId? | Copied from the assignment when present |
+| status | enum | `SCHEDULED`, `CANCELLED` |
+| reason | string? | |
+| createdBy | ObjectId | |
+
+### RouteProgress
+
+Driver/supervisor records where the bus is. v1 has no live GPS. ETA = current stop (last `ARRIVED`/`DEPARTED`) + remaining segment minutes. Label this **Estimated arrival**, never live location. GPS is BUS-002.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| organizationId | ObjectId | |
+| routeId | ObjectId | |
+| date | string | |
+| stopId | ObjectId | |
+| sequence | number | |
+| status | enum | `APPROACHING`, `ARRIVED`, `DEPARTED` |
+| occurredAt | Date | |
+| recordedBy | ObjectId | |
+| source | enum | `MANUAL`, `SYSTEM` |
+| parentsNotified | boolean | Next-stop notify once per stop/date |
 
 ### Activity
 
@@ -328,8 +404,13 @@ Implement collections when the matching ticket lands, not all at once.
 | `student_events` | organizationId | append-only | JOURNEY-001 |
 | `attendance` | organizationId | no | ATTENDANCE-001 |
 | `buses` | organizationId | status | BUS-001 |
-| `routes` | organizationId | status | BUS-001 |
-| `activities` | organizationId | optional deletedAt | later classroom work |
+| `bus_routes` | organizationId | status | BUS-001 |
+| `bus_stops` | organizationId | no | BUS-001 |
+| `route_segments` | organizationId | no | BUS-001 |
+| `student_transport_assignments` | organizationId | `active` / `effectiveTo` | BUS-001 |
+| `daily_transport_plans` | organizationId | no | BUS-001 |
+| `route_progress` | organizationId | no | BUS-001 |
+| `activities` | organizationId | optional deletedAt | ACTIVITY-001 |
 | `media` | organizationId | deletedAt | MEDIA-001 |
 | `notifications` | organizationId | no | NOTIF-001 |
 | `device_tokens` | organizationId | status (`INACTIVE`) | NOTIF-001 |
@@ -360,7 +441,13 @@ All tenant collections: `{ organizationId: 1 }` is never enough alone. Prefer co
 | attendance | `{ organizationId: 1, studentId: 1, scannedAt: -1 }` | Student history |
 | attendance | `{ organizationId: 1, scannedAt: -1 }` | Daily staff list |
 | attendance | `{ organizationId: 1, classroomId: 1, date: 1 }` | Class roll |
-| routes | `{ organizationId: 1, busId: 1 }` | Bus routes |
+| buses | `{ organizationId: 1, status: 1 }` | Active buses |
+| bus_routes | `{ organizationId: 1, campusId: 1, status: 1 }` | Campus routes |
+| bus_stops | `{ organizationId: 1, routeId: 1, sequence: 1 }` | Ordered stops |
+| route_segments | `{ organizationId: 1, routeId: 1, fromStopId: 1, toStopId: 1 }` | ETA segments |
+| student_transport_assignments | `{ organizationId: 1, studentId: 1, direction: 1 }` | Child's routes |
+| student_transport_assignments | `{ organizationId: 1, routeId: 1, stopId: 1 }` | Shared-stop children |
+| daily_transport_plans | `{ organizationId: 1, studentId: 1, date: 1, direction: 1 }` | Day override |
 | media | `{ organizationId: 1, studentId: 1, capturedAt: -1 }` | Child photo gallery |
 | notifications | `{ organizationId: 1, userId: 1, createdAt: -1 }` | Inbox |
 | notifications | `{ organizationId: 1, userId: 1, readAt: 1, createdAt: -1 }` | Unread |

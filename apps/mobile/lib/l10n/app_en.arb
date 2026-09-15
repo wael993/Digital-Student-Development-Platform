@@ -239,5 +239,112 @@
   "errorRequestFailed": "Request failed",
   "errorInternal": "Something went wrong. Try again.",
   "errorNetwork": "Unable to connect. Try again.",
-  "errorStudentInactive": "Student is not active"
+  "errorStudentInactive": "Student is not active",
+  "transport": "Transport",
+  "buses": "Buses",
+  "routes": "Routes",
+  "myRoute": "My Route",
+  "morningArrival": "Morning Arrival",
+  "todaysTransport": "Today's transport",
+  "homeToSchool": "Home → School",
+  "schoolToHome": "School → Home",
+  "cancelBus": "Cancel bus",
+  "cancelBusFor": "Cancel bus for",
+  "cancelToday": "Today",
+  "cancelTomorrow": "Tomorrow",
+  "cancelNextThreeDays": "Next 3 days",
+  "cancelCustomDates": "Custom dates",
+  "confirmCancelBus": "Cancel bus transportation for the selected dates?",
+  "busCancelled": "Bus cancelled",
+  "estimatedArrival": "Estimated arrival",
+  "estimatedArrivalInMinutes": "Estimated arrival in {minutes} minutes",
+  "@estimatedArrivalInMinutes": {
+    "placeholders": {
+      "minutes": {"type": "int"}
+    }
+  },
+  "stopsRemaining": "{count} stops remaining",
+  "@stopsRemaining": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "currentStop": "Current stop",
+  "yourStop": "Your stop",
+  "childrenAtStopCount": "{count} children are scheduled for this stop.",
+  "@childrenAtStopCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "notLiveTracking": "Estimated arrival — not live location",
+  "arrivedAtStop": "Arrived at stop",
+  "departStop": "Depart stop",
+  "scanBoardingQr": "Scan boarding QR",
+  "markAllArrived": "Mark all arrived",
+  "confirmMarkAllArrived": "Register all eligible children on this route as arrived?",
+  "nextStop": "Next stop",
+  "noRoutesAssigned": "No route assigned yet",
+  "childrenExpected": "{count} children expected",
+  "@childrenExpected": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "arrivedByBusCount": "{count} arrived by bus",
+  "@arrivedByBusCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "arrivedByCarCount": "{count} arrived by car",
+  "@arrivedByCarCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "notArrivedCount": "{count} not arrived",
+  "@notArrivedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "swipeRightArrived": "Swipe right to mark arrived",
+  "swipeLeftNotPresent": "Swipe left to mark not arrived",
+  "markArrived": "Arrived",
+  "markNotPresent": "Not arrived",
+  "arrivedByCar": "Arrived by car",
+  "parentPickup": "Parent pickup",
+  "authorizedPickup": "Authorized pickup",
+  "confirmStatusChange": "Update this child's status?",
+  "pickupPerson": "Pickup person",
+  "newBus": "New bus",
+  "newRoute": "New route",
+  "registrationNumber": "Registration number",
+  "capacity": "Capacity",
+  "addStop": "Add stop",
+  "assignChildren": "Assign children",
+  "unassignedChildren": "Not on this route",
+  "segmentMinutes": "Travel time (minutes)",
+  "parentCar": "Parent car",
+  "eventArrivedByCar": "Arrived by car",
+  "eventParentPickup": "Picked up by a parent",
+  "eventAuthorizedPickup": "Picked up by an authorized person",
+  "eventMissedBus": "Missed the bus",
+  "eventTransportCancelled": "Bus cancelled",
+  "eventNotPresentAtClass": "Not arrived yet",
+  "statusArrivedByCar": "Arrived by car",
+  "statusParentPickup": "Picked up",
+  "statusAuthorizedPickup": "Picked up",
+  "statusMissedBus": "Missed the bus",
+  "statusTransportCancelled": "Bus cancelled",
+  "statusNotPresentAtClass": "Not arrived yet",
+  "staffEventArrivedByCar": "Arrived by car",
+  "staffEventParentPickup": "Parent pickup",
+  "staffEventAuthorizedPickup": "Authorized pickup",
+  "staffEventMissedBus": "Missed bus",
+  "staffEventTransportCancelled": "Transport cancelled",
+  "staffEventNotPresentAtClass": "Not arrived",
+  "getReady": "Get ready",
+  "confirm": "Confirm"
 }

@@ -32,6 +32,14 @@ const IN_SCHOOL_TYPES = new Set<StudentEventType>([
   'ACTIVITY_STARTED',
   'MEAL',
   'SKILL_SESSION',
+  'ARRIVED_BY_CAR',
+  'NOT_PRESENT_AT_CLASS_CHECK',
+]);
+
+const DAY_ENDED_TYPES = new Set<StudentEventType>([
+  'HOME_DROPOFF',
+  'PARENT_PICKUP',
+  'AUTHORIZED_PICKUP',
 ]);
 
 export function toEventJson(event: StudentEvent & { id: string }) {
@@ -75,6 +83,58 @@ export async function createEvent(
     metadata: input.metadata,
   });
   return toEventJson(event);
+}
+
+export async function recordJourneyEvent(
+  auth: AuthContext,
+  studentId: string,
+  input: {
+    eventType: StudentEventType;
+    occurredAt: Date;
+    source: StudentEventSource;
+    metadata: Record<string, unknown>;
+  },
+  timeZone: string,
+  opts?: { skipDuplicate?: boolean; skipTransition?: boolean; skipRoleCheck?: boolean },
+) {
+  const student = await loadStudent(auth, studentId, true);
+  if (!opts?.skipRoleCheck) {
+    assertCanWriteEventType(auth, input.eventType);
+  }
+  if (!opts?.skipDuplicate) {
+    await assertNotDuplicate(auth.organizationId, student.id, input.eventType);
+  }
+  if (!opts?.skipTransition) {
+    await assertTransitionAllowed(
+      auth.organizationId,
+      student.id,
+      input.eventType,
+      input.occurredAt,
+      timeZone,
+    );
+  }
+  const event = await insertEvent(auth, student.id, {
+    eventType: input.eventType,
+    occurredAt: input.occurredAt,
+    recordedAt: new Date(),
+    source: input.source,
+    metadata: input.metadata,
+  });
+  return { student, event: toEventJson(event) };
+}
+
+export async function hasEventOfTypeToday(
+  organizationId: string,
+  studentId: string,
+  eventType: StudentEventType,
+  timeZone: string,
+  at = new Date(),
+) {
+  const { start, endExclusive } = utcRangeForCalendarDate(
+    calendarDateInTimeZone(at, timeZone),
+    timeZone,
+  );
+  return findLatestEventOfType(organizationId, studentId, eventType, start, endExclusive);
 }
 
 export async function listEvents(
@@ -235,8 +295,8 @@ async function assertTransitionAllowed(
   if (!latest) {
     return;
   }
-  if (latest.eventType === 'HOME_DROPOFF') {
-    throw validationError('eventType', 'Cannot add events after home drop-off');
+  if (latest.eventType && DAY_ENDED_TYPES.has(latest.eventType)) {
+    throw validationError('eventType', 'Cannot add events after the child has left for the day');
   }
   if (latest.eventType === 'BUS_DEPARTURE' && IN_SCHOOL_TYPES.has(eventType)) {
     throw validationError('eventType', 'Cannot record an in-school event after bus departure');

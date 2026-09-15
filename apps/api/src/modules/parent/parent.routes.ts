@@ -10,6 +10,7 @@ import {
   getJourneyToday,
   rejectWrite,
 } from './parent.controller';
+import { getParentEta, getParentTransportToday, postParentCancel } from '../buses/bus.controller';
 
 export const parentRouter = Router();
 
@@ -34,3 +35,19 @@ parentRouter
   .route('/children/:studentId/media')
   .get(authorize('media.read'), asyncHandler(getChildMedia))
   .all(asyncHandler(rejectWrite));
+
+parentRouter.get(
+  '/children/:studentId/transport/today',
+  authorize('students.read'),
+  asyncHandler(getParentTransportToday),
+);
+parentRouter.get(
+  '/children/:studentId/transport/eta',
+  authorize('students.read'),
+  asyncHandler(getParentEta),
+);
+parentRouter.post(
+  '/children/:studentId/transport/cancel',
+  authorize('students.read'),
+  asyncHandler(postParentCancel),
+);

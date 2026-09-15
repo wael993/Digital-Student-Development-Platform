@@ -35,6 +35,10 @@ export async function listLinksByUserIds(organizationId: string, userIds: string
   return StudentGuardianModel.find(tenantFilter(organizationId, { userId: { $in: userIds } }));
 }
 
+export async function listPickupLinksForStudent(organizationId: string, studentId: string) {
+  return StudentGuardianModel.find(tenantFilter(organizationId, { studentId, canPickup: true }));
+}
+
 export async function listStudentIdsForGuardian(organizationId: string, userId: string) {
   const links = await StudentGuardianModel.find(tenantFilter(organizationId, { userId })).select(
     'studentId',

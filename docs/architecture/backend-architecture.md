@@ -208,7 +208,7 @@ Versioning: URL prefix `/api/v1`. Breaking changes go to `/api/v2`. Additive fie
 See [domain-model.md](./domain-model.md) for collections and indexes.
 
 - One database, many tenants via `organizationId` on documents
-- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations`. STUDENT-001 added `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 added `attendance`. JOURNEY-001 added `student_events`. MEDIA-001 added `media`. NOTIF-001 added `notifications`, `device_tokens`, and `notification_preferences`. Other collections wait for their tickets.
+- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations`. STUDENT-001 added `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 added `attendance`. JOURNEY-001 added `student_events`. MEDIA-001 added `media`. NOTIF-001 added `notifications`, `device_tokens`, and `notification_preferences`. BUS-001 added `buses`, `bus_routes`, `bus_stops`, `route_segments`, `student_transport_assignments`, `daily_transport_plans`, and `route_progress`. Other collections wait for their tickets.
 
 QR scan: `POST /api/v1/attendance/scan` with `{ "qrToken" }`. Lookup is `{ organizationId, qrToken }`. History: `GET /api/v1/attendance?date=&classroomId=&studentId=`. A successful PRESENT scan also inserts `ATTENDANCE_PRESENT`.
 
@@ -218,6 +218,12 @@ Media: `POST/GET /api/v1/students/:studentId/media`, `GET /api/v1/parent/childre
 
 Notifications: `POST/DELETE /api/v1/notifications/devices`, `GET/PATCH /api/v1/notifications/preferences`, `GET /api/v1/notifications`, `PATCH /api/v1/notifications/:notificationId/read`. Journey events and media uploads enqueue push jobs; FCM runs on `notificationQueue`.
 
+Transport (BUS-001): buses/routes/stops/segments under `/api/v1/buses`, `/api/v1/bus-routes`, `/api/v1/bus-stops`, `/api/v1/bus-route-segments`. Assignments on `/api/v1/students/:studentId/transport` and `/api/v1/bus-routes/:routeId/students`. Daily plan and parent cancel: `/api/v1/students/:studentId/transport/today`, `POST /api/v1/parent/children/:studentId/transport/cancel`. Progress: `POST/GET .../bus-routes/:routeId/progress`. Boarding QR: `POST /api/v1/transport/boarding/scan` (token only). Bulk arrivals: `POST /api/v1/transport/routes/:routeId/register-arrivals` (`source: MANUAL_BULK`). Teacher classroom: `GET /api/v1/transport/classroom/:classroomId/today`. Parent ETA is stop-progress + remaining `RouteSegment` minutes, labeled estimated arrival (not live GPS). GPS is BUS-002.
+
 ## Next implementation tickets
 
-1. **BUS-001** — bus routes and boarding / drop-off
+1. **ACTIVITY-001** — activities, homework, teacher observations, and parent visibility
+2. **PROFILE-001** — allergies, medication, emergency contacts, and authorized pickup people beyond `student_guardians.canPickup`
+3. **SCHOOL-001** — staff / classroom assignment model
+4. **AI-001** — AI-assisted daily reports / teacher assistance (after structured journey and activity data exists)
+5. **BUS-002** — live bus GPS tracking and real-time ETA

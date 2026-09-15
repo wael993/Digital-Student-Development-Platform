@@ -11,6 +11,7 @@ const teacher: AuthContext = {
   role: 'TEACHER',
   campusIds: [],
   classroomIds: [],
+  routeIds: [],
 };
 
 const guardian: AuthContext = {
@@ -19,6 +20,7 @@ const guardian: AuthContext = {
   role: 'GUARDIAN',
   campusIds: [],
   classroomIds: [],
+  routeIds: [],
 };
 
 const admin: AuthContext = {
@@ -27,6 +29,7 @@ const admin: AuthContext = {
   role: 'ADMIN',
   campusIds: [],
   classroomIds: [],
+  routeIds: [],
 };
 
 describe('permissions', () => {
@@ -54,6 +57,11 @@ describe('permissions', () => {
     expect(hasPermission('GUARDIAN', 'student_events.read')).toBe(true);
     expect(hasPermission('DRIVER', 'student_events.create')).toBe(true);
     expect(hasPermission('DRIVER', 'student_events.read')).toBe(true);
+    expect(hasPermission('TEACHER', 'buses.read')).toBe(true);
+    expect(hasPermission('TEACHER', 'buses.manage')).toBe(false);
+    expect(hasPermission('DRIVER', 'buses.read')).toBe(true);
+    expect(hasPermission('DRIVER', 'buses.manage')).toBe(false);
+    expect(hasPermission('GUARDIAN', 'buses.read')).toBe(false);
     expect(hasPermission('TEACHER', 'media.create')).toBe(true);
     expect(hasPermission('TEACHER', 'media.read')).toBe(true);
     expect(hasPermission('TEACHER', 'media.delete')).toBe(false);

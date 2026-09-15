@@ -62,6 +62,7 @@ export async function createUser(input: {
   status?: UserStatus;
   campusIds?: string[];
   classroomIds?: string[];
+  routeIds?: string[];
 }) {
   return UserModel.create(input);
 }
@@ -73,6 +74,28 @@ export async function updateUser(
 ) {
   return UserModel.findOneAndUpdate(tenantFilter(organizationId, { _id: id }), patch, {
     new: true,
+  });
+}
+
+export async function setUserRouteIds(organizationId: string, userId: string, routeIds: string[]) {
+  return UserModel.findOneAndUpdate(
+    tenantFilter(organizationId, { _id: userId }),
+    { routeIds },
+    { new: true },
+  );
+}
+
+export async function addUserRouteId(organizationId: string, userId: string, routeId: string) {
+  return UserModel.findOneAndUpdate(
+    tenantFilter(organizationId, { _id: userId }),
+    { $addToSet: { routeIds: routeId } },
+    { new: true },
+  );
+}
+
+export async function pullUserRouteId(organizationId: string, routeId: string) {
+  await UserModel.updateMany(tenantFilter(organizationId, { routeIds: routeId }), {
+    $pull: { routeIds: routeId },
   });
 }
 

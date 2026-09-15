@@ -638,4 +638,235 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorStudentInactive => 'الطالب غير نشط';
+
+  @override
+  String get transport => 'النقل';
+
+  @override
+  String get buses => 'الحافلات';
+
+  @override
+  String get routes => 'المسارات';
+
+  @override
+  String get myRoute => 'مساري';
+
+  @override
+  String get morningArrival => 'وصول الصباح';
+
+  @override
+  String get todaysTransport => 'نقل اليوم';
+
+  @override
+  String get homeToSchool => 'المنزل → المدرسة';
+
+  @override
+  String get schoolToHome => 'المدرسة → المنزل';
+
+  @override
+  String get cancelBus => 'إلغاء الحافلة';
+
+  @override
+  String get cancelBusFor => 'إلغاء الحافلة لـ';
+
+  @override
+  String get cancelToday => 'اليوم';
+
+  @override
+  String get cancelTomorrow => 'غداً';
+
+  @override
+  String get cancelNextThreeDays => 'الأيام الثلاثة القادمة';
+
+  @override
+  String get cancelCustomDates => 'تواريخ مخصصة';
+
+  @override
+  String get confirmCancelBus => 'إلغاء النقل بالحافلة للتواريخ المحددة؟';
+
+  @override
+  String get busCancelled => 'تم إلغاء الحافلة';
+
+  @override
+  String get estimatedArrival => 'الوصول المتوقع';
+
+  @override
+  String estimatedArrivalInMinutes(int minutes) {
+    return 'الوصول المتوقع خلال $minutes دقائق';
+  }
+
+  @override
+  String stopsRemaining(int count) {
+    return '$count محطات متبقية';
+  }
+
+  @override
+  String get currentStop => 'المحطة الحالية';
+
+  @override
+  String get yourStop => 'محطتك';
+
+  @override
+  String childrenAtStopCount(int count) {
+    return '$count أطفال مجدولون في هذه المحطة.';
+  }
+
+  @override
+  String get notLiveTracking => 'وصول متوقع — ليست موقعاً مباشراً';
+
+  @override
+  String get arrivedAtStop => 'وصلت إلى المحطة';
+
+  @override
+  String get departStop => 'مغادرة المحطة';
+
+  @override
+  String get scanBoardingQr => 'مسح رمز الصعود';
+
+  @override
+  String get markAllArrived => 'تسجيل وصول الجميع';
+
+  @override
+  String get confirmMarkAllArrived =>
+      'تسجيل جميع الأطفال المؤهلين في هذا المسار كواصلين؟';
+
+  @override
+  String get nextStop => 'المحطة التالية';
+
+  @override
+  String get noRoutesAssigned => 'لا يوجد مسار معيّن بعد';
+
+  @override
+  String childrenExpected(int count) {
+    return '$count أطفال متوقعون';
+  }
+
+  @override
+  String arrivedByBusCount(int count) {
+    return '$count وصلوا بالحافلة';
+  }
+
+  @override
+  String arrivedByCarCount(int count) {
+    return '$count وصلوا بالسيارة';
+  }
+
+  @override
+  String notArrivedCount(int count) {
+    return '$count لم يصلوا';
+  }
+
+  @override
+  String get swipeRightArrived => 'اسحب يميناً لتسجيل الوصول';
+
+  @override
+  String get swipeLeftNotPresent => 'اسحب يساراً لتسجيل عدم الوصول';
+
+  @override
+  String get markArrived => 'وصل';
+
+  @override
+  String get markNotPresent => 'لم يصل';
+
+  @override
+  String get arrivedByCar => 'وصل بالسيارة';
+
+  @override
+  String get parentPickup => 'استلام ولي الأمر';
+
+  @override
+  String get authorizedPickup => 'استلام مفوّض';
+
+  @override
+  String get confirmStatusChange => 'تحديث حالة هذا الطفل؟';
+
+  @override
+  String get pickupPerson => 'الشخص المستلم';
+
+  @override
+  String get newBus => 'حافلة جديدة';
+
+  @override
+  String get newRoute => 'مسار جديد';
+
+  @override
+  String get registrationNumber => 'رقم التسجيل';
+
+  @override
+  String get capacity => 'السعة';
+
+  @override
+  String get addStop => 'إضافة محطة';
+
+  @override
+  String get assignChildren => 'تعيين الأطفال';
+
+  @override
+  String get unassignedChildren => 'ليسوا على هذا المسار';
+
+  @override
+  String get segmentMinutes => 'مدة التنقل (دقائق)';
+
+  @override
+  String get parentCar => 'سيارة ولي الأمر';
+
+  @override
+  String get eventArrivedByCar => 'وصل بالسيارة';
+
+  @override
+  String get eventParentPickup => 'استلمه ولي الأمر';
+
+  @override
+  String get eventAuthorizedPickup => 'استلمه شخص مفوّض';
+
+  @override
+  String get eventMissedBus => 'فاتته الحافلة';
+
+  @override
+  String get eventTransportCancelled => 'أُلغيت الحافلة';
+
+  @override
+  String get eventNotPresentAtClass => 'لم يصل بعد';
+
+  @override
+  String get statusArrivedByCar => 'وصل بالسيارة';
+
+  @override
+  String get statusParentPickup => 'تم الاستلام';
+
+  @override
+  String get statusAuthorizedPickup => 'تم الاستلام';
+
+  @override
+  String get statusMissedBus => 'فاتته الحافلة';
+
+  @override
+  String get statusTransportCancelled => 'أُلغيت الحافلة';
+
+  @override
+  String get statusNotPresentAtClass => 'لم يصل بعد';
+
+  @override
+  String get staffEventArrivedByCar => 'وصل بالسيارة';
+
+  @override
+  String get staffEventParentPickup => 'استلام ولي الأمر';
+
+  @override
+  String get staffEventAuthorizedPickup => 'استلام مفوّض';
+
+  @override
+  String get staffEventMissedBus => 'فاتته الحافلة';
+
+  @override
+  String get staffEventTransportCancelled => 'أُلغي النقل';
+
+  @override
+  String get staffEventNotPresentAtClass => 'لم يصل';
+
+  @override
+  String get getReady => 'استعد';
+
+  @override
+  String get confirm => 'تأكيد';
 }

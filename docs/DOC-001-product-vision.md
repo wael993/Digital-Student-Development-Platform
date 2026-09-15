@@ -300,7 +300,7 @@ AI will be introduced as a supporting capability rather than the source of truth
 
 The recorded student journey, attendance, notes, and operational data remain authoritative. AI may later assist with daily report drafts, teacher summaries, and insights grounded in that history.
 
-AI must not invent student events, attendance, or status. AI-001 comes after the operational platform exists.
+AI must not invent student events, attendance, or status. AI-001 is last in the remaining sequence: first build the structured journey, activity, profile, and school-assignment data that AI will consume. Do not make AI the next ticket.
 
 ## Recommended Development Sequence
 
@@ -341,9 +341,30 @@ Push Notifications
 BUS-001
 Bus Routes & Boarding / Drop-off
         ↓
+ACTIVITY-001
+Activities, Homework & Teacher Observations
+        ↓
+PROFILE-001
+Allergies, Medication, Emergency Contacts & Authorized Pickup
+        ↓
+SCHOOL-001
+Staff / Classroom Assignment Model
+        ↓
 AI-001
 AI-Assisted Daily Reports / Teacher Assistance
 ```
+
+### Remaining order
+
+ARCH-001 through BUS-001 are done. Implement the rest in this order:
+
+1. **ACTIVITY-001** — Adds the educational content layer: activities, homework, teacher observations, and parent visibility.
+
+2. **PROFILE-001** — Adds child-specific information such as allergies, medication, emergency contacts, and authorized pickup people.
+
+3. **SCHOOL-001** — Strengthens the staff/classroom assignment model so permissions and workflows scale beyond a single nursery.
+
+4. **AI-001** — Once enough structured journey and activity data exists, AI becomes useful instead of a superficial feature. It remains a supporting capability over recorded history, not the source of truth.
 
 ## Related documentation (ARCH-001)
 

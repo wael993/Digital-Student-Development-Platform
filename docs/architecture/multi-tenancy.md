@@ -66,11 +66,11 @@ Failures: 401 (bad/missing token or disabled/mismatched user) or 403 (org missin
 
 ## Which collections require `organizationId`
 
-Required: `users`, `refresh_tokens`, `campuses`, `classrooms`, `students`, `student_guardians`, `attendance`, `student_events`, `media`, `notifications`, `device_tokens`, `notification_preferences`, and later `buses`, `routes`, `activities`.
+Required: `users`, `refresh_tokens`, `campuses`, `classrooms`, `students`, `student_guardians`, `attendance`, `student_events`, `media`, `notifications`, `device_tokens`, `notification_preferences`, `buses`, `bus_routes`, `bus_stops`, `route_segments`, `student_transport_assignments`, `daily_transport_plans`, `route_progress`, and later `activities` (ACTIVITY-001).
 
 Not required: `organizations` (the tenant row).
 
-Campuses, classrooms, students, and student–guardian links are created in STUDENT-001. Attendance is created in ATTENDANCE-001. Student journey events are created in JOURNEY-001. Media metadata is created in MEDIA-001. Notifications, device tokens, and preferences are created in NOTIF-001.
+Campuses, classrooms, students, and student–guardian links are created in STUDENT-001. Attendance is created in ATTENDANCE-001. Student journey events are created in JOURNEY-001. Media metadata is created in MEDIA-001. Notifications, device tokens, and preferences are created in NOTIF-001. Transport collections are created in BUS-001.
 
 ## How repositories enforce isolation
 

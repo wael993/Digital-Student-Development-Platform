@@ -4,6 +4,7 @@ import { notFound, validationError } from '../../utils/validate';
 import { findCampusById } from '../campuses/campus.repository';
 import { findClassroomById, findClassroomsByIds } from '../classrooms/classroom.repository';
 import { listLinksByStudentIds, listStudentIdsForGuardian } from '../guardians/guardian.repository';
+import { listActiveStudentIdsForRoutes } from '../buses/assignment.repository';
 import { findUsersByIds } from '../users/user.repository';
 import {
   createStudent,
@@ -237,6 +238,13 @@ async function studentListFilter(
     extra._id = { $in: ids };
     return extra;
   }
+  if (auth.role === 'DRIVER') {
+    if (auth.routeIds.length === 0) return null;
+    const ids = await listActiveStudentIdsForRoutes(auth.organizationId, auth.routeIds);
+    if (ids.length === 0) return null;
+    extra._id = { $in: ids };
+    return extra;
+  }
   return null;
 }
 
@@ -253,6 +261,11 @@ export async function assertStudentReadable(
   }
   if (auth.role === 'TEACHER') {
     assertAssigned(auth, String(student.classroomId), auth.classroomIds);
+    return;
+  }
+  if (auth.role === 'DRIVER') {
+    const ids = await listActiveStudentIdsForRoutes(auth.organizationId, auth.routeIds);
+    assertAssigned(auth, student.id, ids);
     return;
   }
   if (auth.role === 'GUARDIAN') {

@@ -43,6 +43,32 @@ export function utcRangeForCalendarDate(
   };
 }
 
+export function addCalendarDays(dateOnly: string, days: number): string {
+  const [year, month, day] = dateOnly.split('-').map(Number);
+  const next = new Date(Date.UTC(year, month - 1, day + days));
+  return [
+    next.getUTCFullYear(),
+    String(next.getUTCMonth() + 1).padStart(2, '0'),
+    next.getUTCDate().toString().padStart(2, '0'),
+  ].join('-');
+}
+
+export function eachDateInclusive(start: string, end: string): string[] {
+  const dates: string[] = [];
+  let current = start;
+  while (current <= end) {
+    dates.push(current);
+    current = addCalendarDays(current, 1);
+  }
+  return dates;
+}
+
+export function formatClockInTimeZone(at: Date, timeZone: string): string {
+  const zone = isValidTimeZone(timeZone) ? timeZone : 'UTC';
+  const parts = partsInTimeZone(at, zone);
+  return `${String(parts.hour).padStart(2, '0')}:${String(parts.minute).padStart(2, '0')}`;
+}
+
 function nextDateOnly(dateOnly: string): string {
   const [year, month, day] = dateOnly.split('-').map(Number);
   const next = new Date(Date.UTC(year, month - 1, day + 1));

@@ -44,8 +44,14 @@ Closed enum. New types require a ticket; do not accept arbitrary strings from th
 | Type | Meaning |
 | --- | --- |
 | `ATTENDANCE_PRESENT` | Written by ATTENDANCE-001 when a QR scan records PRESENT |
-| `BUS_BOARDING` | Child boarded (usually morning) |
+| `BUS_BOARDING` | Child boarded (usually morning). QR boarding writes this. |
 | `SCHOOL_ARRIVAL` | Arrived at campus (bus or walk-in) |
+| `ARRIVED_BY_CAR` | Arrived by parent car — not a boarding event |
+| `NOT_PRESENT_AT_CLASS_CHECK` | Teacher marked not arrived yet. Not the same as all-day `SCHOOL_ABSENT` (not a v1 type). Later arrival is a new event. |
+| `PARENT_PICKUP` | Left with a parent before the afternoon bus |
+| `AUTHORIZED_PICKUP` | Left with a guardian who has `canPickup`. Dedicated pickup people wait for PROFILE-001. |
+| `MISSED_BUS` | Missed the scheduled bus |
+| `TRANSPORT_CANCELLED` | Parent cancelled bus for a date/direction. Permanent assignment stays. |
 | `CLASS_STARTED` | Class session began |
 | `BREAK_STARTED` | Break began |
 | `ACTIVITY_STARTED` | Named activity began |
@@ -54,7 +60,7 @@ Closed enum. New types require a ticket; do not accept arbitrary strings from th
 | `BUS_DEPARTURE` | Bus left campus |
 | `HOME_DROPOFF` | Delivered at home stop |
 
-Future (do not implement now): `NOTE`, `PARENT_PICKUP`, `SLEEP`, `HOMEWORK`, GPS breadcrumbs. Mood/food/sleep from the parent mock can live in `NOTE` or `MEAL` metadata until those tickets exist.
+Future (do not implement now): `NOTE`, `SLEEP`, `HOMEWORK`, GPS breadcrumbs. ACTIVITY-001 owns `NOTE` / `HOMEWORK` and teacher observations. Mood/food/sleep from the parent mock can live in `NOTE` or `MEAL` metadata until those tickets exist. Dedicated authorized-pickup *people* (beyond `student_guardians.canPickup`) wait for PROFILE-001. Live GPS is BUS-002.
 
 ## Mandatory fields vs metadata
 
@@ -68,7 +74,7 @@ Future (do not implement now): `NOTE`, `PARENT_PICKUP`, `SLEEP`, `HOMEWORK`, GPS
 | `occurredAt` | When it happened (staff clock; may differ from `recordedAt`) |
 | `recordedAt` | When the system stored it |
 | `recordedBy` | Who wrote it (from auth) |
-| `source` | `MANUAL` \| `QR` \| `SYSTEM` |
+| `source` | `MANUAL` \| `QR` \| `SYSTEM` \| `MANUAL_BULK` |
 
 **metadata** — type-specific, not indexed:
 
@@ -131,7 +137,7 @@ Duplicate attendance (`ALREADY_RECORDED`) does not insert a second journey event
 
 ## Transitions
 
-v1 only rejects obviously invalid sequences on the same org-local day (`HOME_DROPOFF` then anything; `BUS_DEPARTURE` then an in-school event). It does not require every type to occur, and it allows `CLASS_STARTED` → `ACTIVITY_STARTED` → `BREAK_STARTED`.
+v1 only rejects obviously invalid sequences on the same org-local day (`HOME_DROPOFF` then anything; `BUS_DEPARTURE` then an in-school event). It does not require every type to occur, and it allows `CLASS_STARTED` → `ACTIVITY_STARTED` → `BREAK_STARTED`. `NOT_PRESENT_AT_CLASS_CHECK` then `ARRIVED_BY_CAR` is allowed; both stay on the timeline.
 
 ## QR
 
@@ -140,7 +146,8 @@ QR (qrToken)
   → API
   → tenant + permission
   → attendance PRESENT + StudentEvent ATTENDANCE_PRESENT
+     or transport boarding BUS_BOARDING (direction from the day's plan)
 ```
 
-The token is not a capability by itself. A stolen QR without a permitted staff session does nothing useful.
+The token is not a capability by itself. A stolen QR without a permitted staff session does nothing useful. Boarding QR uses the same random `qrToken`; it is not a second code.
 

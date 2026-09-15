@@ -79,6 +79,18 @@ String parentEventLabel(AppLocalizations l10n, String eventType) {
       return l10n.eventBusDeparture;
     case 'HOME_DROPOFF':
       return l10n.eventHomeDropoff;
+    case 'ARRIVED_BY_CAR':
+      return l10n.eventArrivedByCar;
+    case 'PARENT_PICKUP':
+      return l10n.eventParentPickup;
+    case 'AUTHORIZED_PICKUP':
+      return l10n.eventAuthorizedPickup;
+    case 'MISSED_BUS':
+      return l10n.eventMissedBus;
+    case 'TRANSPORT_CANCELLED':
+      return l10n.eventTransportCancelled;
+    case 'NOT_PRESENT_AT_CLASS_CHECK':
+      return l10n.eventNotPresentAtClass;
     default:
       return eventType;
   }
@@ -106,6 +118,18 @@ String parentCurrentStatusLabel(AppLocalizations l10n, String? eventType) {
       return l10n.statusBusDeparture;
     case 'HOME_DROPOFF':
       return l10n.statusHomeDropoff;
+    case 'ARRIVED_BY_CAR':
+      return l10n.statusArrivedByCar;
+    case 'PARENT_PICKUP':
+      return l10n.statusParentPickup;
+    case 'AUTHORIZED_PICKUP':
+      return l10n.statusAuthorizedPickup;
+    case 'MISSED_BUS':
+      return l10n.statusMissedBus;
+    case 'TRANSPORT_CANCELLED':
+      return l10n.statusTransportCancelled;
+    case 'NOT_PRESENT_AT_CLASS_CHECK':
+      return l10n.statusNotPresentAtClass;
     default:
       return l10n.statusJourneyNotStarted;
   }
@@ -133,6 +157,18 @@ String staffEventLabel(AppLocalizations l10n, String eventType) {
       return l10n.staffEventBusDeparture;
     case 'HOME_DROPOFF':
       return l10n.staffEventHomeDropoff;
+    case 'ARRIVED_BY_CAR':
+      return l10n.staffEventArrivedByCar;
+    case 'PARENT_PICKUP':
+      return l10n.staffEventParentPickup;
+    case 'AUTHORIZED_PICKUP':
+      return l10n.staffEventAuthorizedPickup;
+    case 'MISSED_BUS':
+      return l10n.staffEventMissedBus;
+    case 'TRANSPORT_CANCELLED':
+      return l10n.staffEventTransportCancelled;
+    case 'NOT_PRESENT_AT_CLASS_CHECK':
+      return l10n.staffEventNotPresentAtClass;
     default:
       return eventType;
   }
@@ -160,6 +196,18 @@ String staffCurrentStateLabel(AppLocalizations l10n, String? eventType) {
       return l10n.staffStateOnTheWayHome;
     case 'HOME_DROPOFF':
       return l10n.staffStateHome;
+    case 'ARRIVED_BY_CAR':
+      return l10n.staffEventArrivedByCar;
+    case 'PARENT_PICKUP':
+      return l10n.staffEventParentPickup;
+    case 'AUTHORIZED_PICKUP':
+      return l10n.staffEventAuthorizedPickup;
+    case 'MISSED_BUS':
+      return l10n.staffEventMissedBus;
+    case 'TRANSPORT_CANCELLED':
+      return l10n.staffEventTransportCancelled;
+    case 'NOT_PRESENT_AT_CLASS_CHECK':
+      return l10n.staffEventNotPresentAtClass;
     default:
       return l10n.staffStateNoEvents;
   }

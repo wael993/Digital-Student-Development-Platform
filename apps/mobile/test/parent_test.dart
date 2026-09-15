@@ -71,6 +71,27 @@ Dio _dio(Future<ResponseBody> Function(RequestOptions options) fetch) {
         'meta': {'page': 1, 'limit': 20, 'total': 0, 'unreadCount': 0},
       });
     }
+    if (options.path.contains('/transport/today')) {
+      return _json(200, {
+        'date': '2026-09-15',
+        'directions': [
+          {
+            'direction': 'HOME_TO_SCHOOL',
+            'transportMethod': 'BUS',
+            'status': 'SCHEDULED',
+            'progress': {
+              'currentStopSequence': 3,
+              'childStopSequence': 6,
+              'stopsRemaining': 3,
+              'estimatedMinutes': 10,
+              'estimatedArrivalTime': '07:55',
+              'childrenAtStop': 1,
+              'liveTracking': false,
+            },
+          },
+        ],
+      });
+    }
     return fetch(options);
   });
   return dio;
@@ -199,6 +220,8 @@ void main() {
     final l10n = lookupAppLocalizations(const Locale('en'));
     expect(parentEventLabel(l10n, 'CLASS_STARTED'), 'Class started');
     expect(parentEventLabel(l10n, 'BUS_BOARDING'), 'On the bus');
+    expect(parentEventLabel(l10n, 'ARRIVED_BY_CAR'), 'Arrived by car');
+    expect(parentEventLabel(l10n, 'TRANSPORT_CANCELLED'), 'Bus cancelled');
     expect(parentCurrentStatusLabel(l10n, 'CLASS_STARTED'), 'Currently in class');
     expect(
       parentCurrentStatusLabel(l10n, null),

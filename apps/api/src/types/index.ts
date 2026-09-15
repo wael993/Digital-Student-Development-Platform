@@ -25,4 +25,5 @@ export interface AuthContext {
   role: UserRole;
   campusIds: string[];
   classroomIds: string[];
+  routeIds: string[];
 }

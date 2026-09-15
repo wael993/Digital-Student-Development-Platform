@@ -23,6 +23,16 @@ IconData parentEventIcon(String eventType) {
       return Icons.extension;
     case 'HOME_DROPOFF':
       return Icons.home;
+    case 'ARRIVED_BY_CAR':
+      return Icons.directions_car;
+    case 'PARENT_PICKUP':
+    case 'AUTHORIZED_PICKUP':
+      return Icons.family_restroom;
+    case 'MISSED_BUS':
+    case 'TRANSPORT_CANCELLED':
+      return Icons.directions_bus_filled;
+    case 'NOT_PRESENT_AT_CLASS_CHECK':
+      return Icons.hourglass_empty;
     default:
       return Icons.circle;
   }

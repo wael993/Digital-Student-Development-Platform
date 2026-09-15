@@ -44,8 +44,9 @@ They may not:
 
 - List a classroom
 - Read another child's events or media
-- Create attendance or journey events
+- Create attendance or journey events (except direction-specific bus cancellation, which writes `TRANSPORT_CANCELLED` via the parent transport API)
 - See staff-only `visibility` media
+- See other children's names at a shared stop (count only)
 
 `canPickup` and `receivesNotifications` further restrict pickup and push, not the existence of the link.
 
@@ -57,7 +58,7 @@ They may not open another class by guessing its id. Unassigned teacher → empty
 
 ## Driver → route
 
-A `DRIVER` may only see students on assigned `routeIds`, and may only record boarding / departure / drop-off (and equivalent QR events) for those students.
+A `DRIVER` may only see students on assigned `routeIds`, and may only record boarding / departure / drop-off (and equivalent QR events) for those students. Route progress is recorded per physical stop; it is not GPS.
 
 They may not read full academic notes, arbitrary media, or other routes.
 

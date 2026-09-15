@@ -1321,6 +1321,438 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Student is not active'**
   String get errorStudentInactive;
+
+  /// No description provided for @transport.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport'**
+  String get transport;
+
+  /// No description provided for @buses.
+  ///
+  /// In en, this message translates to:
+  /// **'Buses'**
+  String get buses;
+
+  /// No description provided for @routes.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes'**
+  String get routes;
+
+  /// No description provided for @myRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'My Route'**
+  String get myRoute;
+
+  /// No description provided for @morningArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning Arrival'**
+  String get morningArrival;
+
+  /// No description provided for @todaysTransport.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s transport'**
+  String get todaysTransport;
+
+  /// No description provided for @homeToSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'Home → School'**
+  String get homeToSchool;
+
+  /// No description provided for @schoolToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'School → Home'**
+  String get schoolToHome;
+
+  /// No description provided for @cancelBus.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel bus'**
+  String get cancelBus;
+
+  /// No description provided for @cancelBusFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel bus for'**
+  String get cancelBusFor;
+
+  /// No description provided for @cancelToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get cancelToday;
+
+  /// No description provided for @cancelTomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get cancelTomorrow;
+
+  /// No description provided for @cancelNextThreeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Next 3 days'**
+  String get cancelNextThreeDays;
+
+  /// No description provided for @cancelCustomDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom dates'**
+  String get cancelCustomDates;
+
+  /// No description provided for @confirmCancelBus.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel bus transportation for the selected dates?'**
+  String get confirmCancelBus;
+
+  /// No description provided for @busCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Bus cancelled'**
+  String get busCancelled;
+
+  /// No description provided for @estimatedArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated arrival'**
+  String get estimatedArrival;
+
+  /// No description provided for @estimatedArrivalInMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated arrival in {minutes} minutes'**
+  String estimatedArrivalInMinutes(int minutes);
+
+  /// No description provided for @stopsRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} stops remaining'**
+  String stopsRemaining(int count);
+
+  /// No description provided for @currentStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Current stop'**
+  String get currentStop;
+
+  /// No description provided for @yourStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Your stop'**
+  String get yourStop;
+
+  /// No description provided for @childrenAtStopCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} children are scheduled for this stop.'**
+  String childrenAtStopCount(int count);
+
+  /// No description provided for @notLiveTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated arrival — not live location'**
+  String get notLiveTracking;
+
+  /// No description provided for @arrivedAtStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived at stop'**
+  String get arrivedAtStop;
+
+  /// No description provided for @departStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Depart stop'**
+  String get departStop;
+
+  /// No description provided for @scanBoardingQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan boarding QR'**
+  String get scanBoardingQr;
+
+  /// No description provided for @markAllArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all arrived'**
+  String get markAllArrived;
+
+  /// No description provided for @confirmMarkAllArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Register all eligible children on this route as arrived?'**
+  String get confirmMarkAllArrived;
+
+  /// No description provided for @nextStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Next stop'**
+  String get nextStop;
+
+  /// No description provided for @noRoutesAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No route assigned yet'**
+  String get noRoutesAssigned;
+
+  /// No description provided for @childrenExpected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} children expected'**
+  String childrenExpected(int count);
+
+  /// No description provided for @arrivedByBusCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} arrived by bus'**
+  String arrivedByBusCount(int count);
+
+  /// No description provided for @arrivedByCarCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} arrived by car'**
+  String arrivedByCarCount(int count);
+
+  /// No description provided for @notArrivedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} not arrived'**
+  String notArrivedCount(int count);
+
+  /// No description provided for @swipeRightArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe right to mark arrived'**
+  String get swipeRightArrived;
+
+  /// No description provided for @swipeLeftNotPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe left to mark not arrived'**
+  String get swipeLeftNotPresent;
+
+  /// No description provided for @markArrived.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived'**
+  String get markArrived;
+
+  /// No description provided for @markNotPresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Not arrived'**
+  String get markNotPresent;
+
+  /// No description provided for @arrivedByCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived by car'**
+  String get arrivedByCar;
+
+  /// No description provided for @parentPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent pickup'**
+  String get parentPickup;
+
+  /// No description provided for @authorizedPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized pickup'**
+  String get authorizedPickup;
+
+  /// No description provided for @confirmStatusChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Update this child\'s status?'**
+  String get confirmStatusChange;
+
+  /// No description provided for @pickupPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Pickup person'**
+  String get pickupPerson;
+
+  /// No description provided for @newBus.
+  ///
+  /// In en, this message translates to:
+  /// **'New bus'**
+  String get newBus;
+
+  /// No description provided for @newRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'New route'**
+  String get newRoute;
+
+  /// No description provided for @registrationNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration number'**
+  String get registrationNumber;
+
+  /// No description provided for @capacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Capacity'**
+  String get capacity;
+
+  /// No description provided for @addStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Add stop'**
+  String get addStop;
+
+  /// No description provided for @assignChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign children'**
+  String get assignChildren;
+
+  /// No description provided for @unassignedChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Not on this route'**
+  String get unassignedChildren;
+
+  /// No description provided for @segmentMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel time (minutes)'**
+  String get segmentMinutes;
+
+  /// No description provided for @parentCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent car'**
+  String get parentCar;
+
+  /// No description provided for @eventArrivedByCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived by car'**
+  String get eventArrivedByCar;
+
+  /// No description provided for @eventParentPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up by a parent'**
+  String get eventParentPickup;
+
+  /// No description provided for @eventAuthorizedPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up by an authorized person'**
+  String get eventAuthorizedPickup;
+
+  /// No description provided for @eventMissedBus.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed the bus'**
+  String get eventMissedBus;
+
+  /// No description provided for @eventTransportCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Bus cancelled'**
+  String get eventTransportCancelled;
+
+  /// No description provided for @eventNotPresentAtClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Not arrived yet'**
+  String get eventNotPresentAtClass;
+
+  /// No description provided for @statusArrivedByCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived by car'**
+  String get statusArrivedByCar;
+
+  /// No description provided for @statusParentPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up'**
+  String get statusParentPickup;
+
+  /// No description provided for @statusAuthorizedPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Picked up'**
+  String get statusAuthorizedPickup;
+
+  /// No description provided for @statusMissedBus.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed the bus'**
+  String get statusMissedBus;
+
+  /// No description provided for @statusTransportCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Bus cancelled'**
+  String get statusTransportCancelled;
+
+  /// No description provided for @statusNotPresentAtClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Not arrived yet'**
+  String get statusNotPresentAtClass;
+
+  /// No description provided for @staffEventArrivedByCar.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrived by car'**
+  String get staffEventArrivedByCar;
+
+  /// No description provided for @staffEventParentPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent pickup'**
+  String get staffEventParentPickup;
+
+  /// No description provided for @staffEventAuthorizedPickup.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized pickup'**
+  String get staffEventAuthorizedPickup;
+
+  /// No description provided for @staffEventMissedBus.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed bus'**
+  String get staffEventMissedBus;
+
+  /// No description provided for @staffEventTransportCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Transport cancelled'**
+  String get staffEventTransportCancelled;
+
+  /// No description provided for @staffEventNotPresentAtClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Not arrived'**
+  String get staffEventNotPresentAtClass;
+
+  /// No description provided for @getReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Get ready'**
+  String get getReady;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
 }
 
 class _AppLocalizationsDelegate

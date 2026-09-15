@@ -71,6 +71,20 @@ export async function updateStudent(
   });
 }
 
+export async function findActiveStudentsByCampus(organizationId: string, campusId: string) {
+  return StudentModel.find(tenantFilter(organizationId, { campusId, status: 'ACTIVE' })).sort({
+    firstName: 1,
+    lastName: 1,
+  });
+}
+
+export async function findActiveStudentsByClassroom(organizationId: string, classroomId: string) {
+  return StudentModel.find(tenantFilter(organizationId, { classroomId, status: 'ACTIVE' })).sort({
+    firstName: 1,
+    lastName: 1,
+  });
+}
+
 export async function updateStudentsCampus(
   organizationId: string,
   classroomId: string,

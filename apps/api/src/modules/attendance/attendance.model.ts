@@ -3,7 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 export const ATTENDANCE_TYPES = ['PRESENT', 'ABSENT'] as const;
 export type AttendanceType = (typeof ATTENDANCE_TYPES)[number];
 
-export const ATTENDANCE_SOURCES = ['QR'] as const;
+export const ATTENDANCE_SOURCES = ['QR', 'MANUAL', 'MANUAL_BULK'] as const;
 export type AttendanceSource = (typeof ATTENDANCE_SOURCES)[number];
 
 export interface Attendance {

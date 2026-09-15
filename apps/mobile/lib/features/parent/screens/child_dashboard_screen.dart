@@ -6,6 +6,7 @@ import 'package:digital_student/features/parent/screens/child_profile_screen.dar
 import 'package:digital_student/features/parent/widgets/attendance_card.dart';
 import 'package:digital_student/features/parent/widgets/child_card.dart';
 import 'package:digital_student/features/parent/widgets/current_status_card.dart';
+import 'package:digital_student/features/transport/screens/parent_transport_screen.dart';
 import 'package:digital_student/features/media/models/student_media.dart';
 import 'package:digital_student/features/media/providers/media_providers.dart';
 import 'package:digital_student/features/media/screens/photo_gallery_screen.dart';
@@ -73,6 +74,8 @@ class ChildDashboardScreen extends ConsumerWidget {
           CurrentStatusCard(journey: data.journey),
           const SizedBox(height: 8),
           AttendanceCard(attendance: data.attendance),
+          const SizedBox(height: 8),
+          ParentTransportCard(studentId: studentId, childName: data.student.firstName),
           const SizedBox(height: 16),
           FilledButton(
             key: const Key('viewJourneyButton'),

@@ -5,6 +5,7 @@ import { tenantContext } from '../../middlewares/tenantContext';
 import { asyncHandler } from '../../utils/asyncHandler';
 import { journeyRouter } from '../journey/journey.routes';
 import { studentMediaRouter } from '../media/media.routes';
+import { studentTransportRouter } from '../buses/student-transport.routes';
 import {
   deleteStudentGuardian,
   getStudent,
@@ -18,6 +19,7 @@ import {
 export const studentsRouter = Router();
 
 studentsRouter.use(authenticate, tenantContext);
+studentsRouter.use(studentTransportRouter);
 studentsRouter.use(journeyRouter);
 studentsRouter.use(studentMediaRouter);
 

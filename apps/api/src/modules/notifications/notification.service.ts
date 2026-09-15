@@ -28,8 +28,13 @@ import { sendFcm } from './fcm/fcm.service';
 
 export const JOURNEY_NOTIFICATION_MAP: Partial<Record<StudentEventType, NotificationType>> = {
   SCHOOL_ARRIVAL: 'STUDENT_ARRIVAL',
+  ARRIVED_BY_CAR: 'STUDENT_ARRIVAL',
   BUS_DEPARTURE: 'STUDENT_DEPARTURE',
+  PARENT_PICKUP: 'STUDENT_DEPARTURE',
+  AUTHORIZED_PICKUP: 'STUDENT_DEPARTURE',
   HOME_DROPOFF: 'STUDENT_HOME_DROPOFF',
+  BUS_BOARDING: 'JOURNEY_UPDATE',
+  TRANSPORT_CANCELLED: 'JOURNEY_UPDATE',
 };
 
 const PREFERENCE_BY_TYPE = {
@@ -171,7 +176,7 @@ export async function notifyStudentJourneyEvent(input: {
   }
   const classroom = await findClassroomById(input.organizationId, String(student.classroomId));
   const place = placeLabel(classroom?.level);
-  const copy = journeyCopy(type, student.firstName, place);
+  const copy = journeyCopy(type, student.firstName, place, input.eventType);
   await fanout({
     organizationId: input.organizationId,
     studentId: student.id,
@@ -179,6 +184,22 @@ export async function notifyStudentJourneyEvent(input: {
     title: copy.title,
     body: copy.body,
     data: { type, studentId: student.id, eventId: input.eventId },
+  });
+}
+
+export async function notifyJourneyUpdate(input: {
+  organizationId: string;
+  studentId: string;
+  title: string;
+  body: string;
+}): Promise<void> {
+  await fanout({
+    organizationId: input.organizationId,
+    studentId: input.studentId,
+    type: 'JOURNEY_UPDATE',
+    title: input.title,
+    body: input.body,
+    data: { type: 'JOURNEY_UPDATE', studentId: input.studentId },
   });
 }
 
@@ -304,17 +325,49 @@ async function fanout(input: {
   }
 }
 
-function journeyCopy(type: NotificationType, firstName: string, place: string) {
+function journeyCopy(
+  type: NotificationType,
+  firstName: string,
+  place: string,
+  eventType?: StudentEventType,
+) {
   if (type === 'STUDENT_ARRIVAL') {
     return {
       title: `${firstName} has arrived`,
-      body: `${firstName} has arrived at ${place}.`,
+      body:
+        eventType === 'ARRIVED_BY_CAR'
+          ? `${firstName} arrived at ${place} by car.`
+          : `${firstName} has arrived at ${place}.`,
     };
   }
   if (type === 'STUDENT_DEPARTURE') {
+    if (eventType === 'PARENT_PICKUP' || eventType === 'AUTHORIZED_PICKUP') {
+      return {
+        title: `${firstName} was picked up`,
+        body: `${firstName} was picked up from ${place}.`,
+      };
+    }
     return {
       title: `${firstName} has left`,
       body: `${firstName} has left ${place}.`,
+    };
+  }
+  if (type === 'JOURNEY_UPDATE') {
+    if (eventType === 'BUS_BOARDING') {
+      return {
+        title: `${firstName} boarded the bus`,
+        body: `${firstName} boarded the bus.`,
+      };
+    }
+    if (eventType === 'TRANSPORT_CANCELLED') {
+      return {
+        title: `${firstName}'s bus was cancelled`,
+        body: `Bus transportation for ${firstName} was cancelled.`,
+      };
+    }
+    return {
+      title: `${firstName} update`,
+      body: `There is a new update for ${firstName}.`,
     };
   }
   return {

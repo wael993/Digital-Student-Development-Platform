@@ -640,4 +640,236 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorStudentInactive => 'Student is not active';
+
+  @override
+  String get transport => 'Transport';
+
+  @override
+  String get buses => 'Buses';
+
+  @override
+  String get routes => 'Routes';
+
+  @override
+  String get myRoute => 'My Route';
+
+  @override
+  String get morningArrival => 'Morning Arrival';
+
+  @override
+  String get todaysTransport => 'Today\'s transport';
+
+  @override
+  String get homeToSchool => 'Home → School';
+
+  @override
+  String get schoolToHome => 'School → Home';
+
+  @override
+  String get cancelBus => 'Cancel bus';
+
+  @override
+  String get cancelBusFor => 'Cancel bus for';
+
+  @override
+  String get cancelToday => 'Today';
+
+  @override
+  String get cancelTomorrow => 'Tomorrow';
+
+  @override
+  String get cancelNextThreeDays => 'Next 3 days';
+
+  @override
+  String get cancelCustomDates => 'Custom dates';
+
+  @override
+  String get confirmCancelBus =>
+      'Cancel bus transportation for the selected dates?';
+
+  @override
+  String get busCancelled => 'Bus cancelled';
+
+  @override
+  String get estimatedArrival => 'Estimated arrival';
+
+  @override
+  String estimatedArrivalInMinutes(int minutes) {
+    return 'Estimated arrival in $minutes minutes';
+  }
+
+  @override
+  String stopsRemaining(int count) {
+    return '$count stops remaining';
+  }
+
+  @override
+  String get currentStop => 'Current stop';
+
+  @override
+  String get yourStop => 'Your stop';
+
+  @override
+  String childrenAtStopCount(int count) {
+    return '$count children are scheduled for this stop.';
+  }
+
+  @override
+  String get notLiveTracking => 'Estimated arrival — not live location';
+
+  @override
+  String get arrivedAtStop => 'Arrived at stop';
+
+  @override
+  String get departStop => 'Depart stop';
+
+  @override
+  String get scanBoardingQr => 'Scan boarding QR';
+
+  @override
+  String get markAllArrived => 'Mark all arrived';
+
+  @override
+  String get confirmMarkAllArrived =>
+      'Register all eligible children on this route as arrived?';
+
+  @override
+  String get nextStop => 'Next stop';
+
+  @override
+  String get noRoutesAssigned => 'No route assigned yet';
+
+  @override
+  String childrenExpected(int count) {
+    return '$count children expected';
+  }
+
+  @override
+  String arrivedByBusCount(int count) {
+    return '$count arrived by bus';
+  }
+
+  @override
+  String arrivedByCarCount(int count) {
+    return '$count arrived by car';
+  }
+
+  @override
+  String notArrivedCount(int count) {
+    return '$count not arrived';
+  }
+
+  @override
+  String get swipeRightArrived => 'Swipe right to mark arrived';
+
+  @override
+  String get swipeLeftNotPresent => 'Swipe left to mark not arrived';
+
+  @override
+  String get markArrived => 'Arrived';
+
+  @override
+  String get markNotPresent => 'Not arrived';
+
+  @override
+  String get arrivedByCar => 'Arrived by car';
+
+  @override
+  String get parentPickup => 'Parent pickup';
+
+  @override
+  String get authorizedPickup => 'Authorized pickup';
+
+  @override
+  String get confirmStatusChange => 'Update this child\'s status?';
+
+  @override
+  String get pickupPerson => 'Pickup person';
+
+  @override
+  String get newBus => 'New bus';
+
+  @override
+  String get newRoute => 'New route';
+
+  @override
+  String get registrationNumber => 'Registration number';
+
+  @override
+  String get capacity => 'Capacity';
+
+  @override
+  String get addStop => 'Add stop';
+
+  @override
+  String get assignChildren => 'Assign children';
+
+  @override
+  String get unassignedChildren => 'Not on this route';
+
+  @override
+  String get segmentMinutes => 'Travel time (minutes)';
+
+  @override
+  String get parentCar => 'Parent car';
+
+  @override
+  String get eventArrivedByCar => 'Arrived by car';
+
+  @override
+  String get eventParentPickup => 'Picked up by a parent';
+
+  @override
+  String get eventAuthorizedPickup => 'Picked up by an authorized person';
+
+  @override
+  String get eventMissedBus => 'Missed the bus';
+
+  @override
+  String get eventTransportCancelled => 'Bus cancelled';
+
+  @override
+  String get eventNotPresentAtClass => 'Not arrived yet';
+
+  @override
+  String get statusArrivedByCar => 'Arrived by car';
+
+  @override
+  String get statusParentPickup => 'Picked up';
+
+  @override
+  String get statusAuthorizedPickup => 'Picked up';
+
+  @override
+  String get statusMissedBus => 'Missed the bus';
+
+  @override
+  String get statusTransportCancelled => 'Bus cancelled';
+
+  @override
+  String get statusNotPresentAtClass => 'Not arrived yet';
+
+  @override
+  String get staffEventArrivedByCar => 'Arrived by car';
+
+  @override
+  String get staffEventParentPickup => 'Parent pickup';
+
+  @override
+  String get staffEventAuthorizedPickup => 'Authorized pickup';
+
+  @override
+  String get staffEventMissedBus => 'Missed bus';
+
+  @override
+  String get staffEventTransportCancelled => 'Transport cancelled';
+
+  @override
+  String get staffEventNotPresentAtClass => 'Not arrived';
+
+  @override
+  String get getReady => 'Get ready';
+
+  @override
+  String get confirm => 'Confirm';
 }

@@ -70,7 +70,7 @@ Defined in `apps/api/src/authorization/permissions.ts`. Add a permission when th
 | `media.read` / `media.create` / `media.delete` | Photos / files |
 | `notifications.read` / `notifications.update` | Own inbox, preferences, and device tokens |
 
-TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATCH /api/v1/organizations/current`. STUDENT-001 uses `campuses.*`, `classrooms.*`, `students.*`, and `guardians.*`. ATTENDANCE-001 uses `attendance.read` and `attendance.create`. JOURNEY-001 uses `student_events.read` and `student_events.create`. MEDIA-001 uses `media.read`, `media.create`, and `media.delete`. NOTIF-001 uses `notifications.read` and `notifications.update` (always scoped to the authenticated user).
+TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATCH /api/v1/organizations/current`. STUDENT-001 uses `campuses.*`, `classrooms.*`, `students.*`, and `guardians.*`. ATTENDANCE-001 uses `attendance.read` and `attendance.create`. JOURNEY-001 uses `student_events.read` and `student_events.create`. MEDIA-001 uses `media.read`, `media.create`, and `media.delete`. NOTIF-001 uses `notifications.read` and `notifications.update` (always scoped to the authenticated user). BUS-001 uses `buses.read` / `buses.manage` plus `student_events.create` for boarding, arrivals, and pickups.
 
 ## Role × permission matrix
 
@@ -85,7 +85,7 @@ TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATC
 | Record attendance | yes | yes | yes | no | no |
 | Record student events | yes | yes | yes | assigned route types | no |
 | View own children | n/a | n/a | n/a | n/a | yes |
-| Manage buses / routes | yes | yes | no | assigned route (read) | no |
+| Manage buses / routes | yes | yes | classroom arrivals / pickups | assigned route (read + progress) | own child plan / cancel / ETA |
 | Media create | yes | yes | yes | no | no |
 | Media delete | yes | yes | no | no | no |
 
@@ -102,7 +102,7 @@ Empty assignment lists mean **no rows**, not the whole organization. Only `ADMIN
 | `assertSameTenant` | `String(document.organizationId)` must equal `auth.organizationId` |
 | `assertAssigned(auth, resourceId, assignedIds)` | `ADMIN` is org-wide. Every other role must include the id. Empty `assignedIds` means **no access**. |
 
-STUDENT-001 computes `assignedIds` from the role (guardian → `student_guardians`, teacher → `users.classroomIds`, supervisor → `users.campusIds`). Drivers have no education-domain assignment until BUS-001 (`routeIds`); their student lists are empty. Do not call a role-specific helper that returns early for other roles — that fails open.
+STUDENT-001 computes `assignedIds` from the role (guardian → `student_guardians`, teacher → `users.classroomIds`, supervisor → `users.campusIds`). BUS-001 adds driver `users.routeIds` (synced from `buses.driverId`). Do not call a role-specific helper that returns early for other roles — that fails open.
 
 ## MongoDB tenant filtering
 
@@ -118,7 +118,7 @@ withTenant(body, auth.organizationId)
 
 Every tenant repository method takes `organizationId` as a required argument. Lookups are `findOne({ _id, organizationId })`, never `{ _id }` alone.
 
-`users`: `{ organizationId: 1, role: 1 }` plus unique `{ email: 1 }`. Teacher/supervisor assignment lives on `classroomIds` / `campusIds`.
+`users`: `{ organizationId: 1, role: 1 }` plus unique `{ email: 1 }`. Teacher/supervisor/driver assignment lives on `classroomIds` / `campusIds` / `routeIds`.
 
 ## Flutter
 
@@ -126,7 +126,7 @@ Session already includes `id`, `organizationId`, and `role` from `/auth/login` a
 
 ## Testing
 
-See `apps/api/tests/tenant.test.ts`, `apps/api/tests/authorization.test.ts`, `apps/api/tests/students.test.ts`, `apps/api/tests/attendance.test.ts`, `apps/api/tests/journey.test.ts`, `apps/api/tests/media.test.ts`, and `apps/api/tests/notifications.test.ts`. Minimum coverage:
+See `apps/api/tests/tenant.test.ts`, `apps/api/tests/authorization.test.ts`, `apps/api/tests/students.test.ts`, `apps/api/tests/attendance.test.ts`, `apps/api/tests/journey.test.ts`, `apps/api/tests/media.test.ts`, `apps/api/tests/notifications.test.ts`, and `apps/api/tests/transport.test.ts`. Minimum coverage:
 
 - unauthenticated / invalid / expired → 401
 - teacher `PATCH /organizations/current` → 403; admin → 200
@@ -134,3 +134,4 @@ See `apps/api/tests/tenant.test.ts`, `apps/api/tests/authorization.test.ts`, `ap
 - `?organizationId=`, body `organizationId`, and `X-Organization-Id` cannot switch tenant
 - JWT `organizationId` that does not match the user row → 401
 - guardian helper allows linked child ids only; teacher sees assigned classrooms only
+- guardian cannot cancel another child's bus; driver cannot progress an unassigned route; cross-tenant transport ids 404

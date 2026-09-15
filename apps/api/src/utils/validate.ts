@@ -87,6 +87,35 @@ export function optionalBoolean(value: unknown, field: string): boolean | undefi
   return value;
 }
 
+export function requireInt(
+  value: unknown,
+  field: string,
+  opts?: { min?: number; max?: number },
+): number {
+  const n = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
+  if (!Number.isInteger(n)) {
+    throw validationError(field, 'Must be an integer');
+  }
+  if (opts?.min !== undefined && n < opts.min) {
+    throw validationError(field, `Must be at least ${opts.min}`);
+  }
+  if (opts?.max !== undefined && n > opts.max) {
+    throw validationError(field, `Must be at most ${opts.max}`);
+  }
+  return n;
+}
+
+export function optionalInt(
+  value: unknown,
+  field: string,
+  opts?: { min?: number; max?: number },
+): number | undefined {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+  return requireInt(value, field, opts);
+}
+
 export function parsePagination(query: { page?: unknown; limit?: unknown }): {
   page: number;
   limit: number;
