@@ -5,8 +5,8 @@ import { createApp } from '../src/app';
 import { MediaModel } from '../src/modules/media/media.model';
 import { processPhoto, sniffImageType } from '../src/modules/media/media.image';
 import {
-  getObjectStorage,
   isValidStorageSignature,
+  requireLocalObjectStorage,
   signStorageAccess,
 } from '../src/modules/media/storage/object-storage.service';
 import { env } from '../src/config/env';
@@ -130,7 +130,7 @@ describe('media', () => {
 
   beforeEach(async () => {
     await clearAuthData();
-    await getObjectStorage().clear();
+    await requireLocalObjectStorage().clear();
   });
 
   it('lets authorized staff upload a photo into private storage', async () => {
@@ -166,8 +166,8 @@ describe('media', () => {
     );
     expect(stored!.storageKey).not.toContain('emma');
     expect(stored!.storageKey).not.toContain(student.studentNumber);
-    const original = await getObjectStorage().read(stored!.storageKey);
-    const thumb = await getObjectStorage().read(stored!.thumbnailStorageKey);
+    const original = await requireLocalObjectStorage().read(stored!.storageKey);
+    const thumb = await requireLocalObjectStorage().read(stored!.thumbnailStorageKey);
     expect(original?.length).toBeGreaterThan(0);
     expect(thumb?.length).toBeGreaterThan(0);
     expect(original?.length).toBe(stored!.size);
@@ -363,7 +363,7 @@ describe('media', () => {
     const uploaded = await uploadPhoto(token, student.id, await jpeg());
     const mediaId = uploaded.body.media.id as string;
     const stored = await MediaModel.findById(mediaId);
-    expect(await getObjectStorage().read(stored!.storageKey)).toBeTruthy();
+    expect(await requireLocalObjectStorage().read(stored!.storageKey)).toBeTruthy();
 
     const teacher = await insertUser({
       email: 'teacher.g@example.com',
@@ -381,8 +381,8 @@ describe('media', () => {
       .delete(`/api/v1/media/${mediaId}`)
       .set('Authorization', `Bearer ${token}`);
     expect(removed.status).toBe(204);
-    expect(await getObjectStorage().read(stored!.storageKey)).toBeNull();
-    expect(await getObjectStorage().read(stored!.thumbnailStorageKey)).toBeNull();
+    expect(await requireLocalObjectStorage().read(stored!.storageKey)).toBeNull();
+    expect(await requireLocalObjectStorage().read(stored!.thumbnailStorageKey)).toBeNull();
     expect(await MediaModel.findById(mediaId)).toMatchObject({ deletedAt: expect.any(Date) });
 
     const listed = await request(app)

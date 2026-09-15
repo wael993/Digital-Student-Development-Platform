@@ -61,7 +61,15 @@ Dio _dio(Future<ResponseBody> Function(RequestOptions options) fetch) {
       receiveTimeout: const Duration(seconds: 2),
     ),
   );
-  dio.httpClientAdapter = _Adapter(fetch);
+  dio.httpClientAdapter = _Adapter((options) async {
+    if (options.path.contains('/notifications')) {
+      return _json(200, {
+        'data': <dynamic>[],
+        'meta': {'page': 1, 'limit': 20, 'total': 0, 'unreadCount': 0},
+      });
+    }
+    return fetch(options);
+  });
   return dio;
 }
 
@@ -485,6 +493,12 @@ void main() {
       if (options.path.endsWith('/parent/children')) {
         return _json(200, {
           'items': [_childJson()],
+        });
+      }
+      if (options.path.contains('/notifications')) {
+        return _json(200, {
+          'data': <dynamic>[],
+          'meta': {'page': 1, 'limit': 20, 'total': 0, 'unreadCount': 0},
         });
       }
       if (options.path.contains('/media')) {

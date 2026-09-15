@@ -70,7 +70,7 @@ Neither role crosses `organizationId`.
 
 ## Media
 
-- Bytes in private object storage; Mongo holds metadata and `studentId`
+- Bytes in private object storage (Cloudinary `authenticated`, not public); Mongo holds metadata and `studentId`
 - Download path: API checks tenant + student scope, then issues a short-lived signed URL
 - Student photos only in MEDIA-001. Class photos: each guardian only receives media for their child, unless a later ticket defines a class-feed permission
 - Soft-delete media; do not leave public keys around
@@ -99,8 +99,9 @@ A dedicated `audit_logs` collection is not required yet. Add it when admin user 
 | Photos | Authorized signed URLs |
 | QR | Random `qrToken`, rotatable if leaked |
 | Date of birth | Staff/guardian scoped; never in QR or FCM body beyond what the parent already knows |
+| Push payloads | IDs only (`type`, `studentId`, `eventId` / `mediaId`). Recipients come from guardian links, not the client |
 
-Do not put names, medical notes, or addresses in QR payloads or unauthenticated error messages.
+Do not put names, medical notes, or addresses in QR payloads or unauthenticated error messages. FCM notification title/body may include the child's first name because that parent already has the child.
 
 ## Threats this architecture rejects
 
@@ -110,4 +111,4 @@ Do not put names, medical notes, or addresses in QR payloads or unauthenticated 
 - Driver or teacher "because the app only shows my list"
 - Permanent public object-storage URLs
 
-Automated checks: `apps/api/tests/tenant.test.ts`, `apps/api/tests/students.test.ts`, `apps/api/tests/attendance.test.ts`, `apps/api/tests/journey.test.ts`, and `apps/api/tests/media.test.ts`.
+Automated checks: `apps/api/tests/tenant.test.ts`, `apps/api/tests/students.test.ts`, `apps/api/tests/attendance.test.ts`, `apps/api/tests/journey.test.ts`, `apps/api/tests/media.test.ts`, and `apps/api/tests/notifications.test.ts`.

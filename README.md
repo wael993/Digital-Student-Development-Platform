@@ -65,19 +65,21 @@ cp apps/mobile/.env.example apps/mobile/.env
 Root `.env` is used by the API and Docker Compose. Placeholders:
 
 - `NODE_ENV`, `PORT`
-- `MONGODB_URI`, `REDIS_URL`
+- MongoDB: `MONGODB_HOST`, `MONGODB_DATABASE`, `MONGODB_USERNAME`, `MONGODB_PASSWORD` (or a full `MONGODB_URI`)
+- Redis: `REDIS_HOST`, `REDIS_PORT`, `REDIS_USERNAME`, `REDIS_PASSWORD` (or a full `REDIS_URL`). Leave Redis empty to disable BullMQ; notifications then run in-process
 - `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `JWT_ACCESS_EXPIRES_IN`, `JWT_REFRESH_EXPIRES_IN`
-- `API_PUBLIC_URL`, `MEDIA_MAX_UPLOAD_BYTES`, `MEDIA_SIGNED_URL_TTL_SECONDS`, `MEDIA_STORAGE_DIR` (local private media; HMAC signed URLs)
-- `STORAGE_ENDPOINT`, `STORAGE_BUCKET`, `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY` (S3-compatible adapter later)
+- `API_PUBLIC_URL`, `MEDIA_MAX_UPLOAD_BYTES`, `MEDIA_SIGNED_URL_TTL_SECONDS`, `MEDIA_STORAGE_DIR` (local fallback when Cloudinary is unset)
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` (authenticated student photos; short-lived signed URLs)
+- `FCM_PROJECT_ID`, `FCM_CLIENT_EMAIL`, `FCM_PRIVATE_KEY` (Firebase Admin for push; leave empty in local/dev)
 - `AI_API_KEY` (reserved)
 
-`apps/mobile/.env` contains `API_BASE_URL` for the Flutter app.
+`apps/mobile/.env` contains `API_BASE_URL` for the Flutter app. Optional Firebase keys (`FIREBASE_PROJECT_ID`, `FIREBASE_API_KEY`, `FIREBASE_APP_ID`, `FIREBASE_MESSAGING_SENDER_ID`) enable FCM; without them the app still works and in-app notifications remain available.
 
 ## Running the project
 
-### API, MongoDB, and Redis (recommended)
+### API (recommended)
 
-Starts the API, MongoDB, and Redis. You do not need to install MongoDB or Redis on the host.
+Starts the API. MongoDB and Redis come from `.env` (Atlas + Redis Cloud in this project). Local Mongo/Redis containers are optional profiles.
 
 ```bash
 docker compose up --build
@@ -97,24 +99,39 @@ Expected response:
 
 Stop the stack with `Ctrl+C`, or `docker compose down`.
 
-### API on the host (MongoDB and Redis in Docker)
+### API on the host
 
 Use this when you want hot reload via `npm run dev` on your machine.
 
-1. Copy `.env.example` to `.env` (values already point at `localhost`).
-2. Start only the data services:
-
-```bash
-docker compose up mongo redis
-```
-
-3. Start the API:
+1. Copy `.env.example` to `.env` and fill MongoDB + Redis credentials.
+2. Start the API:
 
 ```bash
 npm run dev
 ```
 
 The API listens on `http://localhost:3000`.
+
+### API on Render
+
+Root Directory stays empty. `render.yaml` sets Node 22, `npm ci --include=dev && npm run build`, `npm start`, and health check `/api/v1/health`.
+
+If the service already exists in the dashboard, use those same build/start commands (do not set Root Directory to `apps/api`). Required env vars: `NODE_ENV=production`, Atlas MongoDB, new `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET`, `API_PUBLIC_URL=https://<service>.onrender.com`, and Cloudinary. Redis and FCM can stay empty at first.
+
+API tests use local MongoDB on `localhost:27017` (`dev-platform-test`), not Atlas:
+
+```bash
+docker compose up mongo -d
+npm test
+```
+
+Optional local Redis (only if you are not using Redis Cloud):
+
+```bash
+docker compose --profile local-redis up redis -d
+```
+
+Then set `REDIS_URL=redis://localhost:6379`. For Redis Cloud, set `maxmemory-policy` to `noeviction` in the Redis console so BullMQ keys are not evicted.
 
 Create two local organizations and users you can log in with:
 

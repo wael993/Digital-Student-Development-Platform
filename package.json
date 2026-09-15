@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "npm run dev -w @digital-student/api",
     "build": "npm run build -w @digital-student/api",
+    "start": "npm start -w @digital-student/api",
     "lint": "npm run lint -w @digital-student/api",
     "format": "npm run format -w @digital-student/api",
     "test": "npm run test -w @digital-student/api",

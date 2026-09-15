@@ -10,15 +10,11 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3000
-      MONGODB_URI: mongodb://mongo:27017/dev-platform
-      REDIS_URL: redis://redis:6379
-    depends_on:
-      mongo:
-        condition: service_healthy
     volumes:
       - ./apps/api/src:/app/apps/api/src
     command: npm run dev -w @digital-student/api
 
+  # Local Mongo for API tests (`npm test`). The API itself uses Atlas from .env.
   mongo:
     image: mongo:7
     ports:
@@ -32,7 +28,9 @@ services:
       retries: 5
       start_period: 20s
 
+  # Optional local Redis — docker compose --profile local-redis up
   redis:
+    profiles: ['local-redis']
     image: redis:7-alpine
     ports:
       - "6379:6379"

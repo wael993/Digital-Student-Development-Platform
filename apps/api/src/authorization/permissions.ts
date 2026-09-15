@@ -25,6 +25,8 @@ export const PERMISSIONS = [
   'media.read',
   'media.create',
   'media.delete',
+  'notifications.read',
+  'notifications.update',
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -57,6 +59,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     'media.read',
     'media.create',
     'media.delete',
+    'notifications.read',
+    'notifications.update',
   ],
   TEACHER: [
     'organizations.read',
@@ -70,6 +74,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     'student_events.create',
     'media.read',
     'media.create',
+    'notifications.read',
+    'notifications.update',
   ],
   DRIVER: [
     'organizations.read',
@@ -78,6 +84,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     'student_events.read',
     'student_events.create',
     'buses.read',
+    'notifications.read',
+    'notifications.update',
   ],
   GUARDIAN: [
     'organizations.read',
@@ -86,6 +94,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
     'attendance.read',
     'student_events.read',
     'media.read',
+    'notifications.read',
+    'notifications.update',
   ],
 };
 

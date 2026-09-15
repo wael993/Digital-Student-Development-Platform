@@ -62,6 +62,9 @@ describe('permissions', () => {
     expect(hasPermission('DRIVER', 'media.read')).toBe(false);
     expect(hasPermission('ADMIN', 'media.delete')).toBe(true);
     expect(hasPermission('SUPERVISOR', 'media.delete')).toBe(true);
+    expect(hasPermission('GUARDIAN', 'notifications.read')).toBe(true);
+    expect(hasPermission('GUARDIAN', 'notifications.update')).toBe(true);
+    expect(hasPermission('TEACHER', 'notifications.read')).toBe(true);
   });
 });
 

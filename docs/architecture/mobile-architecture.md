@@ -89,7 +89,7 @@ Session `User` already carries `id`, `organizationId`, and `role`. Use `role` to
 
 GoRouter hosts `AuthGate`. Unauthenticated users see the login screen. Authenticated users see a role-scoped home: campuses (admin/supervisor), my classes (teacher), or my children (guardian).
 
-Deep links are not required for ARCH-001.
+Deep links from FCM are handled in NOTIF-001: arrival opens the child dashboard, departure/home drop-off open the journey, media opens photos.
 
 ## Platform capabilities (later tickets)
 

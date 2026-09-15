@@ -2,7 +2,7 @@
 
 ARCH-001 source of truth for entities, relationships, and the collection plan.
 
-AUTH-001 implemented `users` and `refresh_tokens`. TENANT-001 implemented `organizations`. STUDENT-001 implemented `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 implemented `attendance`. JOURNEY-001 implemented `student_events`. MEDIA-001 implemented `media`. Do not create the remaining collections until their tickets.
+AUTH-001 implemented `users` and `refresh_tokens`. TENANT-001 implemented `organizations`. STUDENT-001 implemented `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 implemented `attendance`. JOURNEY-001 implemented `student_events`. MEDIA-001 implemented `media`. NOTIF-001 implemented `notifications`, `device_tokens`, and `notification_preferences`. Do not create the remaining collections until their tickets.
 
 ## Design decisions
 
@@ -270,7 +270,7 @@ Classroom or learning activity.
 
 ### Media
 
-Metadata only. Bytes live in private object storage. MEDIA-001 stores **student-specific photos**. Class/activity galleries wait for a later ticket.
+Metadata only. Bytes live in private object storage (Cloudinary authenticated assets in dev/prod, local disk when Cloudinary env is unset). MEDIA-001 stores **student-specific photos**. Class/activity galleries wait for a later ticket.
 
 | Field | Type | Notes |
 | --- | --- | --- |
@@ -294,19 +294,23 @@ Class photos may later use `studentIds[]` / `visibility`. Do not add those field
 
 ### Notification
 
-In-app record of something sent or queued to a user. FCM delivery is NOTIF-001.
+In-app record of something queued or sent to a user. FCM delivery is a side effect; the journey event remains the source of truth.
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| organizationId | ObjectId | |
-| userId | ObjectId | Recipient |
-| studentId | ObjectId? | |
-| type | string | |
-| title | string | |
-| body | string | |
-| eventId | ObjectId? | |
-| readAt | Date? | |
-| createdAt | Date | |
+| organizationId | ObjectId | From auth, never from the client |
+| userId | ObjectId | Recipient. Resolved from guardian links, never from the client |
+| studentId | ObjectId | |
+| type | enum | `STUDENT_ARRIVAL`, `STUDENT_DEPARTURE`, `STUDENT_HOME_DROPOFF`, `JOURNEY_UPDATE`, `MEDIA_AVAILABLE` |
+| title / body | string | Factual parent copy. No implied safety/mood |
+| data | object | IDs only (`type`, `studentId`, `eventId` / `mediaId`, `notificationId`). No QR tokens or storage URLs |
+| status | enum | `PENDING`, `SENT`, `FAILED`, `READ`. SENT means submitted to FCM |
+| sentAt | Date? | UTC |
+| readAt | Date? | UTC. Set when the parent opens it |
+
+`device_tokens` stores FCM tokens per user/device (`ACTIVE` \| `INACTIVE`). Unique on `token` and `{ organizationId, userId, deviceId }`.
+
+`notification_preferences` is one row per user: `journeyUpdates`, `studentArrival`, `studentDeparture`, `homeDropoff`, `mediaAvailable`. Quiet hours wait for a later ticket.
 
 ## Collections (v1 plan)
 
@@ -328,6 +332,8 @@ Implement collections when the matching ticket lands, not all at once.
 | `activities` | organizationId | optional deletedAt | later classroom work |
 | `media` | organizationId | deletedAt | MEDIA-001 |
 | `notifications` | organizationId | no | NOTIF-001 |
+| `device_tokens` | organizationId | status (`INACTIVE`) | NOTIF-001 |
+| `notification_preferences` | organizationId | no | NOTIF-001 |
 
 There is no `guardians` collection. Guardian rows would duplicate `users`.
 
@@ -357,6 +363,10 @@ All tenant collections: `{ organizationId: 1 }` is never enough alone. Prefer co
 | routes | `{ organizationId: 1, busId: 1 }` | Bus routes |
 | media | `{ organizationId: 1, studentId: 1, capturedAt: -1 }` | Child photo gallery |
 | notifications | `{ organizationId: 1, userId: 1, createdAt: -1 }` | Inbox |
+| notifications | `{ organizationId: 1, userId: 1, readAt: 1, createdAt: -1 }` | Unread |
+| device_tokens | `{ organizationId: 1, userId: 1, status: 1 }` | Active devices |
+| device_tokens | unique `{ token: 1 }` | Replace/deactivate |
+| notification_preferences | unique `{ organizationId: 1, userId: 1 }` | One preference row |
 
 ## Repository rule
 

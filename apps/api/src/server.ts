@@ -1,19 +1,18 @@
 import { createApp } from './app';
 import { env, isTest } from './config/env';
 import { connectMongo } from './config/mongodb';
-// import { connectRedis } from './config/redis';
+import { startNotificationWorker } from './modules/notifications/jobs/notification.queue';
 import { logger } from './utils/logger';
 
 async function start(): Promise<void> {
   if (!isTest) {
     await connectMongo();
-    // TODO: Connect Redis after making redis service
-    // await connectRedis();
+    await startNotificationWorker();
   }
 
   const app = createApp();
 
-  app.listen(env.port, () => {
+  app.listen(env.port, '0.0.0.0', () => {
     logger.info(`API listening on port ${env.port}`);
   });
 }

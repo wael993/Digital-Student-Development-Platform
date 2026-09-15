@@ -12,6 +12,9 @@ import { createOrganization } from '../src/modules/organizations/organization.re
 import { AttendanceModel } from '../src/modules/attendance/attendance.model';
 import { StudentEventModel } from '../src/modules/journey/student-event.model';
 import { MediaModel } from '../src/modules/media/media.model';
+import { NotificationModel } from '../src/modules/notifications/notification.model';
+import { DeviceTokenModel } from '../src/modules/notifications/device-token.model';
+import { NotificationPreferencesModel } from '../src/modules/notifications/notification-preferences.model';
 import { StudentModel } from '../src/modules/students/student.model';
 import { createStudent } from '../src/modules/students/student.repository';
 import { createUser } from '../src/modules/users/user.repository';
@@ -20,7 +23,11 @@ import type { UserRole, UserStatus } from '../src/types';
 import type { OrganizationStatus } from '../src/modules/organizations/organization.model';
 
 export async function connectTestDb(): Promise<void> {
-  await mongoose.connect(env.mongodbUri);
+  const uri = env.mongodbUri;
+  if (!/localhost|127\.0\.0\.1/.test(uri)) {
+    throw new Error('Tests must use local MongoDB (localhost), not a hosted cluster');
+  }
+  await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
 }
 
 export async function disconnectTestDb(): Promise<void> {
@@ -39,6 +46,9 @@ export async function clearAuthData(): Promise<void> {
     AttendanceModel.deleteMany({}),
     StudentEventModel.deleteMany({}),
     MediaModel.deleteMany({}),
+    NotificationModel.deleteMany({}),
+    DeviceTokenModel.deleteMany({}),
+    NotificationPreferencesModel.deleteMany({}),
   ]);
 }
 

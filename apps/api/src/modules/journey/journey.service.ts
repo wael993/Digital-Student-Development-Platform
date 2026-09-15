@@ -19,6 +19,8 @@ import {
   findRecentEventOfType,
   listStudentEvents,
 } from './student-event.repository';
+import { notifyStudentJourneyEvent } from '../notifications/notification.service';
+import { logger } from '../../utils/logger';
 
 // note: 10s debounce per API process; unique per-student window in Redis if scans fan out across instances.
 const DUPLICATE_WINDOW_MS = 10_000;
@@ -160,6 +162,16 @@ async function insertEvent(
     source: input.source,
     metadata: input.metadata,
   });
+  try {
+    await notifyStudentJourneyEvent({
+      organizationId: auth.organizationId,
+      studentId,
+      eventId: event.id,
+      eventType: input.eventType,
+    });
+  } catch (err) {
+    logger.error('Failed to enqueue journey notification', err);
+  }
   // note: emit student.journey.updated here when Socket.IO lands.
   return event;
 }

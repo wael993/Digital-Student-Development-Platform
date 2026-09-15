@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { mkdir, readFile, rm, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { v2 as cloudinary } from 'cloudinary';
 import { env } from '../../../config/env';
 
 export interface ObjectStorageService {
@@ -9,7 +10,7 @@ export interface ObjectStorageService {
   getSignedUrl(key: string, expiresInSeconds: number): Promise<string>;
 }
 
-// note: S3-compatible adapter when STORAGE_ENDPOINT is set; local HMAC signed URLs until then.
+// note: Cloudinary authenticated assets when CLOUDINARY_* is set; otherwise local HMAC signed URLs.
 
 export function assertSafeStorageKey(key: string): string {
   if (
@@ -105,15 +106,92 @@ export class LocalObjectStorage implements ObjectStorageService {
   }
 }
 
-let storage: LocalObjectStorage | undefined;
+export function toCloudinaryPublicId(key: string): string {
+  return assertSafeStorageKey(key).replace(/\.[^.]+$/, '');
+}
 
-export function getObjectStorage(): LocalObjectStorage {
-  storage ??= new LocalObjectStorage(
-    env.mediaStorageDir,
-    env.apiPublicUrl,
-    env.storageSecret || env.jwtAccessSecret,
-  );
+export class CloudinaryObjectStorage implements ObjectStorageService {
+  constructor(cloudName: string, apiKey: string, apiSecret: string) {
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret,
+      secure: true,
+    });
+  }
+
+  async upload(key: string, body: Buffer, _contentType: string): Promise<void> {
+    const publicId = toCloudinaryPublicId(key);
+    await new Promise<void>((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        {
+          public_id: publicId,
+          resource_type: 'image',
+          type: 'authenticated',
+          overwrite: true,
+          unique_filename: false,
+          invalidate: true,
+        },
+        (err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve();
+        },
+      );
+      stream.end(body);
+    });
+  }
+
+  async delete(key: string): Promise<void> {
+    await cloudinary.uploader.destroy(toCloudinaryPublicId(key), {
+      resource_type: 'image',
+      type: 'authenticated',
+      invalidate: true,
+    });
+  }
+
+  async getSignedUrl(key: string, expiresInSeconds: number): Promise<string> {
+    const expiresAt = Math.floor(Date.now() / 1000) + Math.max(1, expiresInSeconds);
+    return cloudinary.url(toCloudinaryPublicId(key), {
+      resource_type: 'image',
+      type: 'authenticated',
+      sign_url: true,
+      secure: true,
+      expires_at: expiresAt,
+      format: 'jpg',
+    });
+  }
+}
+
+function isCloudinaryConfigured(): boolean {
+  return Boolean(env.cloudinaryCloudName && env.cloudinaryApiKey && env.cloudinaryApiSecret);
+}
+
+let storage: ObjectStorageService | undefined;
+
+export function getObjectStorage(): ObjectStorageService {
+  storage ??= isCloudinaryConfigured()
+    ? new CloudinaryObjectStorage(
+        env.cloudinaryCloudName,
+        env.cloudinaryApiKey,
+        env.cloudinaryApiSecret,
+      )
+    : new LocalObjectStorage(
+        env.mediaStorageDir,
+        env.apiPublicUrl,
+        env.storageSecret || env.jwtAccessSecret,
+      );
   return storage;
+}
+
+export function requireLocalObjectStorage(): LocalObjectStorage {
+  const current = getObjectStorage();
+  if (!(current instanceof LocalObjectStorage)) {
+    throw new Error('Local object storage is required');
+  }
+  return current;
 }
 
 export function resetObjectStorage(): void {

@@ -103,7 +103,7 @@ Use org-local calendar dates for "today". Store `occurredAt` in UTC.
 | Use | Mechanism |
 | --- | --- |
 | History | Same query, wider range, cursor pagination later |
-| Notifications | Service after insert: if guardian `receivesNotifications`, enqueue `notifications` (+ FCM in NOTIF-001) |
+| Notifications | Service after insert: if guardian `receivesNotifications`, enqueue `notifications` and FCM via `notificationQueue` (NOTIF-001). Failed delivery does not roll back the event. |
 | Reports | Aggregate events + `attendance` by day/class |
 | AI | Later read-only consumer of events/notes. Cannot insert journey facts |
 

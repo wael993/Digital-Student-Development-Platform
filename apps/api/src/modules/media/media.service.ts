@@ -11,7 +11,12 @@ import type { Student } from '../students/student.model';
 import { processPhoto, sniffImageType } from './media.image';
 import { createMedia, findMediaById, listStudentMedia, softDeleteMedia } from './media.repository';
 import type { Media, MediaType } from './media.model';
-import { getObjectStorage, isValidStorageSignature } from './storage/object-storage.service';
+import {
+  getObjectStorage,
+  isValidStorageSignature,
+  LocalObjectStorage,
+} from './storage/object-storage.service';
+import { notifyMediaAvailable } from '../notifications/notification.service';
 
 function storageSecret(): string {
   return env.storageSecret || env.jwtAccessSecret;
@@ -134,6 +139,15 @@ export async function uploadStudentPhoto(
       studentId: student.id,
       mediaId: media.id,
     });
+    try {
+      await notifyMediaAvailable({
+        organizationId: auth.organizationId,
+        studentId: student.id,
+        mediaId: media.id,
+      });
+    } catch (notifyErr) {
+      logger.error('Failed to enqueue media notification', notifyErr);
+    }
     return toUploadJson(media);
   } catch (err) {
     await Promise.all([storage.delete(storageKey), storage.delete(thumbnailStorageKey)]);
@@ -201,7 +215,11 @@ export async function readSignedFile(query: {
   if (!isValidStorageSignature(query.key, query.expiresAtUnix, query.signature, storageSecret())) {
     throw notFound();
   }
-  const body = await getObjectStorage().read(query.key);
+  const storage = getObjectStorage();
+  if (!(storage instanceof LocalObjectStorage)) {
+    throw notFound();
+  }
+  const body = await storage.read(query.key);
   if (!body) {
     throw notFound();
   }

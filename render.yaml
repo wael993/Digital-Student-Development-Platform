@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: digital-student-api
+    runtime: node
+    # Empty rootDir: npm workspaces live at the repo root.
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: '22'

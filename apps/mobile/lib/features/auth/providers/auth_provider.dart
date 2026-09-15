@@ -4,6 +4,7 @@ import 'package:digital_student/core/network/api_exception.dart';
 import 'package:digital_student/core/network/auth_session.dart';
 import 'package:digital_student/features/auth/data/auth_repository.dart';
 import 'package:digital_student/features/auth/models/user.dart';
+import 'package:digital_student/features/notifications/repositories/notification_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum AuthStatus { unknown, unauthenticated, authenticating, authenticated, error }
@@ -22,7 +23,7 @@ class AuthState {
 }
 
 class AuthController extends StateNotifier<AuthState> {
-  AuthController(this._repository) : super(AuthState.unknown) {
+  AuthController(this._repository, {this._notifications}) : super(AuthState.unknown) {
     _onRefreshFailed = () {
       if (state.status == AuthStatus.authenticated) {
         state = AuthState.unauthenticated;
@@ -32,6 +33,7 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   final AuthRepository _repository;
+  final NotificationRepository? _notifications;
   late final void Function() _onRefreshFailed;
 
   @override
@@ -83,13 +85,19 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
+    try {
+      await _notifications?.unregisterCurrentDevice();
+    } catch (_) {}
     await _repository.logout();
     state = AuthState.unauthenticated;
   }
 }
 
 final authProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
-  final controller = AuthController(ref.watch(authRepositoryProvider));
+  final controller = AuthController(
+    ref.watch(authRepositoryProvider),
+    notifications: ref.watch(notificationRepositoryProvider),
+  );
   unawaited(controller.restore());
   return controller;
 });

@@ -208,7 +208,7 @@ Versioning: URL prefix `/api/v1`. Breaking changes go to `/api/v2`. Additive fie
 See [domain-model.md](./domain-model.md) for collections and indexes.
 
 - One database, many tenants via `organizationId` on documents
-- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations`. STUDENT-001 added `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 added `attendance`. JOURNEY-001 added `student_events`. MEDIA-001 added `media`. Other collections wait for their tickets.
+- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations`. STUDENT-001 added `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 added `attendance`. JOURNEY-001 added `student_events`. MEDIA-001 added `media`. NOTIF-001 added `notifications`, `device_tokens`, and `notification_preferences`. Other collections wait for their tickets.
 
 QR scan: `POST /api/v1/attendance/scan` with `{ "qrToken" }`. Lookup is `{ organizationId, qrToken }`. History: `GET /api/v1/attendance?date=&classroomId=&studentId=`. A successful PRESENT scan also inserts `ATTENDANCE_PRESENT`.
 
@@ -216,6 +216,8 @@ Journey: `POST /api/v1/students/:studentId/events`, `GET /api/v1/students/:stude
 
 Media: `POST/GET /api/v1/students/:studentId/media`, `GET /api/v1/parent/children/:studentId/media`, `GET/DELETE /api/v1/media/:mediaId`. Bytes are private; list/get return short-lived signed URLs after authorization.
 
+Notifications: `POST/DELETE /api/v1/notifications/devices`, `GET/PATCH /api/v1/notifications/preferences`, `GET /api/v1/notifications`, `PATCH /api/v1/notifications/:notificationId/read`. Journey events and media uploads enqueue push jobs; FCM runs on `notificationQueue`.
+
 ## Next implementation tickets
 
-1. **NOTIF-001** — push notifications
+1. **BUS-001** — bus routes and boarding / drop-off
