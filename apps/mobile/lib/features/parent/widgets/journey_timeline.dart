@@ -1,5 +1,6 @@
 import 'package:digital_student/features/parent/models/parent_models.dart';
 import 'package:digital_student/features/parent/widgets/journey_event_tile.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class JourneyTimeline extends StatelessWidget {
@@ -10,10 +11,11 @@ class JourneyTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (events.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 24),
-        child: Text('No activity has been recorded yet.'),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Text(l10n.noActivityYet),
       );
     }
 

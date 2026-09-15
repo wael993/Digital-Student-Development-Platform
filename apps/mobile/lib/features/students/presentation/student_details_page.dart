@@ -1,3 +1,4 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:digital_student/features/guardians/presentation/add_guardian_page.dart';
 import 'package:digital_student/features/journey/presentation/journey_page.dart';
@@ -9,6 +10,7 @@ import 'package:digital_student/features/media/screens/photo_viewer_screen.dart'
 import 'package:digital_student/features/media/widgets/photo_grid.dart';
 import 'package:digital_student/features/students/student_providers.dart';
 import 'package:digital_student/features/students/student_repository.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -20,12 +22,14 @@ class StudentDetailsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final user = ref.watch(authProvider).user;
     final student = ref.watch(studentDetailsProvider(studentId));
     final canManage = user?.canManageSchool ?? false;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Student')),
+      appBar: AppBar(title: Text(l10n.student)),
       body: student.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
@@ -34,19 +38,18 @@ class StudentDetailsPage extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(error.toString(), textAlign: TextAlign.center),
+                Text(localizedError(l10n, error), textAlign: TextAlign.center),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () =>
                       ref.invalidate(studentDetailsProvider(studentId)),
-                  child: const Text('Retry'),
+                  child: Text(l10n.retry),
                 ),
               ],
             ),
           ),
         ),
         data: (data) {
-          final localizations = MaterialLocalizations.of(context);
           return ListView(
             padding: const EdgeInsets.all(24),
             children: [
@@ -59,8 +62,8 @@ class StudentDetailsPage extends ConsumerWidget {
                 key: const Key('studentJourneyButton'),
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.timeline),
-                title: const Text("Today's Journey"),
-                trailing: const Icon(Icons.chevron_right),
+                title: Text(l10n.todaysJourney),
+                trailing: const Icon(Icons.arrow_forward),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (_) => JourneyPage(studentId: studentId),
@@ -89,22 +92,19 @@ class StudentDetailsPage extends ConsumerWidget {
                       );
                     }
                   },
-                  child: const Text('Take Photo'),
+                  child: Text(l10n.takePhoto),
                 ),
               ],
               const SizedBox(height: 16),
               _StudentPhotos(studentId: studentId),
               const SizedBox(height: 8),
-              _row('Class', data.classroomName ?? data.classroomId),
-              _row(
-                'Date of Birth',
-                localizations.formatFullDate(data.dateOfBirth.toLocal()),
-              ),
-              _row('Status', data.status),
+              _row(l10n.classLabel, data.classroomName ?? data.classroomId),
+              _row(l10n.dateOfBirth, formatAppDate(data.dateOfBirth.toLocal(), locale)),
+              _row(l10n.status, studentStatusLabel(l10n, data.status)),
               if (data.qrToken != null) ...[
                 const SizedBox(height: 16),
                 Text(
-                  'Attendance QR',
+                  l10n.attendanceQr,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
@@ -120,7 +120,7 @@ class StudentDetailsPage extends ConsumerWidget {
               Row(
                 children: [
                   Text(
-                    'Guardians',
+                    l10n.guardians,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const Spacer(),
@@ -137,20 +137,20 @@ class StudentDetailsPage extends ConsumerWidget {
                           ref.invalidate(studentDetailsProvider(studentId));
                         }
                       },
-                      child: const Text('Add Guardian'),
+                      child: Text(l10n.addGuardian),
                     ),
                 ],
               ),
               if (data.guardians.isEmpty)
-                const ListTile(
+                ListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: Text('No guardians yet'),
+                  title: Text(l10n.noGuardiansYet),
                 ),
               for (final guardian in data.guardians)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(guardian.displayName),
-                  subtitle: Text(guardian.relationship.replaceAll('_', ' ')),
+                  subtitle: Text(relationshipLabel(l10n, guardian.relationship)),
                   trailing: canManage
                       ? IconButton(
                           icon: const Icon(Icons.link_off),
@@ -166,7 +166,7 @@ class StudentDetailsPage extends ConsumerWidget {
                             } catch (error) {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(error.toString())),
+                                  SnackBar(content: Text(localizedError(l10n, error))),
                                 );
                               }
                             }
@@ -202,6 +202,7 @@ class _StudentPhotos extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final args = MediaListArgs(
       studentId: studentId,
       audience: MediaAudience.staff,
@@ -212,7 +213,7 @@ class _StudentPhotos extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Text('Photos', style: Theme.of(context).textTheme.titleMedium),
+            Text(l10n.photos, style: Theme.of(context).textTheme.titleMedium),
             const Spacer(),
             TextButton(
               key: const Key('studentViewAllPhotosButton'),
@@ -221,11 +222,11 @@ class _StudentPhotos extends ConsumerWidget {
                   builder: (_) => PhotoGalleryScreen(
                     studentId: studentId,
                     audience: MediaAudience.staff,
-                    title: 'Photos',
+                    title: l10n.photos,
                   ),
                 ),
               ),
-              child: const Text('View all'),
+              child: Text(l10n.viewAll),
             ),
           ],
         ),
@@ -234,10 +235,10 @@ class _StudentPhotos extends ConsumerWidget {
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(child: CircularProgressIndicator()),
           ),
-          error: (error, _) => Text(error.toString()),
+          error: (error, _) => Text(localizedError(l10n, error, fallback: l10n.unableToLoadPhotos)),
           data: (items) => PhotoGrid(
             items: items.take(4).toList(),
-            emptyLabel: 'No photos yet',
+            emptyLabel: l10n.noPhotosYet,
             onOpen: (media) => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => PhotoViewerScreen(media: media),

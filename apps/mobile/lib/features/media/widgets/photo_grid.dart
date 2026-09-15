@@ -1,4 +1,5 @@
 import 'package:digital_student/features/media/models/student_media.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class PhotoGrid extends StatelessWidget {
@@ -6,19 +7,19 @@ class PhotoGrid extends StatelessWidget {
     super.key,
     required this.items,
     this.onOpen,
-    this.emptyLabel = 'No photos yet',
+    this.emptyLabel,
   });
 
   final List<StudentMedia> items;
   final ValueChanged<StudentMedia>? onOpen;
-  final String emptyLabel;
+  final String? emptyLabel;
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 24),
-        child: Center(child: Text(emptyLabel)),
+        child: Center(child: Text(emptyLabel ?? AppLocalizations.of(context).noPhotosYet)),
       );
     }
     return LayoutBuilder(

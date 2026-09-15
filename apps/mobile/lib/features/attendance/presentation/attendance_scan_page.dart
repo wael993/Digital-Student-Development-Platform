@@ -1,5 +1,7 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/attendance/attendance.dart';
 import 'package:digital_student/features/attendance/attendance_providers.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -82,31 +84,33 @@ class _AttendanceScanPageState extends ConsumerState<AttendanceScanPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final state = ref.watch(attendanceScanControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Scan Student QR')),
+      appBar: AppBar(title: Text(l10n.scanStudentQr)),
       body: switch (state.phase) {
-        AttendanceScanPhase.scanning => _scanner(context),
+        AttendanceScanPhase.scanning => _scanner(context, l10n),
         AttendanceScanPhase.loading => const Center(child: CircularProgressIndicator()),
         AttendanceScanPhase.recorded => _result(
-            title: 'Attendance Recorded',
+            title: l10n.attendanceRecorded,
             student: state.result!.student,
-            subtitle: 'Present',
-            time: formatAttendanceTime(state.result!.attendance.scannedAt),
+            subtitle: l10n.present,
+            time: formatAppTime(state.result!.attendance.scannedAt, locale),
           ),
         AttendanceScanPhase.alreadyRecorded => _result(
-            title: 'Already Recorded',
+            title: l10n.alreadyRecorded,
             student: state.result!.student,
-            subtitle: 'was already marked present today.',
-            time: formatAttendanceTime(state.result!.attendance.scannedAt),
+            subtitle: l10n.alreadyMarkedPresent,
+            time: formatAppTime(state.result!.attendance.scannedAt, locale),
           ),
-        AttendanceScanPhase.error => _error(state),
+        AttendanceScanPhase.error => _error(state, l10n),
       },
     );
   }
 
-  Widget _scanner(BuildContext context) {
+  Widget _scanner(BuildContext context, AppLocalizations l10n) {
     final builder = widget.scannerBuilder;
     if (builder != null) {
       return builder(context, _onCode);
@@ -121,7 +125,7 @@ class _AttendanceScanPageState extends ConsumerState<AttendanceScanPage> {
       },
       errorBuilder: (context, error) {
         return _PermissionBody(
-          message: 'Camera permission is required to scan student QR codes.',
+          message: l10n.cameraPermissionScan,
           onRetry: _ensurePermission,
         );
       },
@@ -134,6 +138,7 @@ class _AttendanceScanPageState extends ConsumerState<AttendanceScanPage> {
     required String subtitle,
     required String time,
   }) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -152,17 +157,17 @@ class _AttendanceScanPageState extends ConsumerState<AttendanceScanPage> {
           FilledButton(
             key: const Key('scanNextStudentButton'),
             onPressed: _scanNext,
-            child: const Text('Scan Next Student'),
+            child: Text(l10n.scanNextStudent),
           ),
         ],
       ),
     );
   }
 
-  Widget _error(AttendanceScanState state) {
+  Widget _error(AttendanceScanState state, AppLocalizations l10n) {
     return _PermissionBody(
-      title: state.permissionDenied ? 'Camera Permission Needed' : 'QR Code Not Recognized',
-      message: state.message ?? 'No active student was found.',
+      title: state.permissionDenied ? l10n.cameraPermissionNeeded : l10n.qrNotRecognized,
+      message: _scanErrorMessage(l10n, state),
       onRetry: () {
         if (state.permissionDenied) {
           _ensurePermission();
@@ -171,6 +176,25 @@ class _AttendanceScanPageState extends ConsumerState<AttendanceScanPage> {
         _scanNext();
       },
     );
+  }
+
+  String _scanErrorMessage(AppLocalizations l10n, AttendanceScanState state) {
+    if (state.permissionDenied) {
+      return l10n.cameraPermissionScan;
+    }
+    switch (state.message) {
+      case 'STUDENT_NOT_FOUND':
+      case 'NOT_FOUND':
+        return l10n.noActiveStudent;
+      case 'FORBIDDEN':
+        return l10n.attendanceForbidden;
+      case 'BAD_REQUEST':
+        return l10n.errorStudentInactive;
+      case 'NETWORK_ERROR':
+        return l10n.errorNetwork;
+      default:
+        return localizedErrorCode(l10n, state.message ?? '', fallback: l10n.attendanceFailed);
+    }
   }
 }
 
@@ -187,13 +211,14 @@ class _PermissionBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            title ?? 'QR Code Not Recognized',
+            title ?? l10n.qrNotRecognized,
             style: Theme.of(context).textTheme.headlineSmall,
             textAlign: TextAlign.center,
           ),
@@ -203,7 +228,7 @@ class _PermissionBody extends StatelessWidget {
           FilledButton(
             key: const Key('tryAgainButton'),
             onPressed: onRetry,
-            child: const Text('Try Again'),
+            child: Text(l10n.tryAgain),
           ),
         ],
       ),

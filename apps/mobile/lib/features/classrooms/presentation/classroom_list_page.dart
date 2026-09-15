@@ -1,7 +1,9 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:digital_student/features/classrooms/classroom_providers.dart';
 import 'package:digital_student/features/classrooms/classroom_repository.dart';
 import 'package:digital_student/features/students/presentation/student_list_page.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:digital_student/shared/widgets/school_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,10 +24,11 @@ class ClassroomListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final user = ref.watch(authProvider).user;
     final classrooms = ref.watch(classroomsProvider(campusId));
     final canManage = (user?.canManageSchool ?? false) && campusId != null;
-    final title = campusName ?? 'My Classes';
+    final title = campusName ?? l10n.myClasses;
 
     return SchoolScaffold(
       title: title,
@@ -42,7 +45,7 @@ class ClassroomListPage extends ConsumerWidget {
           await ref.read(classroomsProvider(campusId).future);
         },
         isEmpty: (page) => page.data.isEmpty,
-        emptyMessage: 'No classrooms yet',
+        emptyMessage: l10n.noClassroomsYet,
         builder: (page) => ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: page.data.length,
@@ -50,7 +53,7 @@ class ClassroomListPage extends ConsumerWidget {
             final classroom = page.data[index];
             return ListTile(
               title: Text(classroom.name),
-              subtitle: Text(classroom.level.replaceAll('_', ' ')),
+              subtitle: Text(classroomLevelLabel(l10n, classroom.level)),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => StudentListPage(
@@ -119,7 +122,10 @@ class _CreateClassroomPageState extends ConsumerState<_CreateClassroomPage> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+        final l10n = AppLocalizations.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(localizedError(l10n, error))),
+        );
         setState(() => _saving = false);
       }
     }
@@ -127,8 +133,9 @@ class _CreateClassroomPageState extends ConsumerState<_CreateClassroomPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('New classroom')),
+      appBar: AppBar(title: Text(l10n.newClassroom)),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -137,24 +144,24 @@ class _CreateClassroomPageState extends ConsumerState<_CreateClassroomPage> {
             children: [
               TextFormField(
                 controller: _name,
-                decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: l10n.name, border: const OutlineInputBorder()),
                 validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Name is required' : null,
+                    value == null || value.trim().isEmpty ? l10n.nameRequired : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: _level,
-                decoration: const InputDecoration(labelText: 'Level', border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: l10n.level, border: const OutlineInputBorder()),
                 items: [
                   for (final level in classroomLevels)
-                    DropdownMenuItem(value: level, child: Text(level.replaceAll('_', ' '))),
+                    DropdownMenuItem(value: level, child: Text(classroomLevelLabel(l10n, level))),
                 ],
                 onChanged: (value) => setState(() => _level = value ?? _level),
               ),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _saving ? null : _save,
-                child: const Text('Save'),
+                child: Text(l10n.save),
               ),
             ],
           ),

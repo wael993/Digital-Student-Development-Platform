@@ -13,6 +13,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/localized_app.dart';
+
 class _Adapter implements HttpClientAdapter {
   _Adapter(this._fetch);
 
@@ -78,7 +80,7 @@ void main() {
           authRepositoryProvider.overrideWithValue(repo),
           apiClientProvider.overrideWithValue(client),
         ],
-        child: const MaterialApp(home: AuthGate()),
+        child: localizedApp(home: const AuthGate()),
       ),
     );
     await tester.pump();

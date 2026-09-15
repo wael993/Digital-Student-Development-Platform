@@ -1,6 +1,7 @@
 import 'package:digital_student/features/parent/models/parent_labels.dart';
 import 'package:digital_student/features/parent/providers/parent_providers.dart';
 import 'package:digital_student/features/parent/widgets/journey_timeline.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,19 +12,20 @@ class ChildJourneyScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final journey = ref.watch(childJourneyProvider(studentId));
     return Scaffold(
       appBar: AppBar(
         title: Text(
           journey.maybeWhen(
-            data: (data) => "${data.firstName}'s Day",
-            orElse: () => "Today's Journey",
+            data: (data) => l10n.childDay(data.firstName),
+            orElse: () => l10n.todaysJourney,
           ),
         ),
       ),
       body: journey.when(
         skipLoadingOnReload: true,
-        loading: () => const Center(child: Text("Loading today's journey...")),
+        loading: () => Center(child: Text(l10n.loadingTodaysJourney)),
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -32,8 +34,9 @@ class ChildJourneyScreen extends ConsumerWidget {
               children: [
                 Text(
                   parentLoadErrorMessage(
+                    l10n,
                     error,
-                    fallback: "Unable to load today's journey.",
+                    fallback: l10n.unableToLoadJourney,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -42,7 +45,7 @@ class ChildJourneyScreen extends ConsumerWidget {
                   key: const Key('childJourneyRetry'),
                   onPressed: () =>
                       ref.invalidate(childJourneyProvider(studentId)),
-                  child: const Text('Try Again'),
+                  child: Text(l10n.tryAgain),
                 ),
               ],
             ),
@@ -58,7 +61,7 @@ class ChildJourneyScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(24),
             children: [
               Text(
-                "Today's Journey",
+                l10n.todaysJourney,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 16),

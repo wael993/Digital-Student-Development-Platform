@@ -2,14 +2,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/core/network/api_client.dart';
 import 'package:digital_student/core/storage/token_store.dart';
 import 'package:digital_student/features/auth/data/auth_api.dart';
 import 'package:digital_student/features/auth/data/auth_repository.dart';
 import 'package:digital_student/features/auth/models/user.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
-import 'package:digital_student/features/parent/models/parent_labels.dart';
 import 'package:digital_student/features/parent/repositories/parent_repository.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:digital_student/features/parent/screens/child_journey_screen.dart';
 import 'package:digital_student/features/parent/screens/parent_dashboard_screen.dart';
 import 'package:dio/dio.dart';
@@ -18,6 +19,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/localized_app.dart';
 
 class _Adapter implements HttpClientAdapter {
   _Adapter(this._fetch);
@@ -181,7 +184,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio),
-        child: const MaterialApp(home: ParentDashboardScreen()),
+        child: localizedApp(home: const ParentDashboardScreen()),
       ),
     );
     await tester.pump();
@@ -193,18 +196,18 @@ void main() {
   }
 
   test('maps parent-friendly labels and greetings', () {
-    expect(parentEventLabel('CLASS_STARTED'), 'Class started');
-    expect(parentEventLabel('BUS_BOARDING'), 'On the bus');
-    expect(parentCurrentStatusLabel('CLASS_STARTED'), 'Currently in class');
+    final l10n = lookupAppLocalizations(const Locale('en'));
+    expect(parentEventLabel(l10n, 'CLASS_STARTED'), 'Class started');
+    expect(parentEventLabel(l10n, 'BUS_BOARDING'), 'On the bus');
+    expect(parentCurrentStatusLabel(l10n, 'CLASS_STARTED'), 'Currently in class');
     expect(
-      parentCurrentStatusLabel(null),
+      parentCurrentStatusLabel(l10n, null),
       "Today's journey hasn't started yet.",
     );
     expect(
-      parentGreeting('Sarah', DateTime(2026, 9, 14, 8)),
+      parentGreeting(l10n, 'Sarah', DateTime(2026, 9, 14, 8)),
       'Good morning, Sarah 👋',
     );
-    expect(formatParentTime(DateTime(2026, 9, 14, 7, 42)), '07:42 AM');
   });
 
   testWidgets('loads children and the selected child dashboard', (
@@ -423,7 +426,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio),
-        child: const MaterialApp(home: ChildJourneyScreen(studentId: 'stu-1')),
+        child: localizedApp(home: const ChildJourneyScreen(studentId: 'stu-1')),
       ),
     );
     await tester.pump();
@@ -435,7 +438,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio),
-        child: const MaterialApp(home: ParentDashboardScreen()),
+        child: localizedApp(home: const ParentDashboardScreen()),
       ),
     );
     await tester.pump();

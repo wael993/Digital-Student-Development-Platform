@@ -17,6 +17,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/localized_app.dart';
+
 class _Adapter implements HttpClientAdapter {
   _Adapter(this._fetch);
 
@@ -145,7 +147,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio, _user(role: role)),
-        child: const MaterialApp(home: JourneyPage(studentId: 'stu-1')),
+        child: localizedApp(home: const JourneyPage(studentId: 'stu-1')),
       ),
     );
     await tester.pump();
@@ -182,7 +184,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio, _user()),
-        child: const MaterialApp(home: JourneyPage(studentId: 'stu-1')),
+        child: localizedApp(home: const JourneyPage(studentId: 'stu-1')),
       ),
     );
     await tester.pump();

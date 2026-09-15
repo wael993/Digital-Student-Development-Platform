@@ -1,8 +1,10 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/attendance/presentation/attendance_page.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:digital_student/features/notifications/providers/notification_providers.dart';
 import 'package:digital_student/features/notifications/screens/notification_list_screen.dart';
 import 'package:digital_student/features/notifications/screens/settings_screen.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,6 +26,7 @@ class SchoolScaffold extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final user = ref.watch(authProvider).user;
     final unread = user?.role == 'GUARDIAN'
         ? ref.watch(unreadNotificationsCountProvider)
@@ -32,10 +35,10 @@ class SchoolScaffold extends ConsumerWidget {
       appBar: AppBar(
         title: Text(title),
         actions: [
-          if (user?.role == 'GUARDIAN') ...[
+          if (user?.role == 'GUARDIAN')
             IconButton(
               key: const Key('notificationsButton'),
-              tooltip: 'Notifications',
+              tooltip: l10n.notifications,
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const NotificationListScreen(),
@@ -47,21 +50,20 @@ class SchoolScaffold extends ConsumerWidget {
                 child: const Icon(Icons.notifications_outlined),
               ),
             ),
-            IconButton(
-              key: const Key('settingsButton'),
-              tooltip: 'Settings',
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const SettingsScreen(),
-                ),
+          IconButton(
+            key: const Key('settingsButton'),
+            tooltip: l10n.settings,
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const SettingsScreen(),
               ),
-              icon: const Icon(Icons.settings_outlined),
             ),
-          ],
+            icon: const Icon(Icons.settings_outlined),
+          ),
           if (showAttendanceShortcut && (user?.canRecordAttendance ?? false))
             IconButton(
               key: const Key('attendanceButton'),
-              tooltip: 'Attendance',
+              tooltip: l10n.attendance,
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const AttendancePage()),
               ),
@@ -70,7 +72,7 @@ class SchoolScaffold extends ConsumerWidget {
           TextButton(
             key: const Key('logoutButton'),
             onPressed: () => ref.read(authProvider.notifier).logout(),
-            child: const Text('Log out'),
+            child: Text(l10n.logOut),
           ),
         ],
       ),
@@ -92,17 +94,18 @@ class AsyncRefreshBody<T> extends StatelessWidget {
     required this.onRefresh,
     required this.builder,
     required this.isEmpty,
-    this.emptyMessage = 'Nothing here yet',
+    this.emptyMessage,
   });
 
   final AsyncValue<T> value;
   final Future<void> Function() onRefresh;
   final Widget Function(T data) builder;
   final bool Function(T data) isEmpty;
-  final String emptyMessage;
+  final String? emptyMessage;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return value.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
@@ -111,9 +114,12 @@ class AsyncRefreshBody<T> extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(error.toString(), textAlign: TextAlign.center),
+              Text(
+                localizedError(l10n, error),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 16),
-              FilledButton(onPressed: onRefresh, child: const Text('Retry')),
+              FilledButton(onPressed: onRefresh, child: Text(l10n.retry)),
             ],
           ),
         ),
@@ -126,7 +132,7 @@ class AsyncRefreshBody<T> extends StatelessWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               children: [
                 const SizedBox(height: 120),
-                Center(child: Text(emptyMessage)),
+                Center(child: Text(emptyMessage ?? l10n.nothingHereYet)),
               ],
             ),
           );

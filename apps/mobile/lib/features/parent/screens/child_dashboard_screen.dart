@@ -11,6 +11,7 @@ import 'package:digital_student/features/media/providers/media_providers.dart';
 import 'package:digital_student/features/media/screens/photo_gallery_screen.dart';
 import 'package:digital_student/features/media/screens/photo_viewer_screen.dart';
 import 'package:digital_student/features/media/widgets/photo_grid.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,14 +22,15 @@ class ChildDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final dashboard = ref.watch(childDashboardProvider(studentId));
     return dashboard.when(
       skipLoadingOnReload: true,
       loading: () => ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        children: const [
-          SizedBox(height: 120),
-          Center(child: Text('Loading child information...')),
+        children: [
+          const SizedBox(height: 120),
+          Center(child: Text(l10n.loadingChildInfo)),
         ],
       ),
       error: (error, _) => ListView(
@@ -38,8 +40,9 @@ class ChildDashboardScreen extends ConsumerWidget {
           const SizedBox(height: 80),
           Text(
             parentLoadErrorMessage(
+              l10n,
               error,
-              fallback: 'Unable to load child information.',
+              fallback: l10n.unableToLoadChildInfo,
             ),
             textAlign: TextAlign.center,
           ),
@@ -49,7 +52,7 @@ class ChildDashboardScreen extends ConsumerWidget {
               key: const Key('childDashboardRetry'),
               onPressed: () =>
                   ref.invalidate(childDashboardProvider(studentId)),
-              child: const Text('Try Again'),
+              child: Text(l10n.tryAgain),
             ),
           ),
         ],
@@ -78,7 +81,7 @@ class ChildDashboardScreen extends ConsumerWidget {
                 builder: (_) => ChildJourneyScreen(studentId: studentId),
               ),
             ),
-            child: const Text("View Today's Journey"),
+            child: Text(l10n.viewTodaysJourney),
           ),
           const SizedBox(height: 24),
           _ChildPhotos(studentId: studentId, childName: data.student.firstName),
@@ -96,6 +99,7 @@ class _ChildPhotos extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final args = MediaListArgs(
       studentId: studentId,
       audience: MediaAudience.parent,
@@ -106,7 +110,7 @@ class _ChildPhotos extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Text('Photos', style: Theme.of(context).textTheme.titleMedium),
+            Text(l10n.photos, style: Theme.of(context).textTheme.titleMedium),
             const Spacer(),
             TextButton(
               key: const Key('parentViewAllPhotosButton'),
@@ -115,11 +119,11 @@ class _ChildPhotos extends ConsumerWidget {
                   builder: (_) => PhotoGalleryScreen(
                     studentId: studentId,
                     audience: MediaAudience.parent,
-                    title: "$childName's Photos",
+                    title: l10n.childPhotos(childName),
                   ),
                 ),
               ),
-              child: const Text('View all'),
+              child: Text(l10n.viewAll),
             ),
           ],
         ),
@@ -131,12 +135,12 @@ class _ChildPhotos extends ConsumerWidget {
           error: (error, _) => Text(
             error is ApiException &&
                     (error.statusCode == 403 || error.statusCode == 404)
-                ? 'You do not have access to these photos.'
-                : 'Unable to load photos.',
+                ? l10n.photosAccessDenied
+                : l10n.unableToLoadPhotos,
           ),
           data: (items) => PhotoGrid(
             items: items.take(4).toList(),
-            emptyLabel: 'No photos yet',
+            emptyLabel: l10n.noPhotosYet,
             onOpen: (media) => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => PhotoViewerScreen(media: media),

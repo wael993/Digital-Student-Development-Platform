@@ -26,7 +26,7 @@ class HomePage extends ConsumerWidget {
       case 'GUARDIAN':
         return const ParentDashboardScreen();
       case 'DRIVER':
-        return const StudentListPage(title: 'Students');
+        return const StudentListPage();
       default:
         return const CampusListPage();
     }

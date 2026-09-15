@@ -16,6 +16,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/localized_app.dart';
+
 class _Adapter implements HttpClientAdapter {
   _Adapter(this._fetch);
 
@@ -106,7 +108,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio),
-        child: MaterialApp(
+        child: localizedApp(
           home: AttendanceScanPage(
             requestCameraPermission: requestCameraPermission ?? () async => true,
             scannerBuilder: (context, onCode) {
@@ -266,7 +268,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio),
-        child: const MaterialApp(home: AttendancePage()),
+        child: localizedApp(home: const AttendancePage()),
       ),
     );
     await tester.pump();

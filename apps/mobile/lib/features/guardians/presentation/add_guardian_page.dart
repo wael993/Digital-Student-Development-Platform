@@ -1,4 +1,6 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/students/student_repository.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -33,6 +35,7 @@ class _AddGuardianPageState extends ConsumerState<AddGuardianPage> {
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
     if (!(_formKey.currentState?.validate() ?? false) || _saving) {
       return;
     }
@@ -52,7 +55,9 @@ class _AddGuardianPageState extends ConsumerState<AddGuardianPage> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(localizedError(l10n, error))),
+        );
         setState(() => _saving = false);
       }
     }
@@ -60,8 +65,9 @@ class _AddGuardianPageState extends ConsumerState<AddGuardianPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Add guardian')),
+      appBar: AppBar(title: Text(l10n.addGuardianTitle)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -71,60 +77,60 @@ class _AddGuardianPageState extends ConsumerState<AddGuardianPage> {
               TextFormField(
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
+                decoration: InputDecoration(labelText: l10n.email, border: const OutlineInputBorder()),
                 validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Email is required' : null,
+                    value == null || value.trim().isEmpty ? l10n.emailRequired : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _password,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password (required for a new account)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.passwordNewAccount,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _first,
-                decoration: const InputDecoration(
-                  labelText: 'First name',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.firstName,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'First name is required' : null,
+                    value == null || value.trim().isEmpty ? l10n.firstNameRequired : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _last,
-                decoration: const InputDecoration(
-                  labelText: 'Last name',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.lastName,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Last name is required' : null,
+                    value == null || value.trim().isEmpty ? l10n.lastNameRequired : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: _relationship,
-                decoration: const InputDecoration(
-                  labelText: 'Relationship',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.relationship,
+                  border: const OutlineInputBorder(),
                 ),
                 items: [
                   for (final value in relationships)
-                    DropdownMenuItem(value: value, child: Text(value.replaceAll('_', ' '))),
+                    DropdownMenuItem(value: value, child: Text(relationshipLabel(l10n, value))),
                 ],
                 onChanged: (value) => setState(() => _relationship = value ?? _relationship),
               ),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Primary guardian'),
+                title: Text(l10n.primaryGuardian),
                 value: _primary,
                 onChanged: (value) => setState(() => _primary = value),
               ),
               const SizedBox(height: 24),
-              FilledButton(onPressed: _saving ? null : _save, child: const Text('Save')),
+              FilledButton(onPressed: _saving ? null : _save, child: Text(l10n.save)),
             ],
           ),
         ),

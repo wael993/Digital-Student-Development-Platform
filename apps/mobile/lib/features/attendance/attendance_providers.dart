@@ -54,7 +54,7 @@ class AttendanceScanController extends StateNotifier<AttendanceScanState> {
       }
       state = AttendanceScanState(
         phase: AttendanceScanPhase.error,
-        message: _messageFor(error),
+        message: error.statusCode == 404 ? 'STUDENT_NOT_FOUND' : error.code,
       );
     } catch (_) {
       if (!mounted) {
@@ -62,7 +62,7 @@ class AttendanceScanController extends StateNotifier<AttendanceScanState> {
       }
       state = const AttendanceScanState(
         phase: AttendanceScanPhase.error,
-        message: 'Unable to record attendance. Try again.',
+        message: 'NETWORK_ERROR',
       );
     }
   }
@@ -75,19 +75,9 @@ class AttendanceScanController extends StateNotifier<AttendanceScanState> {
     state = const AttendanceScanState(
       phase: AttendanceScanPhase.error,
       permissionDenied: true,
-      message: 'Camera permission is required to scan student QR codes.',
+      message: 'CAMERA_PERMISSION',
     );
   }
-}
-
-String _messageFor(ApiException error) {
-  if (error.statusCode == 404) {
-    return 'No active student was found.';
-  }
-  if (error.statusCode == 403) {
-    return 'You do not have permission to record attendance.';
-  }
-  return error.message;
 }
 
 final attendanceScanControllerProvider =

@@ -1,8 +1,10 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:digital_student/features/journey/presentation/journey_page.dart';
 import 'package:digital_student/features/students/presentation/student_details_page.dart';
 import 'package:digital_student/features/students/student_providers.dart';
 import 'package:digital_student/features/students/student_repository.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:digital_student/shared/widgets/school_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,10 +37,11 @@ class _StudentListPageState extends ConsumerState<StudentListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final user = ref.watch(authProvider).user;
     final students = ref.watch(studentsProvider(_args));
     final canManage = (user?.canManageSchool ?? false) && widget.classroomId != null;
-    final title = widget.title ?? widget.classroomName ?? 'Students';
+    final title = widget.title ?? widget.classroomName ?? l10n.students;
 
     return SchoolScaffold(
       title: title,
@@ -52,10 +55,10 @@ class _StudentListPageState extends ConsumerState<StudentListPage> {
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         child: TextField(
           controller: _search,
-          decoration: const InputDecoration(
-            hintText: 'Search...',
-            prefixIcon: Icon(Icons.search),
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            hintText: l10n.search,
+            prefixIcon: const Icon(Icons.search),
+            border: const OutlineInputBorder(),
             isDense: true,
           ),
           textInputAction: TextInputAction.search,
@@ -69,7 +72,7 @@ class _StudentListPageState extends ConsumerState<StudentListPage> {
           await ref.read(studentsProvider(_args).future);
         },
         isEmpty: (page) => page.data.isEmpty,
-        emptyMessage: 'No students yet',
+        emptyMessage: l10n.noStudentsYet,
         builder: (page) => ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),
           itemCount: page.data.length,
@@ -77,7 +80,7 @@ class _StudentListPageState extends ConsumerState<StudentListPage> {
             final student = page.data[index];
             return ListTile(
               title: Text(student.displayName),
-              subtitle: Text(student.classroomName ?? widget.classroomName ?? student.status),
+              subtitle: Text(student.classroomName ?? widget.classroomName ?? studentStatusLabel(l10n, student.status)),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => user?.role == 'GUARDIAN'
@@ -135,12 +138,13 @@ class _CreateStudentPageState extends ConsumerState<CreateStudentPage> {
   }
 
   Future<void> _save() async {
+    final l10n = AppLocalizations.of(context);
     if (!(_formKey.currentState?.validate() ?? false) || _saving) {
       return;
     }
     if (_dob == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Date of birth is required')),
+        SnackBar(content: Text(l10n.dateOfBirthRequired)),
       );
       return;
     }
@@ -159,7 +163,9 @@ class _CreateStudentPageState extends ConsumerState<CreateStudentPage> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.toString())));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(localizedError(l10n, error))),
+        );
         setState(() => _saving = false);
       }
     }
@@ -167,8 +173,10 @@ class _CreateStudentPageState extends ConsumerState<CreateStudentPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     return Scaffold(
-      appBar: AppBar(title: const Text('New student')),
+      appBar: AppBar(title: Text(l10n.newStudent)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -177,44 +185,44 @@ class _CreateStudentPageState extends ConsumerState<CreateStudentPage> {
             children: [
               TextFormField(
                 controller: _first,
-                decoration: const InputDecoration(
-                  labelText: 'First name',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.firstName,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'First name is required' : null,
+                    value == null || value.trim().isEmpty ? l10n.firstNameRequired : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _last,
-                decoration: const InputDecoration(
-                  labelText: 'Last name',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.lastName,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Last name is required' : null,
+                    value == null || value.trim().isEmpty ? l10n.lastNameRequired : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _number,
-                decoration: const InputDecoration(
-                  labelText: 'Student number',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.studentNumber,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) =>
-                    value == null || value.trim().isEmpty ? 'Student number is required' : null,
+                    value == null || value.trim().isEmpty ? l10n.studentNumberRequired : null,
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: _gender,
-                decoration: const InputDecoration(
-                  labelText: 'Gender',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.gender,
+                  border: const OutlineInputBorder(),
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'FEMALE', child: Text('Female')),
-                  DropdownMenuItem(value: 'MALE', child: Text('Male')),
-                  DropdownMenuItem(value: 'OTHER', child: Text('Other')),
+                items: [
+                  DropdownMenuItem(value: 'FEMALE', child: Text(l10n.genderFemale)),
+                  DropdownMenuItem(value: 'MALE', child: Text(l10n.genderMale)),
+                  DropdownMenuItem(value: 'OTHER', child: Text(l10n.genderOther)),
                 ],
                 onChanged: (value) => setState(() => _gender = value ?? _gender),
               ),
@@ -222,9 +230,7 @@ class _CreateStudentPageState extends ConsumerState<CreateStudentPage> {
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
-                  _dob == null
-                      ? 'Date of birth'
-                      : MaterialLocalizations.of(context).formatFullDate(_dob!),
+                  _dob == null ? l10n.dateOfBirth : formatAppDate(_dob!, locale),
                 ),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () async {
@@ -240,7 +246,7 @@ class _CreateStudentPageState extends ConsumerState<CreateStudentPage> {
                 },
               ),
               const SizedBox(height: 24),
-              FilledButton(onPressed: _saving ? null : _save, child: const Text('Save')),
+              FilledButton(onPressed: _saving ? null : _save, child: Text(l10n.save)),
             ],
           ),
         ),

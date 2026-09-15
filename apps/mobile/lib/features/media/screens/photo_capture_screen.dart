@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:digital_student/features/media/models/student_media.dart';
 import 'package:digital_student/features/media/providers/media_providers.dart';
 import 'package:digital_student/features/media/widgets/photo_upload_progress.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -125,17 +126,18 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final upload = ref.watch(mediaUploadControllerProvider(widget.studentId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Student Photo')),
+      appBar: AppBar(title: Text(l10n.studentPhoto)),
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: _body(context, upload),
+        child: _body(context, upload, l10n),
       ),
     );
   }
 
-  Widget _body(BuildContext context, MediaUploadState upload) {
+  Widget _body(BuildContext context, MediaUploadState upload, AppLocalizations l10n) {
     if (_permission != null &&
         _permission != CameraPermissionResult.granted &&
         _preview == null) {
@@ -152,7 +154,7 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
             onPressed: () => ref
                 .read(mediaUploadControllerProvider(widget.studentId).notifier)
                 .cancel(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       );
@@ -163,12 +165,12 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
           const Spacer(),
           Icon(Icons.check_circle, color: Colors.green.shade700, size: 64),
           const SizedBox(height: 16),
-          const Text('Photo uploaded'),
+          Text(l10n.photoUploaded),
           const Spacer(),
           FilledButton(
             key: const Key('photoUploadDoneButton'),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Done'),
+            child: Text(l10n.done),
           ),
         ],
       );
@@ -177,18 +179,18 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
       return Column(
         children: [
           const Spacer(),
-          Text(upload.message ?? 'Upload failed', textAlign: TextAlign.center),
+          Text(l10n.uploadFailed, textAlign: TextAlign.center),
           const Spacer(),
           FilledButton(
             key: const Key('retryUploadButton'),
             onPressed: _usePhoto,
-            child: const Text('Try Again'),
+            child: Text(l10n.tryAgain),
           ),
           TextButton(
             onPressed: () => ref
                 .read(mediaUploadControllerProvider(widget.studentId).notifier)
                 .reset(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       );
@@ -213,7 +215,7 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
                 child: OutlinedButton(
                   key: const Key('retakePhotoButton'),
                   onPressed: _retake,
-                  child: const Text('Retake'),
+                  child: Text(l10n.retake),
                 ),
               ),
               const SizedBox(width: 12),
@@ -221,7 +223,7 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
                 child: FilledButton(
                   key: const Key('usePhotoButton'),
                   onPressed: upload.isUploading ? null : _usePhoto,
-                  child: const Text('Use Photo'),
+                  child: Text(l10n.usePhoto),
                 ),
               ),
             ],
@@ -236,13 +238,13 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
         FilledButton(
           key: const Key('takePhotoButton'),
           onPressed: _takePhoto,
-          child: const Text('Take Photo'),
+          child: Text(l10n.takePhoto),
         ),
         const SizedBox(height: 12),
         OutlinedButton(
           key: const Key('chooseGalleryButton'),
           onPressed: _chooseGallery,
-          child: const Text('Choose from device'),
+          child: Text(l10n.chooseFromDevice),
         ),
         const Spacer(),
       ],
@@ -250,11 +252,12 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
   }
 
   Widget _permissionDenied() {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         const Spacer(),
-        const Text(
-          'Camera access is required to take a photo.',
+        Text(
+          l10n.cameraAccessPhoto,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 24),
@@ -263,9 +266,9 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
           onPressed: () async {
             await (widget.openSettings ?? openAppSettings)();
           },
-          child: const Text('Open Settings'),
+          child: Text(l10n.openSystemSettings),
         ),
-        TextButton(onPressed: _takePhoto, child: const Text('Try Again')),
+        TextButton(onPressed: _takePhoto, child: Text(l10n.tryAgain)),
         const Spacer(),
       ],
     );

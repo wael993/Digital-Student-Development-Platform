@@ -20,6 +20,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/localized_app.dart';
+
 class _Adapter implements HttpClientAdapter {
   _Adapter(this._fetch);
 
@@ -141,7 +143,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(_dio((_) async => _json(404, {})), _teacher()),
-        child: MaterialApp(
+        child: localizedApp(
           home: PhotoCaptureScreen(
             studentId: 'stu-1',
             requestCameraPermission: () async => CameraPermissionResult.denied,
@@ -200,7 +202,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio, _teacher()),
-        child: MaterialApp(
+        child: localizedApp(
           home: PhotoCaptureScreen(
             studentId: 'stu-1',
             requestCameraPermission: () async => CameraPermissionResult.granted,
@@ -247,7 +249,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio, _teacher()),
-        child: MaterialApp(
+        child: localizedApp(
           home: PhotoCaptureScreen(
             studentId: 'stu-1',
             pickGallery: () async =>
@@ -277,7 +279,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(emptyDio, _guardian()),
-        child: const MaterialApp(
+        child: localizedApp(
           home: PhotoGalleryScreen(
             studentId: 'stu-1',
             audience: MediaAudience.parent,
@@ -300,7 +302,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(loadedDio, _guardian()),
-        child: const MaterialApp(
+        child: localizedApp(
           home: PhotoGalleryScreen(
             studentId: 'stu-1',
             audience: MediaAudience.parent,
@@ -325,7 +327,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(deniedDio, _guardian()),
-        child: const MaterialApp(
+        child: localizedApp(
           home: PhotoGalleryScreen(
             studentId: 'stu-2',
             audience: MediaAudience.parent,

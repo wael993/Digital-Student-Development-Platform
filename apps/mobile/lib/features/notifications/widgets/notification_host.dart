@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:digital_student/features/notifications/models/app_notification.dart';
 import 'package:digital_student/features/notifications/providers/notification_providers.dart';
 import 'package:digital_student/features/notifications/repositories/notification_repository.dart';
 import 'package:digital_student/features/notifications/services/notification_navigation.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -89,6 +91,7 @@ class _NotificationHostState extends ConsumerState<NotificationHost> {
     });
 
     final banner = ref.watch(foregroundPushPayloadProvider);
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         if (banner != null)
@@ -96,8 +99,8 @@ class _NotificationHostState extends ConsumerState<NotificationHost> {
             color: Theme.of(context).colorScheme.primaryContainer,
             child: ListTile(
               key: const Key('foregroundNotificationBanner'),
-              title: Text(banner.title ?? 'Update'),
-              subtitle: Text(banner.body ?? 'Tap to view today\'s journey'),
+              title: Text(notificationTypeLabel(l10n, banner.type)),
+              subtitle: Text(l10n.tapToViewJourney),
               onTap: () {
                 ref.read(foregroundPushPayloadProvider.notifier).state = null;
                 ref.read(pendingPushPayloadProvider.notifier).state = banner;

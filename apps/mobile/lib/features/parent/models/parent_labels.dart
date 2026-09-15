@@ -1,77 +1,6 @@
 import 'package:digital_student/core/network/api_exception.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
-
-String parentGreeting(String firstName, [DateTime? now]) {
-  final hour = (now ?? DateTime.now()).hour;
-  final hello = hour < 12
-      ? 'Good morning'
-      : hour < 17
-      ? 'Good afternoon'
-      : 'Good evening';
-  return '$hello, $firstName 👋';
-}
-
-String parentEventLabel(String eventType) {
-  switch (eventType) {
-    case 'ATTENDANCE_PRESENT':
-      return 'Present';
-    case 'BUS_BOARDING':
-      return 'On the bus';
-    case 'SCHOOL_ARRIVAL':
-      return 'Arrived at school';
-    case 'CLASS_STARTED':
-      return 'Class started';
-    case 'BREAK_STARTED':
-      return 'Break time';
-    case 'ACTIVITY_STARTED':
-      return 'Activity started';
-    case 'MEAL':
-      return 'Meal time';
-    case 'SKILL_SESSION':
-      return 'Learning activity';
-    case 'BUS_DEPARTURE':
-      return 'Left school';
-    case 'HOME_DROPOFF':
-      return 'Arrived home';
-    default:
-      return eventType.replaceAll('_', ' ').toLowerCase();
-  }
-}
-
-String parentCurrentStatusLabel(String? eventType) {
-  switch (eventType) {
-    case 'ATTENDANCE_PRESENT':
-      return 'Present';
-    case 'BUS_BOARDING':
-      return 'On the bus';
-    case 'SCHOOL_ARRIVAL':
-      return 'Arrived at school';
-    case 'CLASS_STARTED':
-      return 'Currently in class';
-    case 'BREAK_STARTED':
-      return 'Break time';
-    case 'ACTIVITY_STARTED':
-      return 'Activity started';
-    case 'MEAL':
-      return 'Meal time';
-    case 'SKILL_SESSION':
-      return 'Learning activity';
-    case 'BUS_DEPARTURE':
-      return 'Left school';
-    case 'HOME_DROPOFF':
-      return 'Arrived home';
-    default:
-      return "Today's journey hasn't started yet.";
-  }
-}
-
-String formatParentTime(DateTime value) {
-  final local = value.toLocal();
-  final hour = local.hour % 12 == 0 ? 12 : local.hour % 12;
-  final minute = local.minute.toString().padLeft(2, '0');
-  final period = local.hour >= 12 ? 'PM' : 'AM';
-  return '${hour.toString().padLeft(2, '0')}:$minute $period';
-}
 
 IconData parentEventIcon(String eventType) {
   switch (eventType) {
@@ -111,10 +40,14 @@ Color parentStatusColor(String? eventType) {
   }
 }
 
-String parentLoadErrorMessage(Object error, {required String fallback}) {
+String parentLoadErrorMessage(
+  AppLocalizations l10n,
+  Object error, {
+  required String fallback,
+}) {
   if (error is ApiException &&
       (error.statusCode == 403 || error.statusCode == 404)) {
-    return 'This child is no longer available.';
+    return l10n.childUnavailable;
   }
   return fallback;
 }

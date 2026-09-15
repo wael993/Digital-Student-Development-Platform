@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/core/network/api_client.dart';
 import 'package:digital_student/core/storage/token_store.dart';
 import 'package:digital_student/features/auth/data/auth_api.dart';
@@ -15,7 +16,7 @@ import 'package:digital_student/features/notifications/screens/notification_list
 import 'package:digital_student/features/notifications/screens/notification_settings_screen.dart';
 import 'package:digital_student/features/notifications/services/push_client.dart';
 import 'package:digital_student/features/notifications/widgets/notification_host.dart';
-import 'package:digital_student/features/notifications/widgets/notification_tile.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:digital_student/features/parent/screens/parent_dashboard_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'support/localized_app.dart';
 
 class _Adapter implements HttpClientAdapter {
   _Adapter(this._fetch);
@@ -120,9 +123,9 @@ Map<String, dynamic> _notificationJson({
     'body': body,
     'data': {'type': type, 'studentId': studentId, 'eventId': 'ev-1'},
     'status': readAt == null ? 'SENT' : 'READ',
-    'sentAt': '2026-09-14T08:27:05.000Z',
+    'sentAt': DateTime.now().toUtc().toIso8601String(),
     'readAt': readAt,
-    'createdAt': '2026-09-14T08:27:05.000Z',
+    'createdAt': DateTime.now().toUtc().toIso8601String(),
   };
 }
 
@@ -160,12 +163,23 @@ void main() {
   }
 
   test('groups notification days and parses payloads without extra fields', () {
+    final l10n = lookupAppLocalizations(const Locale('en'));
     expect(
-      notificationDayLabel(DateTime(2026, 9, 14, 8), DateTime(2026, 9, 14, 12)),
+      notificationDayLabel(
+        l10n,
+        'en',
+        DateTime(2026, 9, 14, 8),
+        DateTime(2026, 9, 14, 12),
+      ),
       'Today',
     );
     expect(
-      notificationDayLabel(DateTime(2026, 9, 13, 8), DateTime(2026, 9, 14, 12)),
+      notificationDayLabel(
+        l10n,
+        'en',
+        DateTime(2026, 9, 13, 8),
+        DateTime(2026, 9, 14, 12),
+      ),
       'Yesterday',
     );
     final payload = PushPayload.fromData({
@@ -243,7 +257,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio),
-        child: const MaterialApp(home: ParentDashboardScreen()),
+        child: localizedApp(home: const ParentDashboardScreen()),
       ),
     );
     await _pumpQuiet(tester);
@@ -252,7 +266,13 @@ void main() {
 
     await tester.tap(find.byKey(const Key('notificationsButton')));
     await _pumpQuiet(tester);
-    expect(find.text('Emma has arrived'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('notificationTile-n-1')),
+        matching: find.text('Arrived at school'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Today'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('notificationTile-n-1')));
@@ -297,7 +317,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio),
-        child: const MaterialApp(home: NotificationListScreen()),
+        child: localizedApp(home: const NotificationListScreen()),
       ),
     );
     await _pumpQuiet(tester);
@@ -306,7 +326,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio),
-        child: const MaterialApp(home: NotificationSettingsScreen()),
+        child: localizedApp(home: const NotificationSettingsScreen()),
       ),
     );
     await _pumpQuiet(tester);
@@ -349,7 +369,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio),
-        child: const MaterialApp(home: NotificationHost(child: SizedBox.expand())),
+        child: localizedApp(home: const NotificationHost(child: SizedBox.expand())),
       ),
     );
     await _pumpQuiet(tester);
@@ -376,7 +396,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio),
-        child: const MaterialApp(home: NotificationHost(child: SizedBox.expand())),
+        child: localizedApp(home: const NotificationHost(child: SizedBox.expand())),
       ),
     );
     await _pumpQuiet(tester);
@@ -421,7 +441,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: overrides(dio),
-        child: const MaterialApp(home: NotificationHost(child: SizedBox.expand())),
+        child: localizedApp(home: const NotificationHost(child: SizedBox.expand())),
       ),
     );
     await _pumpQuiet(tester);
@@ -442,7 +462,7 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.byKey(const Key('foregroundNotificationBanner')), findsOneWidget);
-    expect(find.text('Emma has left'), findsOneWidget);
+    expect(find.text('Left school'), findsOneWidget);
     await _clearTree(tester);
   });
 

@@ -1,4 +1,7 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
+import 'package:digital_student/core/localization/locale_provider.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,6 +40,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final auth = ref.watch(authProvider);
     final loading = auth.status == AuthStatus.authenticating;
 
@@ -53,7 +57,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text('Welcome', style: Theme.of(context).textTheme.headlineMedium),
+                    Text(l10n.welcome, style: Theme.of(context).textTheme.headlineMedium),
                     const SizedBox(height: 32),
                     TextFormField(
                       key: const Key('emailField'),
@@ -61,13 +65,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       enabled: !loading,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.email,
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Email is required';
+                          return l10n.emailRequired;
                         }
                         return null;
                       },
@@ -79,13 +83,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       enabled: !loading,
                       obscureText: true,
                       autofillHints: const [AutofillHints.password],
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.password,
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Password is required';
+                          return l10n.passwordRequired;
                         }
                         return null;
                       },
@@ -94,7 +98,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     if (auth.status == AuthStatus.error && auth.message != null) ...[
                       const SizedBox(height: 16),
                       Text(
-                        auth.message!,
+                        localizedErrorCode(
+                          l10n,
+                          auth.message!,
+                          fallback: l10n.errorLoginFailed,
+                        ),
                         key: const Key('loginError'),
                         style: TextStyle(color: Theme.of(context).colorScheme.error),
                       ),
@@ -109,19 +117,30 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Login'),
+                          : Text(l10n.login),
                     ),
                     TextButton(
                       onPressed: loading
                           ? null
                           : () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Password reset is not available yet.'),
-                                ),
+                                SnackBar(content: Text(l10n.passwordResetUnavailable)),
                               );
                             },
-                      child: const Text('Forgot password?'),
+                      child: Text(l10n.forgotPassword),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(l10n.language, textAlign: TextAlign.center),
+                    const SizedBox(height: 8),
+                    SegmentedButton<String>(
+                      segments: [
+                        ButtonSegment(value: 'en', label: Text(l10n.english)),
+                        ButtonSegment(value: 'ar', label: Text(l10n.arabic)),
+                      ],
+                      selected: {ref.watch(localeProvider).languageCode},
+                      onSelectionChanged: (selected) {
+                        ref.read(localeProvider.notifier).setLocale(Locale(selected.first));
+                      },
                     ),
                   ],
                 ),

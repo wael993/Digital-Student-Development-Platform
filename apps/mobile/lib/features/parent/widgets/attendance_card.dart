@@ -1,5 +1,6 @@
-import 'package:digital_student/features/parent/models/parent_labels.dart';
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/parent/models/parent_models.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class AttendanceCard extends StatelessWidget {
@@ -9,6 +10,8 @@ class AttendanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final recorded = attendance.isRecorded;
     return Card(
       key: const Key('attendanceCard'),
@@ -18,15 +21,15 @@ class AttendanceCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Today's Attendance",
+              l10n.todaysAttendance,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            Text(recorded ? 'Present' : 'Not recorded yet'),
+            Text(recorded ? l10n.present : l10n.notRecordedYet),
             if (recorded) ...[
               const SizedBox(height: 4),
               Text(
-                'Recorded at ${formatParentTime(attendance.recordedAt!)}',
+                l10n.recordedAt(formatAppTime(attendance.recordedAt!, locale)),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],

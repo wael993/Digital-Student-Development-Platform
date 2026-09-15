@@ -1,4 +1,5 @@
 import 'package:digital_student/features/media/models/student_media.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class PhotoViewerScreen extends StatelessWidget {
@@ -8,18 +9,19 @@ class PhotoViewerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final url = media.url ?? media.thumbnailUrl;
     return Scaffold(
-      appBar: AppBar(title: const Text('Photo')),
+      appBar: AppBar(title: Text(l10n.photo)),
       body: Center(
         child: url == null || url.isEmpty
-            ? const Text('Photo is unavailable.')
+            ? Text(l10n.photoUnavailable)
             : InteractiveViewer(
                 child: Image.network(
                   url,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stack) =>
-                      const Text('Photo is unavailable.'),
+                      Text(l10n.photoUnavailable),
                 ),
               ),
       ),

@@ -1,8 +1,10 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:digital_student/features/parent/models/parent_labels.dart';
 import 'package:digital_student/features/parent/providers/parent_providers.dart';
 import 'package:digital_student/features/parent/screens/child_dashboard_screen.dart';
 import 'package:digital_student/features/parent/widgets/child_selector.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:digital_student/shared/widgets/school_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,16 +14,16 @@ class ParentDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final user = ref.watch(authProvider).user;
     final children = ref.watch(parentChildrenProvider);
     final selectedId = ref.watch(resolvedChildIdProvider);
 
     return SchoolScaffold(
-      title: 'My Children',
+      title: l10n.myChildren,
       body: children.when(
         skipLoadingOnReload: true,
-        loading: () =>
-            const Center(child: Text('Loading child information...')),
+        loading: () => Center(child: Text(l10n.loadingChildInfo)),
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -30,8 +32,9 @@ class ParentDashboardScreen extends ConsumerWidget {
               children: [
                 Text(
                   parentLoadErrorMessage(
+                    l10n,
                     error,
-                    fallback: 'Unable to load your children.',
+                    fallback: l10n.unableToLoadChildren,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -39,7 +42,7 @@ class ParentDashboardScreen extends ConsumerWidget {
                 FilledButton(
                   key: const Key('parentChildrenRetry'),
                   onPressed: () => ref.invalidate(parentChildrenProvider),
-                  child: const Text('Try Again'),
+                  child: Text(l10n.tryAgain),
                 ),
               ],
             ),
@@ -55,16 +58,16 @@ class ParentDashboardScreen extends ConsumerWidget {
               child: ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 padding: const EdgeInsets.all(24),
-                children: const [
-                  SizedBox(height: 80),
+                children: [
+                  const SizedBox(height: 80),
                   Text(
-                    'No children available',
+                    l10n.noChildrenAvailable,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'Your school has not linked any active students to your account yet.',
+                    l10n.noChildrenHint,
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -78,7 +81,7 @@ class ParentDashboardScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Text(
-                  parentGreeting(user?.firstName ?? ''),
+                  parentGreeting(l10n, user?.firstName ?? ''),
                   key: const Key('parentGreeting'),
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
@@ -86,7 +89,7 @@ class ParentDashboardScreen extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'Your children',
+                  l10n.yourChildren,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),

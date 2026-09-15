@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:digital_student/core/network/api_exception.dart';
 import 'package:digital_student/features/media/models/student_media.dart';
 import 'package:digital_student/features/media/repositories/media_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,7 +71,7 @@ class MediaUploadController extends StateNotifier<MediaUploadState> {
       }
       state = MediaUploadState(
         phase: MediaUploadPhase.error,
-        message: error.toString(),
+        message: error is ApiException ? error.code : 'INTERNAL_ERROR',
       );
     }
   }

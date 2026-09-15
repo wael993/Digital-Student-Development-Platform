@@ -1,5 +1,7 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/parent/models/parent_labels.dart';
 import 'package:digital_student/features/parent/models/parent_models.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class JourneyEventTile extends StatelessWidget {
@@ -16,6 +18,8 @@ class JourneyEventTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final theme = Theme.of(context);
     return IntrinsicHeight(
       child: Row(
@@ -24,7 +28,7 @@ class JourneyEventTile extends StatelessWidget {
           SizedBox(
             width: 72,
             child: Text(
-              formatParentTime(event.occurredAt),
+              formatAppTime(event.occurredAt, locale),
               style: theme.textTheme.bodyMedium,
             ),
           ),
@@ -51,7 +55,7 @@ class JourneyEventTile extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.only(bottom: isLast ? 0 : 24),
               child: Text(
-                parentEventLabel(event.eventType),
+                parentEventLabel(l10n, event.eventType),
                 style: isCurrent
                     ? theme.textTheme.titleMedium
                     : theme.textTheme.bodyLarge,

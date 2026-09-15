@@ -99,7 +99,7 @@ void main() {
     await controller.login(email: 'teacher@example.com', password: 'wrong');
 
     expect(controller.state.status, AuthStatus.error);
-    expect(controller.state.message, 'Invalid email or password');
+    expect(controller.state.message, 'INVALID_CREDENTIALS');
     expect(await tokens.readAccessToken(), isNull);
   });
 

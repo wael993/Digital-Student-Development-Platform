@@ -1,5 +1,7 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/parent/models/parent_labels.dart';
 import 'package:digital_student/features/parent/models/parent_models.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class CurrentStatusCard extends StatelessWidget {
@@ -9,6 +11,8 @@ class CurrentStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final color = parentStatusColor(journey.currentState);
     return Card(
       key: const Key('currentStatusCard'),
@@ -18,7 +22,7 @@ class CurrentStatusCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Current status',
+              l10n.currentStatus,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -28,7 +32,7 @@ class CurrentStatusCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    parentCurrentStatusLabel(journey.currentState),
+                    parentCurrentStatusLabel(l10n, journey.currentState),
                     key: const Key('currentStatusLabel'),
                   ),
                 ),
@@ -37,7 +41,7 @@ class CurrentStatusCard extends StatelessWidget {
             if (journey.lastEventAt != null) ...[
               const SizedBox(height: 8),
               Text(
-                'Last update ${formatParentTime(journey.lastEventAt!)}',
+                l10n.lastUpdate(formatAppTime(journey.lastEventAt!, locale)),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],

@@ -1,8 +1,10 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/notifications/models/app_notification.dart';
 import 'package:digital_student/features/notifications/providers/notification_providers.dart';
 import 'package:digital_student/features/notifications/repositories/notification_repository.dart';
 import 'package:digital_student/features/notifications/services/notification_navigation.dart';
 import 'package:digital_student/features/notifications/widgets/notification_tile.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,9 +13,11 @@ class NotificationListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).toString();
     final list = ref.watch(notificationsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Notifications')),
+      appBar: AppBar(title: Text(l10n.notifications)),
       body: list.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
@@ -22,11 +26,11 @@ class NotificationListScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Unable to load notifications.'),
+                Text(l10n.unableToLoadNotifications),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () => ref.invalidate(notificationsProvider),
-                  child: const Text('Try Again'),
+                  child: Text(l10n.tryAgain),
                 ),
               ],
             ),
@@ -34,9 +38,9 @@ class NotificationListScreen extends ConsumerWidget {
         ),
         data: (items) {
           if (items.isEmpty) {
-            return const Center(child: Text('No notifications yet'));
+            return Center(child: Text(l10n.noNotificationsYet));
           }
-          final groups = _group(items);
+          final groups = _group(l10n, locale, items);
           return RefreshIndicator(
             onRefresh: () async {
               ref.invalidate(notificationsProvider);
@@ -91,11 +95,11 @@ class NotificationListScreen extends ConsumerWidget {
   }
 }
 
-List<Object> _group(List<AppNotification> items) {
+List<Object> _group(AppLocalizations l10n, String locale, List<AppNotification> items) {
   final out = <Object>[];
   String? last;
   for (final item in items) {
-    final label = notificationDayLabel(item.createdAt);
+    final label = notificationDayLabel(l10n, locale, item.createdAt);
     if (label != last) {
       out.add(label);
       last = label;

@@ -3,6 +3,7 @@ import 'package:digital_student/features/media/screens/photo_gallery_screen.dart
 import 'package:digital_student/features/notifications/models/app_notification.dart';
 import 'package:digital_student/features/parent/screens/child_dashboard_screen.dart';
 import 'package:digital_student/features/parent/screens/child_journey_screen.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 Future<void> openNotificationTarget(
@@ -13,6 +14,7 @@ Future<void> openNotificationTarget(
   if (studentId.isEmpty || !context.mounted) {
     return;
   }
+  final l10n = AppLocalizations.of(context);
   switch (payload.type) {
     case 'MEDIA_AVAILABLE':
       await Navigator.of(context).push(
@@ -20,7 +22,7 @@ Future<void> openNotificationTarget(
           builder: (_) => PhotoGalleryScreen(
             studentId: studentId,
             audience: MediaAudience.parent,
-            title: 'Photos',
+            title: l10n.photos,
           ),
         ),
       );
@@ -28,7 +30,7 @@ Future<void> openNotificationTarget(
       await Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => Scaffold(
-            appBar: AppBar(title: const Text('Child')),
+            appBar: AppBar(title: Text(l10n.child)),
             body: ChildDashboardScreen(studentId: studentId),
           ),
         ),

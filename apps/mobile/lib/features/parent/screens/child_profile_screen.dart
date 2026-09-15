@@ -1,5 +1,7 @@
+import 'package:digital_student/core/localization/l10n_format.dart';
 import 'package:digital_student/features/parent/models/parent_labels.dart';
 import 'package:digital_student/features/parent/providers/parent_providers.dart';
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,19 +12,20 @@ class ChildProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final children = ref.watch(parentChildrenProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Child')),
+      appBar: AppBar(title: Text(l10n.child)),
       body: children.when(
-        loading: () =>
-            const Center(child: Text('Loading child information...')),
+        loading: () => Center(child: Text(l10n.loadingChildInfo)),
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Text(
               parentLoadErrorMessage(
+                l10n,
                 error,
-                fallback: 'Unable to load child information.',
+                fallback: l10n.unableToLoadChildInfo,
               ),
               textAlign: TextAlign.center,
             ),
@@ -31,9 +34,7 @@ class ChildProfileScreen extends ConsumerWidget {
         data: (items) {
           final child = items.where((item) => item.id == studentId).firstOrNull;
           if (child == null) {
-            return const Center(
-              child: Text('This child is no longer available.'),
-            );
+            return Center(child: Text(l10n.childUnavailable));
           }
           return ListView(
             padding: const EdgeInsets.all(24),
@@ -45,34 +46,23 @@ class ChildProfileScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Class'),
+                title: Text(l10n.classLabel),
                 subtitle: Text(child.classroom.name),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Student number'),
+                title: Text(l10n.studentNumber),
                 subtitle: Text(child.studentNumber),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Status'),
-                subtitle: Text(_statusLabel(child.status)),
+                title: Text(l10n.status),
+                subtitle: Text(studentStatusLabel(l10n, child.status)),
               ),
             ],
           );
         },
       ),
     );
-  }
-
-  String _statusLabel(String status) {
-    switch (status) {
-      case 'ACTIVE':
-        return 'Active';
-      case 'INACTIVE':
-        return 'Inactive';
-      default:
-        return status;
-    }
   }
 }

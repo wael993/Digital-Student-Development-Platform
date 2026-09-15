@@ -75,11 +75,11 @@ class AuthController extends StateNotifier<AuthState> {
       final result = await _repository.login(email: email, password: password);
       state = AuthState(status: AuthStatus.authenticated, user: result.user);
     } on ApiException catch (error) {
-      state = AuthState(status: AuthStatus.error, message: error.message);
+      state = AuthState(status: AuthStatus.error, message: error.code);
     } catch (_) {
       state = const AuthState(
         status: AuthStatus.error,
-        message: 'Unable to log in. Try again.',
+        message: 'LOGIN_FAILED',
       );
     }
   }

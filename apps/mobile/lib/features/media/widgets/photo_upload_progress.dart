@@ -1,3 +1,4 @@
+import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class PhotoUploadProgress extends StatelessWidget {
@@ -7,15 +8,16 @@ class PhotoUploadProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final percent = (progress.clamp(0, 1) * 100).round();
     return Column(
       key: const Key('photoUploadProgress'),
       children: [
-        const Text('Uploading photo...'),
+        Text(l10n.uploadingPhoto),
         const SizedBox(height: 12),
         LinearProgressIndicator(value: progress <= 0 ? null : progress),
         const SizedBox(height: 8),
-        Text('$percent%'),
+        Text(l10n.percentValue(percent)),
       ],
     );
   }
