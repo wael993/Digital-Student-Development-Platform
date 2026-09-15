@@ -79,7 +79,7 @@ Root `.env` is used by the API and Docker Compose. Placeholders:
 
 ### API (recommended)
 
-Starts the API. MongoDB and Redis come from `.env` (Atlas + Redis Cloud in this project). Local Mongo/Redis containers are optional profiles.
+Starts the API plus local Mongo and Redis containers. The API still reads Mongo/Redis from `.env` (Atlas + Redis Cloud in this project). Local Redis is used only if `REDIS_URL` / `REDIS_HOST` points at `localhost:6379`.
 
 ```bash
 docker compose up --build
@@ -125,13 +125,7 @@ docker compose up mongo -d
 npm test
 ```
 
-Optional local Redis (only if you are not using Redis Cloud):
-
-```bash
-docker compose --profile local-redis up redis -d
-```
-
-Then set `REDIS_URL=redis://localhost:6379`. For Redis Cloud, set `maxmemory-policy` to `noeviction` in the Redis console so BullMQ keys are not evicted.
+Local Redis listens on `localhost:6379`. To use it instead of Redis Cloud, set `REDIS_URL=redis://localhost:6379` (from `npm run dev` on the host). If the API runs inside Compose, use `REDIS_URL=redis://redis:6379`. For Redis Cloud, set `maxmemory-policy` to `noeviction` in the Redis console so BullMQ keys are not evicted.
 
 Create two local organizations and users you can log in with:
 
