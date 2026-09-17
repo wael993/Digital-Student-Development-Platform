@@ -14,7 +14,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed": "tsx src/scripts/seed-user.ts"
+    "seed": "tsx src/database/seed/seed.ts",
+    "seed:reset": "tsx src/database/seed/seed.ts --reset"
   },
   "engines": {
     "node": ">=20"

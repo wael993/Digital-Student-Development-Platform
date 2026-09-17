@@ -127,25 +127,26 @@ npm test
 
 Local Redis listens on `localhost:6379`. To use it instead of Redis Cloud, set `REDIS_URL=redis://localhost:6379` (from `npm run dev` on the host). If the API runs inside Compose, use `REDIS_URL=redis://redis:6379`. For Redis Cloud, set `maxmemory-policy` to `noeviction` in the Redis console so BullMQ keys are not evicted.
 
-Create two local organizations and users you can log in with:
+Create the Arabic demo academy (63 students, both campuses, buses, journeys):
 
 ```bash
 npm run seed
 ```
 
-Password for every seed user: `Password123!`
+Password for every seed user: `Demo@12345`
 
-| Email | Org | Role | What you’ll see |
-| --- | --- | --- | --- |
-| `guardian.a@example.com` | Nursery A | GUARDIAN | Sarah’s children: Emma (full day), Noah (on the bus), Liam (not started) |
-| `guardian.empty@example.com` | Nursery A | GUARDIAN | Empty children state |
-| `guardian.b@example.com` | Nursery B | GUARDIAN | Emma Jones arrived at school |
-| `teacher@example.com` | Nursery A | TEACHER | Nursery A roster (Emma, Noah, Liam, inactive Mia) |
-| `supervisor.a@example.com` | Nursery A | SUPERVISOR | Assigned campus |
-| `admin.a@example.com` | Nursery A | ADMIN | Org A |
-| `driver.a@example.com` | Nursery A | DRIVER | Empty student list until bus routes |
-| `admin.b@example.com` | Nursery B | ADMIN | Org B |
-| `teacher.b@example.com` | Nursery B | TEACHER | Nursery B roster |
+See [apps/api/src/database/seed/README.md](apps/api/src/database/seed/README.md) for the full login table.
+
+| Email | Role | What you’ll see |
+| --- | --- | --- |
+| `mohammed.alotaibi+guardian@demo.local` | GUARDIAN | آدم (on the morning bus) and سارة |
+| `sara.aldosari+guardian@demo.local` | GUARDIAN | يوسف (absent) and ليان |
+| `teacher.mariam@demo.local` | TEACHER | روضة النخيل أ |
+| `supervisor.khalid@demo.local` | SUPERVISOR | حرم النخيل |
+| `admin.ahmad@demo.local` | ADMIN | أكاديمية براعم المستقبل |
+| `driver.saad@demo.local` | DRIVER | حافلة النخيل 1 (route in progress) |
+
+`npm run seed:reset` wipes that demo organization and seeds it again. It is blocked when `NODE_ENV=production`.
 
 Useful commands (run from the repository root):
 
@@ -156,7 +157,8 @@ Useful commands (run from the repository root):
 | `npm run lint` | Run ESLint |
 | `npm run format` | Format API sources with Prettier |
 | `npm test` | Run API tests |
-| `npm run seed` | Upsert Nursery A/B and admin/teacher/guardian logins |
+| `npm run seed` | Upsert the Arabic demo academy (63 students) |
+| `npm run seed:reset` | Wipe the demo organization and seed it again (dev/test only) |
 | `npm run typecheck` | TypeScript strict check (`tsc --noEmit`) |
 
 ### Flutter application
