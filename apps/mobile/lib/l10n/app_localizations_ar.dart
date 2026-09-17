@@ -77,6 +77,255 @@ class AppLocalizationsAr extends AppLocalizations {
       'إعادة تعيين كلمة المرور غير متاحة حالياً.';
 
   @override
+  String get platformDashboard => 'لوحة التحكم';
+
+  @override
+  String get platformOrganizations => 'المؤسسات';
+
+  @override
+  String get platformInvitations => 'الدعوات';
+
+  @override
+  String get platformAccount => 'الحساب';
+
+  @override
+  String get platformDashboardEmpty => 'لا يوجد نشاط على المنصة بعد';
+
+  @override
+  String get platformTotalOrganizations => 'إجمالي المؤسسات';
+
+  @override
+  String get platformActiveOrganizations => 'المؤسسات النشطة';
+
+  @override
+  String get platformTrialOrganizations => 'مؤسسات تجريبية';
+
+  @override
+  String get platformSuspendedOrganizations => 'المؤسسات المعلّقة';
+
+  @override
+  String get platformInactiveOrganizations => 'المؤسسات غير النشطة';
+
+  @override
+  String get platformCancelledOrganizations => 'المؤسسات الملغاة';
+
+  @override
+  String get platformTotalStudents => 'إجمالي الطلاب';
+
+  @override
+  String get platformTotalTeachers => 'إجمالي المعلمين';
+
+  @override
+  String get platformTotalBuses => 'إجمالي الحافلات';
+
+  @override
+  String get searchOrganizations => 'بحث عن المؤسسات...';
+
+  @override
+  String get filterAll => 'الكل';
+
+  @override
+  String get noOrganizationsYet => 'لا توجد مؤسسات بعد';
+
+  @override
+  String get organizationDetails => 'المؤسسة';
+
+  @override
+  String get organizationName => 'اسم المؤسسة';
+
+  @override
+  String get organizationSlug => 'المعرّف';
+
+  @override
+  String get organizationCountry => 'الدولة';
+
+  @override
+  String get organizationTimezone => 'المنطقة الزمنية';
+
+  @override
+  String get organizationDefaultLanguage => 'اللغة الافتراضية';
+
+  @override
+  String get organizationContactEmail => 'البريد للتواصل';
+
+  @override
+  String get organizationContactPhone => 'هاتف التواصل';
+
+  @override
+  String get organizationContactPhoneOptional => 'هاتف التواصل (اختياري)';
+
+  @override
+  String get organizationAddressOptional => 'العنوان (اختياري)';
+
+  @override
+  String get organizationWebsiteOptional => 'الموقع (اختياري)';
+
+  @override
+  String get organizationLogoOptional => 'رابط الشعار (اختياري)';
+
+  @override
+  String get organizationStatus => 'الحالة';
+
+  @override
+  String get organizationPlan => 'الخطة';
+
+  @override
+  String get organizationUsage => 'الاستخدام';
+
+  @override
+  String organizationUsageSummary(int campuses, int students, int users) {
+    return '$campuses فروع · $students طلاب · $users مستخدمون';
+  }
+
+  @override
+  String get usageCampuses => 'الفروع';
+
+  @override
+  String get usageStudents => 'الطلاب';
+
+  @override
+  String get usageUsers => 'المستخدمون';
+
+  @override
+  String get usageClassrooms => 'الفصول';
+
+  @override
+  String get usageBuses => 'الحافلات';
+
+  @override
+  String get createdAt => 'تاريخ الإنشاء';
+
+  @override
+  String get createOrganization => 'إنشاء مؤسسة';
+
+  @override
+  String get activateOrganization => 'تفعيل';
+
+  @override
+  String get suspendOrganization => 'تعليق';
+
+  @override
+  String get deactivateOrganization => 'إلغاء التفعيل';
+
+  @override
+  String get confirmSuspendOrganization =>
+      'هل تريد تعليق هذه المؤسسة؟ سيفقد مستخدمو المستأجر الوصول حتى يتم تفعيلها مرة أخرى.';
+
+  @override
+  String get confirmDeactivateOrganization =>
+      'هل تريد إلغاء تفعيل هذه المؤسسة؟ سيوقف ذلك الوصول الاعتيادي للمستأجر.';
+
+  @override
+  String get organizationCreated => 'تم إنشاء المؤسسة بنجاح';
+
+  @override
+  String get organizationCreatedWithInvitation =>
+      'تم إنشاء المؤسسة وإرسال الدعوة';
+
+  @override
+  String get organizationUpdated => 'تم تحديث المؤسسة';
+
+  @override
+  String get optionalAdminInvitation => 'دعوة المسؤول الأول (اختياري)';
+
+  @override
+  String get adminFirstName => 'الاسم الأول للمسؤول';
+
+  @override
+  String get adminLastName => 'اسم عائلة المسؤول';
+
+  @override
+  String get adminEmail => 'بريد المسؤول';
+
+  @override
+  String get adminFirstNameOptional => 'الاسم الأول للمسؤول (اختياري)';
+
+  @override
+  String get adminLastNameOptional => 'اسم عائلة المسؤول (اختياري)';
+
+  @override
+  String get adminEmailOptional => 'بريد المسؤول (اختياري)';
+
+  @override
+  String get adminInviteIncomplete =>
+      'أدخل الاسم الأول واسم العائلة والبريد معاً';
+
+  @override
+  String get inviteAdminHint => 'ادعُ المسؤول الأول لمؤسسة موجودة.';
+
+  @override
+  String get sendInvitation => 'إرسال الدعوة';
+
+  @override
+  String get invitationCreated => 'تم إنشاء الدعوة بنجاح';
+
+  @override
+  String get role => 'الدور';
+
+  @override
+  String get rolePlatformAdmin => 'مسؤول المنصة';
+
+  @override
+  String get accountStatus => 'حالة الحساب';
+
+  @override
+  String get orgStatusTrial => 'تجريبي';
+
+  @override
+  String get orgStatusActive => 'نشط';
+
+  @override
+  String get orgStatusSuspended => 'معلّق';
+
+  @override
+  String get orgStatusInactive => 'غير نشط';
+
+  @override
+  String get orgStatusCancelled => 'ملغى';
+
+  @override
+  String get planStarter => 'أساسي';
+
+  @override
+  String get planProfessional => 'احترافي';
+
+  @override
+  String get planEnterprise => 'مؤسسي';
+
+  @override
+  String get fieldRequired => 'هذا الحقل مطلوب';
+
+  @override
+  String get invalidEmail => 'أدخل بريداً إلكترونياً صالحاً';
+
+  @override
+  String get errorOrganizationNotFound => 'المؤسسة غير موجودة';
+
+  @override
+  String get errorOrganizationSuspended => 'المؤسسة معلّقة';
+
+  @override
+  String get errorOrganizationInactive => 'المؤسسة غير نشطة';
+
+  @override
+  String get errorUserNotFound => 'المستخدم غير موجود';
+
+  @override
+  String get errorUserAlreadyExists => 'يوجد مستخدم بهذا البريد مسبقاً';
+
+  @override
+  String get errorUserRoleNotAllowed => 'هذا الدور غير مسموح';
+
+  @override
+  String get errorInvitationExpired => 'انتهت صلاحية هذه الدعوة';
+
+  @override
+  String get errorInvitationAlreadyUsed => 'تم استخدام هذه الدعوة مسبقاً';
+
+  @override
+  String get errorInvitationRevoked => 'تم إلغاء هذه الدعوة';
+
+  @override
   String get emailRequired => 'البريد الإلكتروني مطلوب';
 
   @override

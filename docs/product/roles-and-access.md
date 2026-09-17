@@ -36,7 +36,7 @@ Related: [user-roles.md](user-roles.md), [authorization.md](../architecture/auth
 
 ## 2. Platform Admin — tenant provisioning
 
-Platform Admin uses `/api/v1/platform/*` (API only in Slice 1; Flutter console is Slice 2).
+Platform Admin uses `/api/v1/platform/*`. Flutter console is PLATFORM-004 (`features/platform`).
 
 ### Create tenant
 
@@ -134,16 +134,16 @@ Do **not** give one admin two schools. v1 is one tenant user → one organizatio
 
 ---
 
-## 6. What is not in Slice 1
+## 6. What is not in the current platform slice
 
-- Flutter platform console / navigation
-- Tenant `/api/v1/users` staff CRUD
 - Invitation resend/revoke UI
 - Separate `TenantPlan` / `TenantSubscription` collections (plan fields live on the organization)
 - `SupervisorCampusAssignment` collection (keep `campusIds`)
 - Self-service school signup
 - Multi-org membership
 - Student login
+
+Flutter platform console (Dashboard, Organizations, Invitations, Account) is implemented in PLATFORM-004.
 
 ## 7. UI to add supervisor, teacher, or parent
 
@@ -154,4 +154,4 @@ Do **not** give one admin two schools. v1 is one tenant user → one organizatio
 | Campus                                | Yes — campus list **+**                  | ADMIN, SUPERVISOR | `POST /campuses`                                  |
 | Classroom                             | Yes — classroom list **+**               | ADMIN, SUPERVISOR | `POST /classrooms`                                |
 | Teacher / Supervisor / Admin / Driver | **No** (Slice 2)                         | —                 | No staff-user route yet                           |
-| New organization / tenant             | **No** Flutter UI (API only)             | PLATFORM_ADMIN    | `/api/v1/platform/organizations`                  |
+| New organization / tenant             | Yes — Platform Console → Organizations → create | PLATFORM_ADMIN    | `/api/v1/platform/organizations`                  |

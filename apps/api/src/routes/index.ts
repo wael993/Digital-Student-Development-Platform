@@ -18,6 +18,7 @@ import {
   transportRouter,
 } from '../modules/buses/bus.routes';
 import { platformRouter } from '../modules/platform/platform.routes';
+import { usersRouter } from '../modules/users/user.routes';
 
 export const v1Router = Router();
 
@@ -25,6 +26,7 @@ v1Router.use('/health', healthRouter);
 v1Router.use('/auth', authRouter);
 v1Router.use('/platform', platformRouter);
 v1Router.use('/organizations', organizationsRouter);
+v1Router.use('/users', usersRouter);
 v1Router.use('/campuses', campusesRouter);
 v1Router.use('/classrooms', classroomsRouter);
 v1Router.use('/students', studentsRouter);

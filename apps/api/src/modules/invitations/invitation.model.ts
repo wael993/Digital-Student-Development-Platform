@@ -10,6 +10,9 @@ export interface UserInvitation {
   role: TenantRole;
   firstName: string;
   lastName: string;
+  campusIds: mongoose.Types.ObjectId[];
+  classroomIds: mongoose.Types.ObjectId[];
+  routeIds: mongoose.Types.ObjectId[];
   tokenHash: string;
   expiresAt: Date;
   invitedBy: mongoose.Types.ObjectId;
@@ -26,6 +29,9 @@ const userInvitationSchema = new Schema<UserInvitation>(
     role: { type: String, required: true },
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
+    campusIds: { type: [Schema.Types.ObjectId], required: true, default: [] },
+    classroomIds: { type: [Schema.Types.ObjectId], required: true, default: [] },
+    routeIds: { type: [Schema.Types.ObjectId], required: true, default: [] },
     tokenHash: { type: String, required: true, unique: true },
     expiresAt: { type: Date, required: true },
     invitedBy: { type: Schema.Types.ObjectId, required: true },

@@ -16,6 +16,7 @@ import * as invitationService from '../invitations/invitation.service';
 import {
   DEFAULT_LANGUAGE,
   DEFAULT_TIMEZONE,
+  OrganizationModel,
   ORGANIZATION_STATUSES,
   PLAN_CODES,
   SUBSCRIPTION_STATUSES,
@@ -23,6 +24,9 @@ import {
   type PlanCode,
   type SubscriptionStatus,
 } from '../organizations/organization.model';
+import { BusModel } from '../buses/bus.model';
+import { StudentModel } from '../students/student.model';
+import { UserModel } from '../users/user.model';
 import {
   createOrganization,
   findOrganizationById,
@@ -31,6 +35,7 @@ import {
   toOrganizationJson,
   uniqueSlugFromName,
   updateOrganization,
+  type ListOrganizationsFilter,
 } from '../organizations/organization.repository';
 import * as subscriptionService from '../subscriptions/subscription.service';
 
@@ -264,12 +269,64 @@ export async function createTenant(
   };
 }
 
-export async function listTenants(query: { page?: unknown; limit?: unknown }) {
+export function parseListTenantsQuery(query: Record<string, unknown>) {
   const { page, limit, skip } = parsePagination(query);
-  const { items, total } = await listOrganizations(skip, limit);
+  const filter: ListOrganizationsFilter = {
+    status: optionalEnum(query.status, 'status', ORGANIZATION_STATUSES),
+    q: asTrimmedString(query.q)?.toLowerCase(),
+  };
+  return { page, limit, skip, filter };
+}
+
+export async function listTenants(query: Record<string, unknown>) {
+  const { page, limit, skip, filter } = parseListTenantsQuery(query);
+  const { items, total } = await listOrganizations(skip, limit, filter);
+  const data = await Promise.all(
+    items.map(async (org) => {
+      const usage = await subscriptionService.getUsage(org.id);
+      return {
+        ...toOrganizationJson(org),
+        usage: {
+          campusCount: usage.campusCount,
+          studentCount: usage.studentCount,
+          userCount: usage.userCount,
+        },
+      };
+    }),
+  );
   return {
-    data: items.map((org) => toOrganizationJson(org)),
+    data,
     meta: { page, limit, total },
+  };
+}
+
+export async function getDashboard() {
+  const [orgCounts, students, teachers, buses] = await Promise.all([
+    OrganizationModel.aggregate<{ _id: OrganizationStatus; count: number }>([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]),
+    StudentModel.countDocuments({}),
+    UserModel.countDocuments({ role: 'TEACHER' }),
+    BusModel.countDocuments({}),
+  ]);
+
+  const byStatus = Object.fromEntries(orgCounts.map((row) => [row._id, row.count])) as Partial<
+    Record<OrganizationStatus, number>
+  >;
+  const total = orgCounts.reduce((sum, row) => sum + row.count, 0);
+
+  return {
+    organizations: {
+      total,
+      active: byStatus.ACTIVE ?? 0,
+      trial: byStatus.TRIAL ?? 0,
+      suspended: byStatus.SUSPENDED ?? 0,
+      inactive: byStatus.INACTIVE ?? 0,
+      cancelled: byStatus.CANCELLED ?? 0,
+    },
+    students,
+    teachers,
+    buses,
   };
 }
 
@@ -309,6 +366,30 @@ export async function patchTenant(
   return toOrganizationJson(organization);
 }
 
+const STATUS_TRANSITIONS: Partial<Record<OrganizationStatus, readonly OrganizationStatus[]>> = {
+  TRIAL: ['ACTIVE', 'INACTIVE'],
+  ACTIVE: ['SUSPENDED', 'INACTIVE'],
+  SUSPENDED: ['ACTIVE'],
+};
+
+function assertStatusTransition(
+  current: OrganizationStatus,
+  next: OrganizationStatus,
+): void {
+  if (current === next) {
+    return;
+  }
+  const allowed = STATUS_TRANSITIONS[current];
+  if (!allowed?.includes(next)) {
+    throw new AppError(
+      422,
+      'VALIDATION_ERROR',
+      `Cannot transition organization from ${current} to ${next}`,
+      [{ field: 'status', message: `Invalid transition from ${current} to ${next}` }],
+    );
+  }
+}
+
 async function transitionStatus(
   actor: AuthContext,
   organizationId: string,
@@ -316,6 +397,15 @@ async function transitionStatus(
   action: 'TENANT_ACTIVATED' | 'TENANT_SUSPENDED' | 'TENANT_DEACTIVATED' | 'TENANT_CANCELLED',
   req?: Request,
 ) {
+  const existing = await findOrganizationById(organizationId);
+  if (!existing) {
+    throw new AppError(404, 'NOT_FOUND', 'Not Found');
+  }
+  assertStatusTransition(existing.status, status);
+  if (existing.status === status) {
+    return toOrganizationJson(existing);
+  }
+
   const organization = await setOrganizationStatus(organizationId, status);
   if (!organization) {
     throw new AppError(404, 'NOT_FOUND', 'Not Found');
@@ -326,7 +416,7 @@ async function transitionStatus(
     resourceType: 'organization',
     resourceId: organizationId,
     organizationId,
-    metadata: { status },
+    metadata: { status, previousStatus: existing.status },
     req,
   });
   return toOrganizationJson(organization);

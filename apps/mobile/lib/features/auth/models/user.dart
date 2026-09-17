@@ -1,7 +1,7 @@
 class User {
   const User({
     required this.id,
-    required this.organizationId,
+    this.organizationId,
     required this.firstName,
     required this.lastName,
     required this.email,
@@ -9,7 +9,8 @@ class User {
   });
 
   final String id;
-  final String organizationId;
+  // Null for PLATFORM_ADMIN (no tenant).
+  final String? organizationId;
   final String firstName;
   final String lastName;
   final String email;
@@ -18,6 +19,8 @@ class User {
   String get displayName => '$firstName $lastName'.trim();
 
   bool get canManageSchool => role == 'ADMIN' || role == 'SUPERVISOR';
+
+  bool get isPlatformAdmin => role == 'PLATFORM_ADMIN';
 
   bool get canRecordAttendance =>
       role == 'ADMIN' || role == 'SUPERVISOR' || role == 'TEACHER';
@@ -31,7 +34,7 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,
-      organizationId: json['organizationId'] as String,
+      organizationId: json['organizationId'] as String?,
       firstName: json['firstName'] as String,
       lastName: json['lastName'] as String,
       email: json['email'] as String,

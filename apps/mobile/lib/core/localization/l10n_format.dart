@@ -46,6 +46,26 @@ String localizedErrorCode(
       return l10n.noActiveStudent;
     case 'STUDENT_INACTIVE':
       return l10n.errorStudentInactive;
+    case 'ORGANIZATION_NOT_FOUND':
+      return l10n.errorOrganizationNotFound;
+    case 'ORGANIZATION_SUSPENDED':
+    case 'TENANT_SUSPENDED':
+      return l10n.errorOrganizationSuspended;
+    case 'ORGANIZATION_INACTIVE':
+    case 'TENANT_INACTIVE':
+      return l10n.errorOrganizationInactive;
+    case 'USER_NOT_FOUND':
+      return l10n.errorUserNotFound;
+    case 'USER_ALREADY_EXISTS':
+      return l10n.errorUserAlreadyExists;
+    case 'USER_ROLE_NOT_ALLOWED':
+      return l10n.errorUserRoleNotAllowed;
+    case 'INVITATION_EXPIRED':
+      return l10n.errorInvitationExpired;
+    case 'INVITATION_ALREADY_USED':
+      return l10n.errorInvitationAlreadyUsed;
+    case 'INVITATION_REVOKED':
+      return l10n.errorInvitationRevoked;
     case 'NETWORK_ERROR':
       return l10n.errorNetwork;
     case 'LOGIN_FAILED':
@@ -54,6 +74,36 @@ String localizedErrorCode(
       return l10n.errorInternal;
     default:
       return fallback ?? l10n.errorRequestFailed;
+  }
+}
+
+String organizationStatusLabel(AppLocalizations l10n, String status) {
+  switch (status) {
+    case 'TRIAL':
+      return l10n.orgStatusTrial;
+    case 'ACTIVE':
+      return l10n.orgStatusActive;
+    case 'SUSPENDED':
+      return l10n.orgStatusSuspended;
+    case 'INACTIVE':
+      return l10n.orgStatusInactive;
+    case 'CANCELLED':
+      return l10n.orgStatusCancelled;
+    default:
+      return status;
+  }
+}
+
+String organizationPlanLabel(AppLocalizations l10n, String plan) {
+  switch (plan) {
+    case 'STARTER':
+      return l10n.planStarter;
+    case 'PROFESSIONAL':
+      return l10n.planProfessional;
+    case 'ENTERPRISE':
+      return l10n.planEnterprise;
+    default:
+      return plan;
   }
 }
 

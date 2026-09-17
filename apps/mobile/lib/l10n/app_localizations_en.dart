@@ -76,6 +76,256 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordResetUnavailable => 'Password reset is not available yet.';
 
   @override
+  String get platformDashboard => 'Dashboard';
+
+  @override
+  String get platformOrganizations => 'Organizations';
+
+  @override
+  String get platformInvitations => 'Invitations';
+
+  @override
+  String get platformAccount => 'Account';
+
+  @override
+  String get platformDashboardEmpty => 'No platform activity yet';
+
+  @override
+  String get platformTotalOrganizations => 'Total organizations';
+
+  @override
+  String get platformActiveOrganizations => 'Active organizations';
+
+  @override
+  String get platformTrialOrganizations => 'Trial organizations';
+
+  @override
+  String get platformSuspendedOrganizations => 'Suspended organizations';
+
+  @override
+  String get platformInactiveOrganizations => 'Inactive organizations';
+
+  @override
+  String get platformCancelledOrganizations => 'Cancelled organizations';
+
+  @override
+  String get platformTotalStudents => 'Total students';
+
+  @override
+  String get platformTotalTeachers => 'Total teachers';
+
+  @override
+  String get platformTotalBuses => 'Total buses';
+
+  @override
+  String get searchOrganizations => 'Search organizations...';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get noOrganizationsYet => 'No organizations yet';
+
+  @override
+  String get organizationDetails => 'Organization';
+
+  @override
+  String get organizationName => 'Organization name';
+
+  @override
+  String get organizationSlug => 'Slug';
+
+  @override
+  String get organizationCountry => 'Country';
+
+  @override
+  String get organizationTimezone => 'Timezone';
+
+  @override
+  String get organizationDefaultLanguage => 'Default language';
+
+  @override
+  String get organizationContactEmail => 'Contact email';
+
+  @override
+  String get organizationContactPhone => 'Contact phone';
+
+  @override
+  String get organizationContactPhoneOptional => 'Contact phone (optional)';
+
+  @override
+  String get organizationAddressOptional => 'Address (optional)';
+
+  @override
+  String get organizationWebsiteOptional => 'Website (optional)';
+
+  @override
+  String get organizationLogoOptional => 'Logo URL (optional)';
+
+  @override
+  String get organizationStatus => 'Status';
+
+  @override
+  String get organizationPlan => 'Plan';
+
+  @override
+  String get organizationUsage => 'Usage';
+
+  @override
+  String organizationUsageSummary(int campuses, int students, int users) {
+    return '$campuses campuses · $students students · $users users';
+  }
+
+  @override
+  String get usageCampuses => 'Campuses';
+
+  @override
+  String get usageStudents => 'Students';
+
+  @override
+  String get usageUsers => 'Users';
+
+  @override
+  String get usageClassrooms => 'Classrooms';
+
+  @override
+  String get usageBuses => 'Buses';
+
+  @override
+  String get createdAt => 'Created';
+
+  @override
+  String get createOrganization => 'Create organization';
+
+  @override
+  String get activateOrganization => 'Activate';
+
+  @override
+  String get suspendOrganization => 'Suspend';
+
+  @override
+  String get deactivateOrganization => 'Deactivate';
+
+  @override
+  String get confirmSuspendOrganization =>
+      'Suspend this organization? Tenant users will lose access until it is activated again.';
+
+  @override
+  String get confirmDeactivateOrganization =>
+      'Deactivate this organization? This stops normal tenant access.';
+
+  @override
+  String get organizationCreated => 'Organization created successfully';
+
+  @override
+  String get organizationCreatedWithInvitation =>
+      'Organization created and invitation sent';
+
+  @override
+  String get organizationUpdated => 'Organization updated';
+
+  @override
+  String get optionalAdminInvitation => 'Initial admin invitation (optional)';
+
+  @override
+  String get adminFirstName => 'Admin first name';
+
+  @override
+  String get adminLastName => 'Admin last name';
+
+  @override
+  String get adminEmail => 'Admin email';
+
+  @override
+  String get adminFirstNameOptional => 'Admin first name (optional)';
+
+  @override
+  String get adminLastNameOptional => 'Admin last name (optional)';
+
+  @override
+  String get adminEmailOptional => 'Admin email (optional)';
+
+  @override
+  String get adminInviteIncomplete =>
+      'Provide admin first name, last name, and email together';
+
+  @override
+  String get inviteAdminHint =>
+      'Invite the first tenant admin for an existing organization.';
+
+  @override
+  String get sendInvitation => 'Send invitation';
+
+  @override
+  String get invitationCreated => 'Invitation created successfully';
+
+  @override
+  String get role => 'Role';
+
+  @override
+  String get rolePlatformAdmin => 'Platform admin';
+
+  @override
+  String get accountStatus => 'Account status';
+
+  @override
+  String get orgStatusTrial => 'Trial';
+
+  @override
+  String get orgStatusActive => 'Active';
+
+  @override
+  String get orgStatusSuspended => 'Suspended';
+
+  @override
+  String get orgStatusInactive => 'Inactive';
+
+  @override
+  String get orgStatusCancelled => 'Cancelled';
+
+  @override
+  String get planStarter => 'Starter';
+
+  @override
+  String get planProfessional => 'Professional';
+
+  @override
+  String get planEnterprise => 'Enterprise';
+
+  @override
+  String get fieldRequired => 'This field is required';
+
+  @override
+  String get invalidEmail => 'Enter a valid email';
+
+  @override
+  String get errorOrganizationNotFound => 'Organization not found';
+
+  @override
+  String get errorOrganizationSuspended => 'Organization is suspended';
+
+  @override
+  String get errorOrganizationInactive => 'Organization is inactive';
+
+  @override
+  String get errorUserNotFound => 'User not found';
+
+  @override
+  String get errorUserAlreadyExists => 'A user with this email already exists';
+
+  @override
+  String get errorUserRoleNotAllowed => 'This role is not allowed';
+
+  @override
+  String get errorInvitationExpired => 'This invitation has expired';
+
+  @override
+  String get errorInvitationAlreadyUsed => 'This invitation was already used';
+
+  @override
+  String get errorInvitationRevoked => 'This invitation was revoked';
+
+  @override
   String get emailRequired => 'Email is required';
 
   @override

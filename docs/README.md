@@ -43,4 +43,4 @@ Local environment and how to run the stack: root [README](../README.md).
 
 ## What to implement next
 
-PLATFORM-001 Slice 1 (API platform layer) and PLATFORM-002 (platform owner bootstrap auth) are done. Product sequence remaining: ACTIVITY-001, PROFILE-001, SCHOOL-001, then AI-001. PLATFORM-001 Slice 2 (Flutter console + tenant `/users` CRUD) can land independently. See [DOC-001](DOC-001-product-vision.md).
+PLATFORM-001 through PLATFORM-004 (API platform layer, owner bootstrap, tenant user APIs, Flutter Platform Admin console) are done. Product sequence remaining: ACTIVITY-001, PROFILE-001, SCHOOL-001, then AI-001. See [DOC-001](DOC-001-product-vision.md).

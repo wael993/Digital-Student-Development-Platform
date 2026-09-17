@@ -1,6 +1,40 @@
-import type { UserRole, UserStatus, PublicUser } from '../../types';
+import type { TenantRole, UserRole, UserStatus, PublicUser } from '../../types';
 import { tenantFilter } from '../../data/tenant';
 import { UserModel, type User } from './user.model';
+
+export type ListUsersFilter = {
+  role?: UserRole;
+  status?: UserStatus;
+  campusId?: string;
+  q?: string;
+};
+
+export type UserAssignmentPatch = {
+  firstName?: string;
+  lastName?: string;
+  status?: UserStatus;
+  campusIds?: string[];
+  classroomIds?: string[];
+  routeIds?: string[];
+};
+
+export function toStaffUserJson(user: User & { id: string }) {
+  return {
+    id: user.id,
+    organizationId: user.organizationId ? String(user.organizationId) : null,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    role: user.role as TenantRole,
+    status: user.status,
+    campusIds: user.campusIds.map(String),
+    classroomIds: user.classroomIds.map(String),
+    routeIds: user.routeIds.map(String),
+    lastLoginAt: user.lastLoginAt ?? null,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+}
 
 export function toPublicUser(user: User & { id: string }): PublicUser {
   return {
@@ -64,6 +98,41 @@ export async function countUsersByOrganization(organizationId: string, role?: Us
   });
 }
 
+function buildListUsersFilter(
+  organizationId: string,
+  filter: ListUsersFilter,
+): Record<string, unknown> {
+  const extra: Record<string, unknown> = {};
+  if (filter.role) {
+    extra.role = filter.role;
+  }
+  if (filter.status) {
+    extra.status = filter.status;
+  }
+  if (filter.campusId) {
+    extra.campusIds = filter.campusId;
+  }
+  if (filter.q) {
+    const regex = new RegExp(filter.q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    extra.$or = [{ firstName: regex }, { lastName: regex }, { email: regex }];
+  }
+  return tenantFilter(organizationId, extra);
+}
+
+export async function listUsers(
+  organizationId: string,
+  filter: ListUsersFilter,
+  skip = 0,
+  limit = 20,
+) {
+  const query = buildListUsersFilter(organizationId, filter);
+  const [items, total] = await Promise.all([
+    UserModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    UserModel.countDocuments(query),
+  ]);
+  return { items, total };
+}
+
 export async function createUser(input: {
   organizationId?: string | null;
   email: string;
@@ -85,11 +154,19 @@ export async function createUser(input: {
 export async function updateUser(
   organizationId: string,
   id: string,
-  patch: { firstName?: string; lastName?: string; status?: UserStatus },
+  patch: UserAssignmentPatch,
 ) {
   return UserModel.findOneAndUpdate(tenantFilter(organizationId, { _id: id }), patch, {
     new: true,
   });
+}
+
+export async function updateUserAssignments(
+  organizationId: string,
+  id: string,
+  patch: UserAssignmentPatch,
+) {
+  return updateUser(organizationId, id, patch);
 }
 
 export async function setUserPassword(id: string, passwordHash: string) {

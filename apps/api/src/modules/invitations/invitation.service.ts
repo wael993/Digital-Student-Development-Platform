@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import type { AuthContext, TenantRole } from '../../types';
 import { AppError } from '../../utils/appError';
-import { conflict, notFound } from '../../utils/validate';
+import { notFound } from '../../utils/validate';
 import { hashPassword } from '../auth/auth.service';
 import { writeAuditLog } from '../audit/audit.service';
 import { findOrganizationById } from '../organizations/organization.repository';
@@ -19,23 +19,22 @@ function generateInviteToken(): string {
   return randomBytes(32).toString('hex');
 }
 
-export async function createAdminInvitation(input: {
+function userAlreadyExistsError(): AppError {
+  return new AppError(409, 'USER_ALREADY_EXISTS', 'Email is already registered');
+}
+
+export async function createUserInvitation(input: {
   actor: AuthContext;
   organizationId: string;
   email: string;
   firstName: string;
   lastName: string;
-  role?: TenantRole;
+  role: TenantRole;
+  campusIds?: string[];
+  classroomIds?: string[];
+  routeIds?: string[];
   req?: Parameters<typeof writeAuditLog>[0]['req'];
 }): Promise<{ invitationId: string; email: string; expiresAt: Date; token: string }> {
-  const role = input.role ?? 'ADMIN';
-  if (role !== 'ADMIN') {
-    // Slice 1: platform invites initial ADMIN only.
-    throw new AppError(422, 'VALIDATION_ERROR', 'Only ADMIN invitations are supported', [
-      { field: 'role', message: 'Must be ADMIN' },
-    ]);
-  }
-
   const organization = await findOrganizationById(input.organizationId);
   if (!organization) {
     throw notFound();
@@ -44,7 +43,7 @@ export async function createAdminInvitation(input: {
   const email = input.email.toLowerCase().trim();
   const existingUser = await findUserByEmail(email);
   if (existingUser) {
-    throw conflict('Email is already registered');
+    throw userAlreadyExistsError();
   }
 
   if (!(await subscriptionService.canCreateUser(input.organizationId))) {
@@ -63,9 +62,12 @@ export async function createAdminInvitation(input: {
   const invitation = await UserInvitationModel.create({
     organizationId: input.organizationId,
     email,
-    role,
+    role: input.role,
     firstName: input.firstName,
     lastName: input.lastName,
+    campusIds: input.campusIds ?? [],
+    classroomIds: input.classroomIds ?? [],
+    routeIds: input.routeIds ?? [],
     tokenHash,
     expiresAt,
     invitedBy: input.actor.userId,
@@ -74,21 +76,35 @@ export async function createAdminInvitation(input: {
 
   await writeAuditLog({
     actor: input.actor,
-    action: 'ADMIN_INVITED',
+    action: 'USER_INVITED',
     resourceType: 'user_invitation',
     resourceId: invitation.id,
     organizationId: input.organizationId,
-    metadata: { email, role },
+    metadata: { email, role: input.role },
     req: input.req,
   });
 
-  // note: email delivery is out of scope; return raw token once for the platform client/tests.
   return {
     invitationId: invitation.id,
     email,
     expiresAt,
     token,
   };
+}
+
+export async function createAdminInvitation(input: {
+  actor: AuthContext;
+  organizationId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role?: TenantRole;
+  req?: Parameters<typeof writeAuditLog>[0]['req'];
+}): Promise<{ invitationId: string; email: string; expiresAt: Date; token: string }> {
+  return createUserInvitation({
+    ...input,
+    role: input.role ?? 'ADMIN',
+  });
 }
 
 export async function acceptInvitation(input: {
@@ -104,7 +120,7 @@ export async function acceptInvitation(input: {
   }
 
   if (invitation.status === 'ACCEPTED') {
-    throw new AppError(409, 'INVITATION_USED', 'Invitation has already been accepted');
+    throw new AppError(409, 'INVITATION_ALREADY_USED', 'Invitation has already been accepted');
   }
   if (invitation.status === 'REVOKED') {
     throw new AppError(410, 'INVITATION_REVOKED', 'Invitation has been revoked');
@@ -119,11 +135,7 @@ export async function acceptInvitation(input: {
 
   const existingUser = await findUserByEmail(invitation.email);
   if (existingUser) {
-    throw conflict('Email is already registered');
-  }
-
-  if (invitation.role !== 'ADMIN') {
-    throw new AppError(403, 'FORBIDDEN', 'You do not have permission to perform this action');
+    throw userAlreadyExistsError();
   }
 
   const organization = await findOrganizationById(String(invitation.organizationId));
@@ -140,6 +152,9 @@ export async function acceptInvitation(input: {
     lastName: input.lastName?.trim() || invitation.lastName,
     role: invitation.role,
     status: 'ACTIVE',
+    campusIds: invitation.campusIds.map(String),
+    classroomIds: invitation.classroomIds.map(String),
+    routeIds: invitation.routeIds.map(String),
   });
 
   invitation.status = 'ACCEPTED';
@@ -151,15 +166,15 @@ export async function acceptInvitation(input: {
       userId: user.id,
       organizationId: String(invitation.organizationId),
       role: invitation.role,
-      campusIds: [],
-      classroomIds: [],
-      routeIds: [],
+      campusIds: invitation.campusIds.map(String),
+      classroomIds: invitation.classroomIds.map(String),
+      routeIds: invitation.routeIds.map(String),
     },
-    action: 'ADMIN_INVITATION_ACCEPTED',
+    action: 'USER_INVITATION_ACCEPTED',
     resourceType: 'user_invitation',
     resourceId: invitation.id,
     organizationId: String(invitation.organizationId),
-    metadata: { email: invitation.email, userId: user.id },
+    metadata: { email: invitation.email, userId: user.id, role: invitation.role },
   });
 
   return {

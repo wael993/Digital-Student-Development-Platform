@@ -103,7 +103,7 @@ describe('platform SaaS layer', () => {
     expect(audits).toHaveLength(1);
     expect(String(audits[0].organizationId)).toBe(response.body.organization.id);
 
-    const inviteAudits = await AuditLogModel.find({ action: 'ADMIN_INVITED' });
+    const inviteAudits = await AuditLogModel.find({ action: 'USER_INVITED' });
     expect(inviteAudits).toHaveLength(1);
 
     const stored = await UserInvitationModel.findById(response.body.invitation.invitationId);
@@ -150,7 +150,7 @@ describe('platform SaaS layer', () => {
       .post(`/api/v1/platform/invitations/${inviteToken}/accept`)
       .send({ password: 'AdminPass1!' });
     expect(reuse.status).toBe(409);
-    expect(reuse.body.error.code).toBe('INVITATION_USED');
+    expect(reuse.body.error.code).toBe('INVITATION_ALREADY_USED');
 
     const secondInvite = await request(app)
       .post(`/api/v1/platform/organizations/${organizationId}/admin-invitation`)
@@ -224,6 +224,12 @@ describe('platform SaaS layer', () => {
     expect(suspended.status).toBe(200);
     expect(suspended.body.status).toBe('SUSPENDED');
 
+    const reactivated = await request(app)
+      .post(`/api/v1/platform/organizations/${organizationId}/activate`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(reactivated.status).toBe(200);
+    expect(reactivated.body.status).toBe('ACTIVE');
+
     const deactivated = await request(app)
       .post(`/api/v1/platform/organizations/${organizationId}/deactivate`)
       .set('Authorization', `Bearer ${token}`);
@@ -234,7 +240,10 @@ describe('platform SaaS layer', () => {
       organizationId,
       action: { $in: ['TENANT_ACTIVATED', 'TENANT_SUSPENDED', 'TENANT_DEACTIVATED'] },
     });
-    expect(actions).toHaveLength(3);
+    expect(actions.length).toBeGreaterThanOrEqual(3);
+    expect(new Set(actions.map((a) => a.action))).toEqual(
+      new Set(['TENANT_ACTIVATED', 'TENANT_SUSPENDED', 'TENANT_DEACTIVATED']),
+    );
   });
 
   it('blocks suspended tenant users from login and tenant operations', async () => {
@@ -346,6 +355,79 @@ describe('platform SaaS layer', () => {
 
     const audit = await AuditLogModel.findOne({ action: 'SUBSCRIPTION_CHANGED' });
     expect(audit).toBeTruthy();
+  });
+
+  it('filters organizations by status and q, and returns dashboard metrics', async () => {
+    await insertPlatformAdmin({ email: 'ops@example.com', password });
+    const token = await login('ops@example.com');
+
+    await request(app)
+      .post('/api/v1/platform/organizations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'Alpha Academy',
+        country: 'SA',
+        contactEmail: 'alpha@filter.example',
+        planCode: 'STARTER',
+        status: 'TRIAL',
+      });
+    await request(app)
+      .post('/api/v1/platform/organizations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'Beta School',
+        country: 'SA',
+        contactEmail: 'beta@other.example',
+        planCode: 'STARTER',
+        status: 'ACTIVE',
+      });
+
+    const filtered = await request(app)
+      .get('/api/v1/platform/organizations')
+      .set('Authorization', `Bearer ${token}`)
+      .query({ status: 'TRIAL', q: 'alpha' });
+    expect(filtered.status).toBe(200);
+    expect(filtered.body.data).toHaveLength(1);
+    expect(filtered.body.data[0].name).toBe('Alpha Academy');
+    expect(filtered.body.data[0].usage).toMatchObject({
+      campusCount: expect.any(Number),
+      studentCount: expect.any(Number),
+      userCount: expect.any(Number),
+    });
+
+    const dashboard = await request(app)
+      .get('/api/v1/platform/dashboard')
+      .set('Authorization', `Bearer ${token}`);
+    expect(dashboard.status).toBe(200);
+    expect(dashboard.body.organizations.total).toBeGreaterThanOrEqual(2);
+    expect(dashboard.body).toMatchObject({
+      students: expect.any(Number),
+      teachers: expect.any(Number),
+      buses: expect.any(Number),
+    });
+  });
+
+  it('rejects invalid organization status transitions', async () => {
+    await insertPlatformAdmin({ email: 'ops@example.com', password });
+    const token = await login('ops@example.com');
+
+    const created = await request(app)
+      .post('/api/v1/platform/organizations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'Transition School',
+        country: 'SA',
+        contactEmail: 'trans@example.com',
+        planCode: 'STARTER',
+        status: 'INACTIVE',
+      });
+    const organizationId = created.body.organization.id as string;
+
+    const invalid = await request(app)
+      .post(`/api/v1/platform/organizations/${organizationId}/activate`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(invalid.status).toBe(422);
+    expect(invalid.body.error.code).toBe('VALIDATION_ERROR');
   });
 
   it('does not create PLATFORM_ADMIN via invitation accept', async () => {

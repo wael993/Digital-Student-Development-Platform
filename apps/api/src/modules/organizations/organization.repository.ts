@@ -40,10 +40,32 @@ export async function findOrganizationBySlug(slug: string) {
   return OrganizationModel.findOne({ slug: slug.toLowerCase().trim() });
 }
 
-export async function listOrganizations(skip = 0, limit = 20) {
+export type ListOrganizationsFilter = {
+  status?: OrganizationStatus;
+  q?: string;
+};
+
+function buildOrganizationListFilter(filter?: ListOrganizationsFilter): Record<string, unknown> {
+  const query: Record<string, unknown> = {};
+  if (filter?.status) {
+    query.status = filter.status;
+  }
+  if (filter?.q) {
+    const regex = new RegExp(filter.q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    query.$or = [{ name: regex }, { contactEmail: regex }];
+  }
+  return query;
+}
+
+export async function listOrganizations(
+  skip = 0,
+  limit = 20,
+  filter?: ListOrganizationsFilter,
+) {
+  const query = buildOrganizationListFilter(filter);
   const [items, total] = await Promise.all([
-    OrganizationModel.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit),
-    OrganizationModel.countDocuments({}),
+    OrganizationModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    OrganizationModel.countDocuments(query),
   ]);
   return { items, total };
 }
@@ -106,12 +128,13 @@ export function toOrganizationJson(organization: Organization & { id: string }) 
   return {
     id: organization.id,
     name: organization.name,
-    slug: organization.slug,
+    // note: pre-PLATFORM docs may lack slug/contactEmail; always emit strings
+    slug: organization.slug ?? '',
     status: organization.status,
     country: organization.country,
     timezone: organization.timezone,
     defaultLanguage: organization.defaultLanguage,
-    contactEmail: organization.contactEmail,
+    contactEmail: organization.contactEmail ?? '',
     contactPhone: organization.contactPhone ?? null,
     planCode: organization.planCode,
     subscriptionStatus: organization.subscriptionStatus,

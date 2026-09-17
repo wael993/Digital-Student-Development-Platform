@@ -3,6 +3,7 @@ import { authenticate } from '../../middlewares/authenticate';
 import { requirePlatformAdmin } from '../../middlewares/requirePlatformAdmin';
 import { asyncHandler } from '../../utils/asyncHandler';
 import {
+  getDashboard,
   getOrganization,
   getOrganizations,
   getSubscription,
@@ -25,6 +26,7 @@ platformRouter.post('/invitations/:token/accept', asyncHandler(postAcceptInvitat
 
 platformRouter.use(authenticate, requirePlatformAdmin);
 
+platformRouter.get('/dashboard', asyncHandler(getDashboard));
 platformRouter.post('/organizations', asyncHandler(postOrganization));
 platformRouter.get('/organizations', asyncHandler(getOrganizations));
 platformRouter.get('/organizations/:organizationId', asyncHandler(getOrganization));

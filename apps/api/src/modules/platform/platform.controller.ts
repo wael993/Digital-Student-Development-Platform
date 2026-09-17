@@ -12,7 +12,13 @@ export async function postOrganization(req: Request, res: Response): Promise<voi
 
 export async function getOrganizations(req: Request, res: Response): Promise<void> {
   requirePlatformAuth(req);
-  const result = await platformService.listTenants(req.query as { page?: unknown; limit?: unknown });
+  const result = await platformService.listTenants(req.query as Record<string, unknown>);
+  res.status(200).json(result);
+}
+
+export async function getDashboard(req: Request, res: Response): Promise<void> {
+  requirePlatformAuth(req);
+  const result = await platformService.getDashboard();
   res.status(200).json(result);
 }
 

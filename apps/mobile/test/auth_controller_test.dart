@@ -81,6 +81,34 @@ void main() {
     expect(await tokens.readRefreshToken(), 'refresh');
   });
 
+  test('platform admin login accepts null organizationId', () async {
+    final dio = _dioThat({
+      'POST /auth/login': (options) => Response(
+            requestOptions: options,
+            statusCode: 200,
+            data: {
+              'user': {
+                'id': 'p1',
+                'organizationId': null,
+                'firstName': 'wael',
+                'lastName': 'zobani',
+                'email': 'wael@rivo.com',
+                'role': 'PLATFORM_ADMIN',
+              },
+              'accessToken': 'access',
+              'refreshToken': 'refresh',
+            },
+          ),
+    });
+    controller = AuthController(repoWith(dio));
+
+    await controller.login(email: 'wael@rivo.com', password: 'Password123!');
+
+    expect(controller.state.status, AuthStatus.authenticated);
+    expect(controller.state.user?.role, 'PLATFORM_ADMIN');
+    expect(controller.state.user?.organizationId, isNull);
+  });
+
   test('login failure sets an authentication error', () async {
     final dio = _dioThat({
       'POST /auth/login': (options) => Response(

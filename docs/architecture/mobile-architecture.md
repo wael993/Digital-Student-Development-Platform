@@ -19,6 +19,7 @@ apps/mobile/lib/
 ├── features/
 │   ├── auth/
 │   ├── home/
+│   ├── platform/     # PLATFORM_ADMIN console (PLATFORM-004)
 │   ├── campuses/
 │   ├── classrooms/
 │   ├── students/
@@ -87,9 +88,31 @@ Session `User` already carries `id`, `organizationId`, and `role`. Use `role` to
 
 ## Routing
 
-GoRouter hosts `AuthGate`. Unauthenticated users see the login screen. Authenticated users see a role-scoped home: campuses (admin/supervisor), my classes (teacher), my route (driver), or my children (guardian).
+GoRouter hosts `AuthGate`. Unauthenticated users see the login screen. Authenticated users see a role-scoped home:
+
+- `PLATFORM_ADMIN` → Platform Console (`features/platform`: Dashboard, Organizations, Invitations, Account). No tenant organization context.
+- `ADMIN` / `SUPERVISOR` → campuses
+- `TEACHER` → my classes
+- `DRIVER` → my route
+- `GUARDIAN` → my children
 
 Deep links from FCM are handled in NOTIF-001: arrival opens the child dashboard, departure/home drop-off open the journey, media opens photos.
+
+## Platform Admin Flutter flow (PLATFORM-004)
+
+```
+Login (PLATFORM_ADMIN, organizationId = null)
+  → PlatformShell
+       ├── Dashboard          GET /platform/dashboard
+       ├── Organizations      GET /platform/organizations?q=&status=
+       │     ├── Details      GET /platform/organizations/:id
+       │     │     └── Activate / Suspend / Deactivate
+       │     └── Create       POST /platform/organizations (+ optional admin)
+       ├── Invitations        POST /platform/organizations/:id/admin-invitation
+       └── Account            logout
+```
+
+Invitation tokens returned by the API are discarded in the repository layer and never shown in the UI. Backend authorization on `/api/v1/platform/*` remains authoritative.
 
 ## Platform capabilities (later tickets)
 

@@ -230,6 +230,492 @@ abstract class AppLocalizations {
   /// **'Password reset is not available yet.'**
   String get passwordResetUnavailable;
 
+  /// No description provided for @platformDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get platformDashboard;
+
+  /// No description provided for @platformOrganizations.
+  ///
+  /// In en, this message translates to:
+  /// **'Organizations'**
+  String get platformOrganizations;
+
+  /// No description provided for @platformInvitations.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitations'**
+  String get platformInvitations;
+
+  /// No description provided for @platformAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get platformAccount;
+
+  /// No description provided for @platformDashboardEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No platform activity yet'**
+  String get platformDashboardEmpty;
+
+  /// No description provided for @platformTotalOrganizations.
+  ///
+  /// In en, this message translates to:
+  /// **'Total organizations'**
+  String get platformTotalOrganizations;
+
+  /// No description provided for @platformActiveOrganizations.
+  ///
+  /// In en, this message translates to:
+  /// **'Active organizations'**
+  String get platformActiveOrganizations;
+
+  /// No description provided for @platformTrialOrganizations.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial organizations'**
+  String get platformTrialOrganizations;
+
+  /// No description provided for @platformSuspendedOrganizations.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended organizations'**
+  String get platformSuspendedOrganizations;
+
+  /// No description provided for @platformInactiveOrganizations.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive organizations'**
+  String get platformInactiveOrganizations;
+
+  /// No description provided for @platformCancelledOrganizations.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled organizations'**
+  String get platformCancelledOrganizations;
+
+  /// No description provided for @platformTotalStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Total students'**
+  String get platformTotalStudents;
+
+  /// No description provided for @platformTotalTeachers.
+  ///
+  /// In en, this message translates to:
+  /// **'Total teachers'**
+  String get platformTotalTeachers;
+
+  /// No description provided for @platformTotalBuses.
+  ///
+  /// In en, this message translates to:
+  /// **'Total buses'**
+  String get platformTotalBuses;
+
+  /// No description provided for @searchOrganizations.
+  ///
+  /// In en, this message translates to:
+  /// **'Search organizations...'**
+  String get searchOrganizations;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @noOrganizationsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No organizations yet'**
+  String get noOrganizationsYet;
+
+  /// No description provided for @organizationDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization'**
+  String get organizationDetails;
+
+  /// No description provided for @organizationName.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization name'**
+  String get organizationName;
+
+  /// No description provided for @organizationSlug.
+  ///
+  /// In en, this message translates to:
+  /// **'Slug'**
+  String get organizationSlug;
+
+  /// No description provided for @organizationCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Country'**
+  String get organizationCountry;
+
+  /// No description provided for @organizationTimezone.
+  ///
+  /// In en, this message translates to:
+  /// **'Timezone'**
+  String get organizationTimezone;
+
+  /// No description provided for @organizationDefaultLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Default language'**
+  String get organizationDefaultLanguage;
+
+  /// No description provided for @organizationContactEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact email'**
+  String get organizationContactEmail;
+
+  /// No description provided for @organizationContactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact phone'**
+  String get organizationContactPhone;
+
+  /// No description provided for @organizationContactPhoneOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact phone (optional)'**
+  String get organizationContactPhoneOptional;
+
+  /// No description provided for @organizationAddressOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Address (optional)'**
+  String get organizationAddressOptional;
+
+  /// No description provided for @organizationWebsiteOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Website (optional)'**
+  String get organizationWebsiteOptional;
+
+  /// No description provided for @organizationLogoOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Logo URL (optional)'**
+  String get organizationLogoOptional;
+
+  /// No description provided for @organizationStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get organizationStatus;
+
+  /// No description provided for @organizationPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Plan'**
+  String get organizationPlan;
+
+  /// No description provided for @organizationUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage'**
+  String get organizationUsage;
+
+  /// No description provided for @organizationUsageSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{campuses} campuses · {students} students · {users} users'**
+  String organizationUsageSummary(int campuses, int students, int users);
+
+  /// No description provided for @usageCampuses.
+  ///
+  /// In en, this message translates to:
+  /// **'Campuses'**
+  String get usageCampuses;
+
+  /// No description provided for @usageStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'Students'**
+  String get usageStudents;
+
+  /// No description provided for @usageUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get usageUsers;
+
+  /// No description provided for @usageClassrooms.
+  ///
+  /// In en, this message translates to:
+  /// **'Classrooms'**
+  String get usageClassrooms;
+
+  /// No description provided for @usageBuses.
+  ///
+  /// In en, this message translates to:
+  /// **'Buses'**
+  String get usageBuses;
+
+  /// No description provided for @createdAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Created'**
+  String get createdAt;
+
+  /// No description provided for @createOrganization.
+  ///
+  /// In en, this message translates to:
+  /// **'Create organization'**
+  String get createOrganization;
+
+  /// No description provided for @activateOrganization.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate'**
+  String get activateOrganization;
+
+  /// No description provided for @suspendOrganization.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend'**
+  String get suspendOrganization;
+
+  /// No description provided for @deactivateOrganization.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get deactivateOrganization;
+
+  /// No description provided for @confirmSuspendOrganization.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspend this organization? Tenant users will lose access until it is activated again.'**
+  String get confirmSuspendOrganization;
+
+  /// No description provided for @confirmDeactivateOrganization.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate this organization? This stops normal tenant access.'**
+  String get confirmDeactivateOrganization;
+
+  /// No description provided for @organizationCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization created successfully'**
+  String get organizationCreated;
+
+  /// No description provided for @organizationCreatedWithInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization created and invitation sent'**
+  String get organizationCreatedWithInvitation;
+
+  /// No description provided for @organizationUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization updated'**
+  String get organizationUpdated;
+
+  /// No description provided for @optionalAdminInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial admin invitation (optional)'**
+  String get optionalAdminInvitation;
+
+  /// No description provided for @adminFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin first name'**
+  String get adminFirstName;
+
+  /// No description provided for @adminLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin last name'**
+  String get adminLastName;
+
+  /// No description provided for @adminEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin email'**
+  String get adminEmail;
+
+  /// No description provided for @adminFirstNameOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin first name (optional)'**
+  String get adminFirstNameOptional;
+
+  /// No description provided for @adminLastNameOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin last name (optional)'**
+  String get adminLastNameOptional;
+
+  /// No description provided for @adminEmailOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin email (optional)'**
+  String get adminEmailOptional;
+
+  /// No description provided for @adminInviteIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide admin first name, last name, and email together'**
+  String get adminInviteIncomplete;
+
+  /// No description provided for @inviteAdminHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite the first tenant admin for an existing organization.'**
+  String get inviteAdminHint;
+
+  /// No description provided for @sendInvitation.
+  ///
+  /// In en, this message translates to:
+  /// **'Send invitation'**
+  String get sendInvitation;
+
+  /// No description provided for @invitationCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation created successfully'**
+  String get invitationCreated;
+
+  /// No description provided for @role.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get role;
+
+  /// No description provided for @rolePlatformAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform admin'**
+  String get rolePlatformAdmin;
+
+  /// No description provided for @accountStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Account status'**
+  String get accountStatus;
+
+  /// No description provided for @orgStatusTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial'**
+  String get orgStatusTrial;
+
+  /// No description provided for @orgStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get orgStatusActive;
+
+  /// No description provided for @orgStatusSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get orgStatusSuspended;
+
+  /// No description provided for @orgStatusInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get orgStatusInactive;
+
+  /// No description provided for @orgStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get orgStatusCancelled;
+
+  /// No description provided for @planStarter.
+  ///
+  /// In en, this message translates to:
+  /// **'Starter'**
+  String get planStarter;
+
+  /// No description provided for @planProfessional.
+  ///
+  /// In en, this message translates to:
+  /// **'Professional'**
+  String get planProfessional;
+
+  /// No description provided for @planEnterprise.
+  ///
+  /// In en, this message translates to:
+  /// **'Enterprise'**
+  String get planEnterprise;
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get fieldRequired;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email'**
+  String get invalidEmail;
+
+  /// No description provided for @errorOrganizationNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization not found'**
+  String get errorOrganizationNotFound;
+
+  /// No description provided for @errorOrganizationSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization is suspended'**
+  String get errorOrganizationSuspended;
+
+  /// No description provided for @errorOrganizationInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization is inactive'**
+  String get errorOrganizationInactive;
+
+  /// No description provided for @errorUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User not found'**
+  String get errorUserNotFound;
+
+  /// No description provided for @errorUserAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'A user with this email already exists'**
+  String get errorUserAlreadyExists;
+
+  /// No description provided for @errorUserRoleNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'This role is not allowed'**
+  String get errorUserRoleNotAllowed;
+
+  /// No description provided for @errorInvitationExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This invitation has expired'**
+  String get errorInvitationExpired;
+
+  /// No description provided for @errorInvitationAlreadyUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'This invitation was already used'**
+  String get errorInvitationAlreadyUsed;
+
+  /// No description provided for @errorInvitationRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'This invitation was revoked'**
+  String get errorInvitationRevoked;
+
   /// No description provided for @emailRequired.
   ///
   /// In en, this message translates to:
