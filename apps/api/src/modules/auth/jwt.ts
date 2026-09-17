@@ -5,17 +5,18 @@ import type { UserRole } from '../../types';
 
 export type AccessClaims = {
   sub: string;
-  organizationId: string;
   role: UserRole;
   type: 'access';
+  /** Present for tenant users; omitted for PLATFORM_ADMIN. */
+  organizationId?: string;
 };
 
 export type RefreshClaims = {
   sub: string;
-  organizationId: string;
   role: UserRole;
   type: 'refresh';
   jti: string;
+  organizationId?: string;
 };
 
 function expiresIn(value: string): SignOptions['expiresIn'] {
@@ -46,6 +47,10 @@ export function signRefreshToken(input: Omit<RefreshClaims, 'type' | 'jti'>): {
   return { token, jti, expiresAt: new Date(decoded.exp * 1000) };
 }
 
+function isUserRole(value: unknown): value is UserRole {
+  return typeof value === 'string';
+}
+
 export function verifyAccessToken(token: string): AccessClaims {
   const payload = jwt.verify(token, env.jwtAccessSecret, { algorithms: ['HS256'] });
   if (
@@ -53,12 +58,25 @@ export function verifyAccessToken(token: string): AccessClaims {
     payload === null ||
     payload.type !== 'access' ||
     typeof payload.sub !== 'string' ||
-    typeof payload.organizationId !== 'string' ||
-    typeof payload.role !== 'string'
+    !isUserRole(payload.role)
   ) {
     throw new jwt.JsonWebTokenError('Invalid access token');
   }
-  return payload as AccessClaims;
+  if (payload.role === 'PLATFORM_ADMIN') {
+    if (payload.organizationId !== undefined) {
+      throw new jwt.JsonWebTokenError('Invalid access token');
+    }
+    return { sub: payload.sub, role: 'PLATFORM_ADMIN', type: 'access' };
+  }
+  if (typeof payload.organizationId !== 'string') {
+    throw new jwt.JsonWebTokenError('Invalid access token');
+  }
+  return {
+    sub: payload.sub,
+    organizationId: payload.organizationId,
+    role: payload.role as UserRole,
+    type: 'access',
+  };
 }
 
 export function verifyRefreshToken(token: string): RefreshClaims {
@@ -68,11 +86,25 @@ export function verifyRefreshToken(token: string): RefreshClaims {
     payload === null ||
     payload.type !== 'refresh' ||
     typeof payload.sub !== 'string' ||
-    typeof payload.organizationId !== 'string' ||
-    typeof payload.role !== 'string' ||
-    typeof payload.jti !== 'string'
+    typeof payload.jti !== 'string' ||
+    !isUserRole(payload.role)
   ) {
     throw new jwt.JsonWebTokenError('Invalid refresh token');
   }
-  return payload as RefreshClaims;
+  if (payload.role === 'PLATFORM_ADMIN') {
+    if (payload.organizationId !== undefined) {
+      throw new jwt.JsonWebTokenError('Invalid refresh token');
+    }
+    return { sub: payload.sub, role: 'PLATFORM_ADMIN', type: 'refresh', jti: payload.jti };
+  }
+  if (typeof payload.organizationId !== 'string') {
+    throw new jwt.JsonWebTokenError('Invalid refresh token');
+  }
+  return {
+    sub: payload.sub,
+    organizationId: payload.organizationId,
+    role: payload.role as UserRole,
+    type: 'refresh',
+    jti: payload.jti,
+  };
 }

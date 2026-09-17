@@ -2,11 +2,12 @@ import type { Request, Response } from 'express';
 import { AppError } from '../../utils/appError';
 import { requireAuth } from '../../utils/requireAuth';
 import { isValidTimeZone } from '../../utils/timezone';
+import { asTrimmedString } from '../../utils/validate';
 import { DEFAULT_TIMEZONE } from './organization.model';
-import { findOrganizationById, updateOrganization } from './organization.repository';
+import { findOrganizationById, toOrganizationJson, updateOrganization } from './organization.repository';
 
 function asName(value: unknown): string | undefined {
-  return typeof value === 'string' && value.trim() !== '' ? value.trim() : undefined;
+  return asTrimmedString(value);
 }
 
 function asTimezone(value: unknown): string | undefined {
@@ -52,7 +53,8 @@ export async function patchCurrentOrganization(req: Request, res: Response): Pro
   res.status(200).json(toOrganizationJson(organization));
 }
 
-function toOrganizationJson(organization: {
+/** @deprecated use toOrganizationJson from repository — kept for any local callers */
+export function toOrgJson(organization: {
   id: string;
   name: string;
   status: string;

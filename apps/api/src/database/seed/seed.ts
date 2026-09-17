@@ -25,6 +25,7 @@ import { calendarDateInTimeZone } from '../../utils/timezone';
 import { CAMPUSES, CLASSROOMS, SEED_ORG_NAME, SEED_PASSWORD, SEED_TIMEZONE } from './catalog';
 import { assertSeedEnvironment } from './seed-env';
 import { seedOrganization } from './seed-organization';
+import { seedPlatformAdmin, SEED_PLATFORM_ADMIN_EMAIL } from './seed-platform';
 import { seedCampuses } from './seed-campuses';
 import { seedClassrooms } from './seed-classrooms';
 import { seedUsers } from './seed-users';
@@ -93,11 +94,13 @@ export async function resetDemoData(): Promise<void> {
     await OrganizationModel.deleteOne({ _id: organizationId });
   }
   await UserModel.deleteMany({ email: /@demo\.local$/i });
+  await UserModel.deleteMany({ email: SEED_PLATFORM_ADMIN_EMAIL });
 }
 
 export async function runSeed(): Promise<SeedSummary> {
   assertSeedEnvironment(env.nodeEnv);
   const ids = emptyIds();
+  await seedPlatformAdmin();
   await seedOrganization(ids);
   ids.today = calendarDateInTimeZone(new Date(), ids.timezone);
   await seedCampuses(ids);
@@ -180,6 +183,7 @@ export function formatSeedSummary(summary: SeedSummary): string {
     `Media records: ${summary.mediaRecords}`,
     '',
     `Password for every user: ${SEED_PASSWORD}`,
+    `Platform admin: ${SEED_PLATFORM_ADMIN_EMAIL}`,
     'Staff logins: admin.ahmad@demo.local, teacher.mariam@demo.local, supervisor.khalid@demo.local, driver.saad@demo.local',
     'Parent login: mohammed.alotaibi+guardian@demo.local (آدم and سارة)',
   ].join('\n');

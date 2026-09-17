@@ -26,6 +26,8 @@ import { StudentModel } from '../src/modules/students/student.model';
 import { createStudent } from '../src/modules/students/student.repository';
 import { createUser } from '../src/modules/users/user.repository';
 import { UserModel } from '../src/modules/users/user.model';
+import { AuditLogModel } from '../src/modules/audit/audit.model';
+import { UserInvitationModel } from '../src/modules/invitations/invitation.model';
 import type { UserRole, UserStatus } from '../src/types';
 import type { OrganizationStatus } from '../src/modules/organizations/organization.model';
 
@@ -63,6 +65,8 @@ export async function clearAuthData(): Promise<void> {
     StudentTransportAssignmentModel.deleteMany({}),
     DailyTransportPlanModel.deleteMany({}),
     RouteProgressModel.deleteMany({}),
+    AuditLogModel.deleteMany({}),
+    UserInvitationModel.deleteMany({}),
   ]);
 }
 
@@ -77,6 +81,24 @@ export async function setOrganizationStatus(id: string, status: OrganizationStat
   return OrganizationModel.findByIdAndUpdate(id, { status }, { new: true });
 }
 
+export async function insertPlatformAdmin(input?: {
+  email?: string;
+  password?: string;
+  firstName?: string;
+  lastName?: string;
+}) {
+  const passwordHash = await hashPassword(input?.password ?? 'Password123!');
+  return createUser({
+    organizationId: null,
+    email: input?.email ?? 'platform.admin@example.com',
+    passwordHash,
+    firstName: input?.firstName ?? 'Platform',
+    lastName: input?.lastName ?? 'Admin',
+    role: 'PLATFORM_ADMIN',
+    status: 'ACTIVE',
+  });
+}
+
 export async function insertUser(input: {
   email: string;
   password: string;
@@ -89,6 +111,14 @@ export async function insertUser(input: {
   classroomIds?: string[];
   routeIds?: string[];
 }) {
+  if (input.role === 'PLATFORM_ADMIN') {
+    return insertPlatformAdmin({
+      email: input.email,
+      password: input.password,
+      firstName: input.firstName,
+      lastName: input.lastName,
+    });
+  }
   const organizationId =
     input.organizationId ?? (await insertOrganization({ name: `Org ${input.email}` })).id;
   const passwordHash = await hashPassword(input.password);

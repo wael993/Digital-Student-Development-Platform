@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed": "tsx src/database/seed/seed.ts",
-    "seed:reset": "tsx src/database/seed/seed.ts --reset"
+    "seed:reset": "tsx src/database/seed/seed.ts --reset",
+    "bootstrap:platform-admin": "tsx src/database/bootstrap-platform-admin.ts"
   },
   "engines": {
     "node": ">=20"

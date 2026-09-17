@@ -2,6 +2,7 @@ import type { AuthContext } from '../../types';
 import { assertAssigned } from '../../authorization/scope';
 import { notFound } from '../../utils/validate';
 import { findClassroomsByIds } from '../classrooms/classroom.repository';
+import { assertCanCreateCampus } from '../subscriptions/subscription.service';
 import { createCampus, findCampusById, listCampuses, updateCampus } from './campus.repository';
 import type { Campus, CampusStatus } from './campus.model';
 
@@ -17,6 +18,7 @@ export function toCampusJson(campus: Campus & { id: string }) {
 }
 
 export async function create(auth: AuthContext, input: { name: string; status?: CampusStatus }) {
+  await assertCanCreateCampus(auth.organizationId);
   return createCampus(auth.organizationId, input);
 }
 

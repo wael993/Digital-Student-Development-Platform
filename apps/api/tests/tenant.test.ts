@@ -233,7 +233,7 @@ describe('tenant isolation and RBAC', () => {
     });
 
     expect(response.status).toBe(403);
-    expect(response.body.error.code).toBe('FORBIDDEN');
+    expect(response.body.error.code).toBe('TENANT_INACTIVE');
   });
 
   it('ignores a forged JWT role and still uses the user row', async () => {
@@ -286,7 +286,7 @@ describe('tenant isolation and RBAC', () => {
       .get('/api/v1/campuses')
       .set('Authorization', `Bearer ${accessToken}`);
     expect(probe.status).toBe(403);
-    expect(probe.body.error.code).toBe('FORBIDDEN');
+    expect(probe.body.error.code).toBe('TENANT_INACTIVE');
 
     const me = await request(app)
       .get('/api/v1/auth/me')
@@ -295,7 +295,7 @@ describe('tenant isolation and RBAC', () => {
 
     const refreshed = await request(app).post('/api/v1/auth/refresh').send({ refreshToken });
     expect(refreshed.status).toBe(403);
-    expect(refreshed.body.error.code).toBe('FORBIDDEN');
+    expect(refreshed.body.error.code).toBe('TENANT_INACTIVE');
   });
 
   it('returns 404 for an invalid resource id', async () => {

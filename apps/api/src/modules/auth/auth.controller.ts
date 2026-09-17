@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { AppError } from '../../utils/appError';
 import { requireAuth } from '../../utils/requireAuth';
 import * as authService from './auth.service';
 
@@ -21,6 +22,14 @@ export async function postLogout(req: Request, res: Response): Promise<void> {
 }
 
 export async function getMe(req: Request, res: Response): Promise<void> {
+  if (!req.auth) {
+    throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
+  }
+  if (req.auth.role === 'PLATFORM_ADMIN') {
+    const result = await authService.getMe(req.auth.userId, null);
+    res.status(200).json(result);
+    return;
+  }
   const auth = requireAuth(req);
   const result = await authService.getMe(auth.userId, auth.organizationId);
   res.status(200).json(result);

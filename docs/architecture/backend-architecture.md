@@ -37,6 +37,10 @@ apps/api/src/
 │   ├── health/             # exists
 │   ├── auth/
 │   ├── organizations/
+│   ├── platform/          # PLATFORM-001/002 SaaS console + platform-admin bootstrap
+│   ├── subscriptions/     # plan limits / feature checks
+│   ├── invitations/
+│   ├── audit/
 │   ├── users/
 │   ├── campuses/
 │   ├── students/
@@ -208,7 +212,7 @@ Versioning: URL prefix `/api/v1`. Breaking changes go to `/api/v2`. Additive fie
 See [domain-model.md](./domain-model.md) for collections and indexes.
 
 - One database, many tenants via `organizationId` on documents
-- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations`. STUDENT-001 added `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 added `attendance`. JOURNEY-001 added `student_events`. MEDIA-001 added `media`. NOTIF-001 added `notifications`, `device_tokens`, and `notification_preferences`. BUS-001 added `buses`, `bus_routes`, `bus_stops`, `route_segments`, `student_transport_assignments`, `daily_transport_plans`, and `route_progress`. Other collections wait for their tickets.
+- AUTH-001 created `users` and `refresh_tokens`. TENANT-001 added `organizations`. PLATFORM-001 extended organizations (lifecycle + plan fields), added `PLATFORM_ADMIN`, `user_invitations`, `audit_logs`, and `/api/v1/platform/*`. PLATFORM-002 adds one-time `bootstrap:platform-admin` (env secrets → hashed `PLATFORM_ADMIN` in Mongo; no permanent env login). STUDENT-001 added `campuses`, `classrooms`, `students`, and `student_guardians`. ATTENDANCE-001 added `attendance`. JOURNEY-001 added `student_events`. MEDIA-001 added `media`. NOTIF-001 added `notifications`, `device_tokens`, and `notification_preferences`. BUS-001 added `buses`, `bus_routes`, `bus_stops`, `route_segments`, `student_transport_assignments`, `daily_transport_plans`, and `route_progress`. Other collections wait for their tickets.
 
 QR scan: `POST /api/v1/attendance/scan` with `{ "qrToken" }`. Lookup is `{ organizationId, qrToken }`. History: `GET /api/v1/attendance?date=&classroomId=&studentId=`. A successful PRESENT scan also inserts `ATTENDANCE_PRESENT`.
 

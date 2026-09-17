@@ -7,7 +7,7 @@ function notFound(): AppError {
 
 /** Cross-tenant ids look like missing rows. */
 export function assertSameTenant(auth: AuthContext, organizationId: string): void {
-  if (auth.organizationId !== String(organizationId)) {
+  if (!auth.organizationId || auth.organizationId !== String(organizationId)) {
     throw notFound();
   }
 }

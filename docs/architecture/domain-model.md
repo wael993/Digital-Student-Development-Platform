@@ -100,14 +100,24 @@ MongoDB `_id` is the internal identifier. Do not put `_id` in QR codes.
 
 ### Organization
 
-School / company / tenant.
+School / company / tenant. Also the SaaS customer row (PLATFORM-001).
 
 | Field | Type | Notes |
 | --- | --- | --- |
 | name | string | |
-| type | enum | Planned (`NURSERY`, `KINDERGARTEN`, `PRIMARY`, `MIDDLE`, `HIGH`, `MIXED`). Not stored in TENANT-001. |
-| status | enum | `ACTIVE`, `INACTIVE` |
+| slug | string | Unique, server-generated |
+| type | enum | Planned (`NURSERY`, `KINDERGARTEN`, `PRIMARY`, `MIDDLE`, `HIGH`, `MIXED`). Not stored yet. |
+| status | enum | `TRIAL`, `ACTIVE`, `SUSPENDED`, `INACTIVE`, `CANCELLED` |
+| country | string | |
 | timezone | string | IANA timezone. Default `UTC`. ATTENDANCE-001 uses this for “today”. |
+| defaultLanguage | string | Default `ar` |
+| contactEmail | string | |
+| contactPhone | string? | |
+| planCode | enum | `STARTER`, `PROFESSIONAL`, `ENTERPRISE` |
+| subscriptionStatus | enum | Separate from org status |
+| subscriptionStartedAt / EndsAt / trialEndsAt | Date? | |
+| address / website / notes / logoUrl | string? | Optional |
+| retentionEndsAt | Date? | Set on cancel; permanent deletion is explicit later |
 
 Not tenant-scoped (it **is** the tenant). No `organizationId` on this document.
 
@@ -141,18 +151,46 @@ Authenticated person. Students are not users.
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| organizationId | ObjectId | v1: exactly one org |
+| organizationId | ObjectId? | Required for tenant roles; **null** for `PLATFORM_ADMIN` |
 | email | string | Unique globally in v1 |
 | passwordHash | string | Never returned by the API |
 | firstName | string | |
 | lastName | string | |
-| role | enum | `ADMIN`, `SUPERVISOR`, `TEACHER`, `DRIVER`, `GUARDIAN` |
+| role | enum | `PLATFORM_ADMIN`, `ADMIN`, `SUPERVISOR`, `TEACHER`, `DRIVER`, `GUARDIAN` |
 | status | enum | `ACTIVE`, `INACTIVE` |
+| mfaEnabled | boolean | Default `false`. MFA/passkeys: SECURITY-002 |
+| lastLoginAt | Date? | Updated on successful login |
 | campusIds | ObjectId[] | SUPERVISOR assignment; empty = no campuses |
 | classroomIds | ObjectId[] | TEACHER assignment; empty = no classes |
 | routeIds | ObjectId[] | DRIVER assignment; synced from `buses.driverId`. Empty = no routes |
 
 Assignment scope: `campusIds` (supervisor), `classroomIds` (teacher), and `routeIds` (driver) are stored on the user. Guardian child access is **not** stored on the user. It lives in `student_guardians`. Empty assignment lists mean no rows. SCHOOL-001 strengthens this assignment model so permissions scale beyond a single nursery.
+
+### UserInvitation (PLATFORM-001)
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| organizationId | ObjectId | Target tenant |
+| email | string | |
+| role | enum | Tenant role; Slice 1 invites `ADMIN` only |
+| firstName / lastName | string | |
+| tokenHash | string | SHA-256 of raw token; raw never stored |
+| expiresAt | Date | |
+| invitedBy | ObjectId | Platform or staff user |
+| acceptedAt | Date? | |
+| status | enum | `PENDING`, `ACCEPTED`, `EXPIRED`, `REVOKED` |
+
+### AuditLog (PLATFORM-001)
+
+Platform (and later tenant) mutation trail. Never store secrets in `metadata`.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| actorUserId / actorRole | | |
+| organizationId | ObjectId? | Target tenant when applicable |
+| action | enum | e.g. `TENANT_CREATED`, `ADMIN_INVITED`, `PLATFORM_ADMIN_LOGIN` |
+| resourceType / resourceId | | |
+| metadata / ipAddress / userAgent | | |
 
 ### Student
 

@@ -34,6 +34,8 @@ export type Permission = (typeof PERMISSIONS)[number];
 const ALL: Permission[] = [...PERMISSIONS];
 
 export const ROLE_PERMISSIONS: Record<UserRole, readonly Permission[]> = {
+  /** Platform admins use requirePlatformAdmin(); never tenant permissions. */
+  PLATFORM_ADMIN: [],
   ADMIN: ALL,
   SUPERVISOR: [
     'organizations.read',

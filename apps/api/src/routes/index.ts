@@ -17,11 +17,13 @@ import {
   busesRouter,
   transportRouter,
 } from '../modules/buses/bus.routes';
+import { platformRouter } from '../modules/platform/platform.routes';
 
 export const v1Router = Router();
 
 v1Router.use('/health', healthRouter);
 v1Router.use('/auth', authRouter);
+v1Router.use('/platform', platformRouter);
 v1Router.use('/organizations', organizationsRouter);
 v1Router.use('/campuses', campusesRouter);
 v1Router.use('/classrooms', classroomsRouter);

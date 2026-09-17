@@ -148,6 +148,8 @@ See [apps/api/src/database/seed/README.md](apps/api/src/database/seed/README.md)
 
 `npm run seed:reset` wipes that demo organization and seeds it again. It is blocked when `NODE_ENV=production`.
 
+Production platform owner (not the demo seed): set `PLATFORM_BOOTSTRAP_EMAIL` / `PLATFORM_BOOTSTRAP_PASSWORD` in the environment or secret manager, then `npm run bootstrap:platform-admin`. See [docs/architecture/security.md](docs/architecture/security.md).
+
 Useful commands (run from the repository root):
 
 | Command | Description |
@@ -159,6 +161,7 @@ Useful commands (run from the repository root):
 | `npm test` | Run API tests |
 | `npm run seed` | Upsert the Arabic demo academy (63 students) |
 | `npm run seed:reset` | Wipe the demo organization and seed it again (dev/test only) |
+| `npm run bootstrap:platform-admin` | One-time PLATFORM_ADMIN create from env secrets |
 | `npm run typecheck` | TypeScript strict check (`tsc --noEmit`) |
 
 ### Flutter application

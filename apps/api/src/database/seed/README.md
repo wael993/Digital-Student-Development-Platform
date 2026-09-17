@@ -9,6 +9,8 @@ npm run seed:reset   # wipes the demo organization, then seeds again
 
 `seed:reset` refuses to run when `NODE_ENV=production`.
 
+For the **production** platform owner (`wael@rivo.com`), use `npm run bootstrap:platform-admin` with `PLATFORM_BOOTSTRAP_*` secrets — not this demo seed. See `docs/architecture/security.md`.
+
 ## Organization
 
 أكاديمية براعم المستقبل — timezone `Asia/Riyadh`
@@ -20,21 +22,22 @@ Password for every seeded user (bcrypt, not stored in plaintext): **`Demo@12345`
 
 ## Staff
 
-| Email                          | Role       | Scope          |
-| ------------------------------ | ---------- | -------------- |
-| `admin.ahmad@demo.local`       | ADMIN      | Organization   |
-| `admin.mona@demo.local`        | ADMIN      | Organization   |
-| `supervisor.khalid@demo.local` | SUPERVISOR | حرم النخيل     |
-| `supervisor.huda@demo.local`   | SUPERVISOR | حرم الندى      |
-| `teacher.mariam@demo.local`    | TEACHER    | روضة النخيل أ  |
-| `teacher.hana@demo.local`      | TEACHER    | روضة النخيل ب  |
-| `teacher.najla@demo.local`     | TEACHER    | حضانة البراعم  |
-| `teacher.samer@demo.local`     | TEACHER    | الصف الأول     |
-| `teacher.reem@demo.local`      | TEACHER    | روضة الندى     |
-| `driver.saad@demo.local`       | DRIVER     | حافلة النخيل 1 |
-| `driver.fahad@demo.local`      | DRIVER     | حافلة النخيل 2 |
-| `driver.tariq@demo.local`      | DRIVER     | حافلة الندى 1  |
-| `driver.hassan@demo.local`     | DRIVER     | Unassigned     |
+| Email                          | Role           | Scope          |
+| ------------------------------ | -------------- | -------------- |
+| `platform.admin@demo.local`    | PLATFORM_ADMIN | SaaS platform  |
+| `admin.ahmad@demo.local`       | ADMIN          | Organization   |
+| `admin.mona@demo.local`        | ADMIN          | Organization   |
+| `supervisor.khalid@demo.local` | SUPERVISOR     | حرم النخيل     |
+| `supervisor.huda@demo.local`   | SUPERVISOR     | حرم الندى      |
+| `teacher.mariam@demo.local`    | TEACHER        | روضة النخيل أ  |
+| `teacher.hana@demo.local`      | TEACHER        | روضة النخيل ب  |
+| `teacher.najla@demo.local`     | TEACHER        | حضانة البراعم  |
+| `teacher.samer@demo.local`     | TEACHER        | الصف الأول     |
+| `teacher.reem@demo.local`      | TEACHER        | روضة الندى     |
+| `driver.saad@demo.local`       | DRIVER         | حافلة النخيل 1 |
+| `driver.fahad@demo.local`      | DRIVER         | حافلة النخيل 2 |
+| `driver.tariq@demo.local`      | DRIVER         | حافلة الندى 1  |
+| `driver.hassan@demo.local`     | DRIVER         | Unassigned     |
 
 ## Useful parent accounts
 

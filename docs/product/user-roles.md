@@ -4,16 +4,17 @@ Same Flutter app, different scope. Students are not a login role in v1.
 
 Canonical roles:
 
-`ADMIN` · `SUPERVISOR` · `TEACHER` · `DRIVER` · `GUARDIAN`
+`PLATFORM_ADMIN` · `ADMIN` · `SUPERVISOR` · `TEACHER` · `DRIVER` · `GUARDIAN`
 
-A user may hold more than one role in the same organization (teacher who is also a parent). Services union the scopes. Empty scope for a role still means no access through that role.
+A tenant user may hold more than one role in the same organization later (teacher who is also a parent). Services union the scopes. Empty scope for a role still means no access through that role.
 
-Details of JWT and middleware: AUTH-001 implements a single `role` per user. TENANT-001 enforces permissions via `authorize()`. A user may hold more than one role later if needed.
+Details of JWT and middleware: AUTH-001 implements a single `role` per user. TENANT-001 enforces permissions via `authorize()`. PLATFORM-001 adds `PLATFORM_ADMIN` with `requirePlatformAdmin()` on `/api/v1/platform/*` (no tenant `organizationId`). PLATFORM-002 bootstraps the owner account securely (`npm run bootstrap:platform-admin`); credentials never stay in `.env` for permanent login.
 
 ## High-level scope
 
 | Role | Main scope | Typical job |
 | --- | --- | --- |
+| PLATFORM_ADMIN | SaaS platform (all orgs metadata) | Provision tenants, lifecycle, invitations, subscriptions |
 | ADMIN | Organization | Users, campuses, classrooms, settings |
 | SUPERVISOR | Assigned campuses | Daily operations, exceptions, buses at site |
 | TEACHER | Assigned classrooms | Roster, attendance, class events, notes, photos |
@@ -63,4 +64,6 @@ Guardian **W** on events/attendance is not allowed. Parents observe; staff recor
 
 ## Out of scope for these roles
 
-Platform operator (multi-org superadmin), student login, and medical-role accounts are not in v1.
+Student login and medical-role accounts are not in v1. Platform operator is implemented as `PLATFORM_ADMIN` (PLATFORM-001/002); it is not a tenant role and must not receive school operational permissions. Provision via bootstrap (production) or demo seed (local only).
+
+Working access tables, what the app can create today, and how to onboard a tenant: [roles-and-access.md](roles-and-access.md).

@@ -4,20 +4,35 @@ RBAC and resource-scope checks sit after authentication. The API is the security
 
 ## Flow
 
+### Tenant
+
 ```
 HTTP request
   → authenticate()          JWT → req.auth { userId, organizationId, role }
-  → tenantContext()         organization exists and status === ACTIVE
+  → tenantContext()         organization exists and status ∈ { TRIAL, ACTIVE }
   → authorize(permission)   role → permission matrix
   → controller / service    resource-scope helpers
   → repository              tenantFilter(organizationId, …)
   → MongoDB
 ```
 
+### Platform
+
+```
+HTTP request
+  → authenticate()              PLATFORM_ADMIN (no org claim)
+  → requirePlatformAdmin()
+  → platform controller/service
+  → audit write
+  → MongoDB
+```
+
 | Failure | Status | Code |
 | --- | --- | --- |
 | Missing / invalid / expired token, or user not found in that org | 401 | `UNAUTHORIZED` or `ACCESS_TOKEN_EXPIRED` |
-| Authenticated but role lacks the permission, or org is missing/INACTIVE | 403 | `FORBIDDEN` |
+| Authenticated but role lacks the permission | 403 | `FORBIDDEN` |
+| Org suspended / inactive / cancelled | 403 | `TENANT_SUSPENDED` / `TENANT_INACTIVE` / `TENANT_CANCELLED` |
+| Plan limit exceeded | 403 | `PLAN_LIMIT` |
 | Resource not in this tenant or not in the caller's scope | 404 | `NOT_FOUND` |
 
 401 is never used for “wrong role”. 403 is never used for “no token”. Cross-tenant ids look like missing rows (404), not a permission error.
@@ -39,17 +54,25 @@ Do not put the missing permission name or the other org’s id in the message.
 
 `req.auth` is copied from the **user row** after JWT verification (`authenticate`), not from the request body, query, or `X-Organization-Id`.
 
-`tenantContext` then loads `organizations` by `auth.organizationId`. No org, or `INACTIVE`, → 403.
+`tenantContext` then loads `organizations` by `auth.organizationId`. No org, or status not operational → 403 with a specific tenant code when applicable.
 
-v1: one user, one organization. Multi-org memberships need a later `memberships` design.
+`PLATFORM_ADMIN` skips tenant org loading. Tenant routes still fail `authorize(...)` because platform has an empty permission set.
+
+v1: one tenant user, one organization. Multi-org memberships need a later `memberships` design.
 
 ## Roles
 
-Canonical values (same as AUTH-001):
+Canonical tenant values:
 
 `ADMIN` · `SUPERVISOR` · `TEACHER` · `DRIVER` · `GUARDIAN`
 
-Stored as a single `users.role`. Do not branch on string literals in controllers. Call `authorize('students.read')` (or `hasPermission`) instead.
+Platform:
+
+`PLATFORM_ADMIN`
+
+Stored as a single `users.role`. Platform users must not have an `organizationId`. Tenant users must not be `PLATFORM_ADMIN`.
+
+Do not branch on string literals in controllers. Call `authorize('students.read')` (or `hasPermission`) for tenant routes, and `requirePlatformAdmin()` for platform routes.
 
 ## Permissions
 
@@ -59,7 +82,7 @@ Defined in `apps/api/src/authorization/permissions.ts`. Add a permission when th
 | --- | --- |
 | `organizations.read` | Read current org profile |
 | `organizations.update` | Update current org profile |
-| `users.read` / `users.create` / `users.update` | Staff user administration |
+| `users.read` / `users.create` / `users.update` | Staff user administration (HTTP surface deferred to Slice 2 / SCHOOL-001) |
 | `campuses.read` / `campuses.manage` | Campuses |
 | `classrooms.read` / `classrooms.manage` | Classrooms |
 | `students.read` / `create` / `update` / `delete` | Student records |
@@ -70,9 +93,9 @@ Defined in `apps/api/src/authorization/permissions.ts`. Add a permission when th
 | `media.read` / `media.create` / `media.delete` | Photos / files |
 | `notifications.read` / `notifications.update` | Own inbox, preferences, and device tokens |
 
-TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATCH /api/v1/organizations/current`. STUDENT-001 uses `campuses.*`, `classrooms.*`, `students.*`, and `guardians.*`. ATTENDANCE-001 uses `attendance.read` and `attendance.create`. JOURNEY-001 uses `student_events.read` and `student_events.create`. MEDIA-001 uses `media.read`, `media.create`, and `media.delete`. NOTIF-001 uses `notifications.read` and `notifications.update` (always scoped to the authenticated user). BUS-001 uses `buses.read` / `buses.manage` plus `student_events.create` for boarding, arrivals, and pickups.
+`PLATFORM_ADMIN` has **no** tenant permissions. Platform capabilities are enforced only via `requirePlatformAdmin()` on `/api/v1/platform/*`.
 
-## Role × permission matrix
+## Role × permission matrix (tenant)
 
 | Capability | Admin | Supervisor | Teacher | Driver | Guardian |
 | --- | --- | --- | --- | --- | --- |
@@ -88,10 +111,28 @@ TENANT-001 enforces `organizations.read` and `organizations.update` on `GET/PATC
 | Manage buses / routes | yes | yes | classroom arrivals / pickups | assigned route (read + progress) | own child plan / cancel / ETA |
 | Media create | yes | yes | yes | no | no |
 | Media delete | yes | yes | no | no | no |
+| Platform APIs | no | no | no | no | no |
 
-“Assigned” and “own children” are **resource-level** rules, not extra permissions. A teacher with `students.read` still must fail closed on another class’s student.
+## Platform Admin matrix (summary)
 
-Empty assignment lists mean **no rows**, not the whole organization. Only `ADMIN` is org-wide inside the tenant.
+| Action | PLATFORM_ADMIN | Tenant ADMIN |
+| --- | --- | --- |
+| Create / list / edit tenants | yes | no (own profile only via `/organizations/current`) |
+| Activate / suspend / deactivate | yes | no |
+| Manage subscription fields | yes | view own later (Slice 2 UI) |
+| Invite initial ADMIN | yes | — |
+| Create PLATFORM_ADMIN | `npm run bootstrap:platform-admin` (one-time; idempotent) | no |
+| Daily school operations | no | yes |
+
+Platform capabilities (enforced by `requirePlatformAdmin()` on `/api/v1/platform/*`, not tenant `PERMISSIONS`):
+
+- organizations: read / create / update / activate / suspend / deactivate
+- subscriptions: read / manage
+- usage: read
+- invitations: create (first tenant ADMIN)
+- audit: read
+
+Do **not** grant `PLATFORM_ADMIN` tenant school-ops permissions (`students.write`, `attendance.write`, `journey.write`, `media.write`, `bus_operations.write`).
 
 ## Resource-level authorization
 
@@ -120,18 +161,36 @@ Every tenant repository method takes `organizationId` as a required argument. Lo
 
 `users`: `{ organizationId: 1, role: 1 }` plus unique `{ email: 1 }`. Teacher/supervisor/driver assignment lives on `classroomIds` / `campusIds` / `routeIds`.
 
+## JWT claims
+
+Tenant:
+
+```json
+{ "sub": "userId", "organizationId": "orgId", "role": "ADMIN", "type": "access" }
+```
+
+Platform:
+
+```json
+{ "sub": "platformUserId", "role": "PLATFORM_ADMIN", "type": "access" }
+```
+
 ## Flutter
 
-Session already includes `id`, `organizationId`, and `role` from `/auth/login` and `/auth/me`. Use `role` only for navigation. Repeat every check on the server.
+Session already includes `id`, `organizationId`, and `role` from `/auth/login` and `/auth/me`. Use `role` only for navigation. Repeat every check on the server. Platform console UI is Slice 2.
 
 ## Testing
 
-See `apps/api/tests/tenant.test.ts`, `apps/api/tests/authorization.test.ts`, `apps/api/tests/students.test.ts`, `apps/api/tests/attendance.test.ts`, `apps/api/tests/journey.test.ts`, `apps/api/tests/media.test.ts`, `apps/api/tests/notifications.test.ts`, and `apps/api/tests/transport.test.ts`. Minimum coverage:
+See `apps/api/tests/platform.test.ts`, `tests/tenant.test.ts`, `tests/authorization.test.ts`, and feature tests. Minimum coverage:
 
 - unauthenticated / invalid / expired → 401
 - teacher `PATCH /organizations/current` → 403; admin → 200
 - org A cannot GET/PATCH org B campuses or students (404)
 - `?organizationId=`, body `organizationId`, and `X-Organization-Id` cannot switch tenant
 - JWT `organizationId` that does not match the user row → 401
-- guardian helper allows linked child ids only; teacher sees assigned classrooms only
-- guardian cannot cancel another child's bus; driver cannot progress an unassigned route; cross-tenant transport ids 404
+- tenant ADMIN cannot access `/platform/*`
+- PLATFORM_ADMIN cannot access tenant operational routes
+- suspended tenant cannot login or call tenant APIs
+- invitation single-use + expiry
+- subscription campus/student limits via `SubscriptionService`
+- platform bootstrap idempotency + no env-based login (`platform-admin-bootstrap.test.ts`)

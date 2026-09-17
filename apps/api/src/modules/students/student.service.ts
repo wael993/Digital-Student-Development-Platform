@@ -6,6 +6,7 @@ import { findClassroomById, findClassroomsByIds } from '../classrooms/classroom.
 import { listLinksByStudentIds, listStudentIdsForGuardian } from '../guardians/guardian.repository';
 import { listActiveStudentIdsForRoutes } from '../buses/assignment.repository';
 import { findUsersByIds } from '../users/user.repository';
+import { assertCanCreateStudent } from '../subscriptions/subscription.service';
 import {
   createStudent,
   findStudentById,
@@ -78,6 +79,7 @@ export async function create(
     status?: StudentStatus;
   },
 ) {
+  await assertCanCreateStudent(auth.organizationId);
   const classroom = await requireActiveClassroom(auth.organizationId, input.classroomId);
   if (auth.role === 'SUPERVISOR') {
     assertAssigned(auth, String(classroom.campusId), auth.campusIds);

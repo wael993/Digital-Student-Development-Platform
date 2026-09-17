@@ -378,4 +378,5 @@ Domain, tenancy, API, mobile, security, roles, and the student journey event con
 - [Authorization](architecture/authorization.md)
 - [Security](architecture/security.md)
 - [User roles](product/user-roles.md)
+- [Roles and access](product/roles-and-access.md)
 - [Student journey](product/student-journey.md)

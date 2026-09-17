@@ -6,6 +6,7 @@ import { childKey } from './seed-helpers';
 export const SEED_ORG_NAME = 'أكاديمية براعم المستقبل';
 export const SEED_TIMEZONE = 'Asia/Riyadh';
 export const SEED_PASSWORD = 'Demo@12345';
+export const SEED_PLATFORM_ADMIN_EMAIL = 'platform.admin@demo.local';
 
 export type CampusKey = 'nakheel' | 'nada';
 export type ClassKey = 'kg_a' | 'kg_b' | 'nursery' | 'primary' | 'kg_nada';
