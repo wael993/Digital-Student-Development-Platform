@@ -57,11 +57,7 @@ function buildOrganizationListFilter(filter?: ListOrganizationsFilter): Record<s
   return query;
 }
 
-export async function listOrganizations(
-  skip = 0,
-  limit = 20,
-  filter?: ListOrganizationsFilter,
-) {
+export async function listOrganizations(skip = 0, limit = 20, filter?: ListOrganizationsFilter) {
   const query = buildOrganizationListFilter(filter);
   const [items, total] = await Promise.all([
     OrganizationModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
@@ -70,7 +66,9 @@ export async function listOrganizations(
   return { items, total };
 }
 
-export async function createOrganization(input: CreateOrganizationInput | { name: string; status?: OrganizationStatus }) {
+export async function createOrganization(
+  input: CreateOrganizationInput | { name: string; status?: OrganizationStatus },
+) {
   // Backward-compatible path used by tests/seed helpers.
   if (!('slug' in input) || !input.slug) {
     const name = input.name;
@@ -104,13 +102,15 @@ export async function setOrganizationStatus(id: string, status: OrganizationStat
 }
 
 function slugify(name: string): string {
-  return name
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 48) || 'org';
+  return (
+    name
+      .normalize('NFKD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 48) || 'org'
+  );
 }
 
 export async function uniqueSlugFromName(name: string): Promise<string> {

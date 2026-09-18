@@ -8,6 +8,20 @@ class User {
     required this.role,
   });
 
+  static const tenantRoles = [
+    'ADMIN',
+    'SUPERVISOR',
+    'TEACHER',
+    'DRIVER',
+    'GUARDIAN',
+  ];
+
+  static const supervisorCreatableRoles = [
+    'TEACHER',
+    'DRIVER',
+    'GUARDIAN',
+  ];
+
   final String id;
   // Null for PLATFORM_ADMIN (no tenant).
   final String? organizationId;
@@ -21,6 +35,23 @@ class User {
   bool get canManageSchool => role == 'ADMIN' || role == 'SUPERVISOR';
 
   bool get isPlatformAdmin => role == 'PLATFORM_ADMIN';
+
+  bool get canManageStaffUsers => role == 'ADMIN' || role == 'SUPERVISOR';
+
+  bool get canChangeUserRoles => role == 'ADMIN';
+
+  /// Roles this user may offer in an Add User picker (UI only; API enforces).
+  List<String> get creatableStaffRoles {
+    if (role == 'ADMIN') return List<String>.from(tenantRoles);
+    if (role == 'SUPERVISOR') return List<String>.from(supervisorCreatableRoles);
+    return const [];
+  }
+
+  bool canManageUserWithRole(String targetRole) {
+    if (role == 'ADMIN') return tenantRoles.contains(targetRole);
+    if (role == 'SUPERVISOR') return supervisorCreatableRoles.contains(targetRole);
+    return false;
+  }
 
   bool get canRecordAttendance =>
       role == 'ADMIN' || role == 'SUPERVISOR' || role == 'TEACHER';

@@ -22,15 +22,23 @@ class _PlatformShellState extends State<PlatformShell> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final pages = [
-      const PlatformDashboardPage(),
-      const OrganizationsPage(),
-      const InviteAdminPage(),
-      PlatformAccountPage(user: widget.user),
-    ];
+
+    // Lazy pages: avoid firing dashboard+orgs+invite APIs all at once after login
+    // (Render cold starts / aggregate queries otherwise race the Dio timeout).
+    final Widget body;
+    switch (_index) {
+      case 1:
+        body = const OrganizationsPage();
+      case 2:
+        body = const InviteAdminPage();
+      case 3:
+        body = PlatformAccountPage(user: widget.user);
+      default:
+        body = const PlatformDashboardPage();
+    }
 
     return Scaffold(
-      body: IndexedStack(index: _index, children: pages),
+      body: body,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (value) => setState(() => _index = value),

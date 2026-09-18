@@ -37,7 +37,10 @@ platformRouter.post('/organizations/:organizationId/deactivate', asyncHandler(po
 
 platformRouter.get('/organizations/:organizationId/subscription', asyncHandler(getSubscription));
 platformRouter.post('/organizations/:organizationId/subscription', asyncHandler(postSubscription));
-platformRouter.patch('/organizations/:organizationId/subscription', asyncHandler(patchSubscription));
+platformRouter.patch(
+  '/organizations/:organizationId/subscription',
+  asyncHandler(patchSubscription),
+);
 
 platformRouter.post(
   '/organizations/:organizationId/admin-invitation',

@@ -12,7 +12,8 @@ class PlatformApi {
   Future<PlatformDashboard> getDashboard() async {
     try {
       final response = await _dio.get<Map<String, dynamic>>('/platform/dashboard');
-      return PlatformDashboard.fromJson(requireData(response.data));
+      final data = requireData(response.data);
+      return PlatformDashboard.fromJson(Map<String, dynamic>.from(data));
     } on DioException catch (error) {
       throwApi(error);
     }
@@ -61,14 +62,13 @@ class PlatformApi {
         data: request.toJson(),
       );
       final data = requireData(response.data);
-      final invitationJson = data['invitation'];
+      final initialAdminJson = data['initialAdmin'];
       return CreateTenantResult(
         organization: PlatformOrganization.fromJson(
           data['organization'] as Map<String, dynamic>,
         ),
-        // note: API may return a one-time token; we never keep or surface it here
-        invitation: invitationJson is Map<String, dynamic>
-            ? PlatformInvitationResult.fromJson(invitationJson)
+        initialAdmin: initialAdminJson is Map<String, dynamic>
+            ? InitialAdminResult.fromJson(initialAdminJson)
             : null,
       );
     } on DioException catch (error) {

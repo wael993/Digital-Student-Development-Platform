@@ -27,11 +27,7 @@ export async function writeAuditLog(input: {
   });
 }
 
-export async function listAuditLogsForOrganization(
-  organizationId: string,
-  skip = 0,
-  limit = 50,
-) {
+export async function listAuditLogsForOrganization(organizationId: string, skip = 0, limit = 50) {
   const filter = { organizationId };
   const [items, total] = await Promise.all([
     AuditLogModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),

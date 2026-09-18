@@ -6,7 +6,11 @@ import * as platformService from './platform.service';
 
 export async function postOrganization(req: Request, res: Response): Promise<void> {
   const actor = requirePlatformAuth(req);
-  const result = await platformService.createTenant(actor, req.body as Record<string, unknown>, req);
+  const result = await platformService.createTenant(
+    actor,
+    req.body as Record<string, unknown>,
+    req,
+  );
   res.status(201).json(result);
 }
 

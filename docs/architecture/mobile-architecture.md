@@ -107,12 +107,12 @@ Login (PLATFORM_ADMIN, organizationId = null)
        ├── Organizations      GET /platform/organizations?q=&status=
        │     ├── Details      GET /platform/organizations/:id
        │     │     └── Activate / Suspend / Deactivate
-       │     └── Create       POST /platform/organizations (+ optional admin)
+       │     └── Create       POST /platform/organizations (+ required initialAdmin)
        ├── Invitations        POST /platform/organizations/:id/admin-invitation
        └── Account            logout
 ```
 
-Invitation tokens returned by the API are discarded in the repository layer and never shown in the UI. Backend authorization on `/api/v1/platform/*` remains authoritative.
+Create returns the organization and initial Admin identity (never the password). Subsequent invitation tokens returned by the API are discarded in the repository layer and never shown in the UI. Backend authorization on `/api/v1/platform/*` remains authoritative.
 
 ## Platform capabilities (later tickets)
 

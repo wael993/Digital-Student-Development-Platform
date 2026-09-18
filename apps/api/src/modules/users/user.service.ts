@@ -3,6 +3,7 @@ import type { AuthContext, TenantRole, UserStatus } from '../../types';
 import { assertAssigned } from '../../authorization/scope';
 import { AppError } from '../../utils/appError';
 import { notFound } from '../../utils/validate';
+import { writeAuditLog } from '../audit/audit.service';
 import { hashPassword } from '../auth/auth.service';
 import { findCampusById } from '../campuses/campus.repository';
 import { findClassroomById } from '../classrooms/classroom.repository';
@@ -10,6 +11,7 @@ import { findRouteById } from '../buses/bus.repository';
 import * as invitationService from '../invitations/invitation.service';
 import * as subscriptionService from '../subscriptions/subscription.service';
 import {
+  countActiveAdmins,
   createUser,
   findUserByEmail,
   findUserById,
@@ -18,6 +20,9 @@ import {
   updateUserAssignments,
   type ListUsersFilter,
 } from './user.repository';
+
+/** Roles a SUPERVISOR may create/edit/disable (AUTH-002). */
+const SUPERVISOR_MANAGEABLE_ROLES: readonly TenantRole[] = ['TEACHER', 'DRIVER', 'GUARDIAN'];
 
 type CreateInput = {
   email: string;
@@ -35,6 +40,7 @@ type PatchInput = {
   firstName?: string;
   lastName?: string;
   status?: UserStatus;
+  role?: TenantRole;
   campusIds?: string[];
   classroomIds?: string[];
   routeIds?: string[];
@@ -67,8 +73,36 @@ function assertSupervisorCampusSubset(auth: AuthContext, campusIds: string[]): v
 }
 
 function assertCanManageTarget(auth: AuthContext, targetRole: TenantRole): void {
-  if (auth.role === 'SUPERVISOR' && targetRole === 'ADMIN') {
+  if (auth.role !== 'SUPERVISOR') {
+    return;
+  }
+  if (!SUPERVISOR_MANAGEABLE_ROLES.includes(targetRole)) {
     throw new AppError(403, 'FORBIDDEN', 'You do not have permission to perform this action');
+  }
+}
+
+async function assertNotLastActiveAdmin(
+  organizationId: string,
+  existing: { id: string; role: string; status: string },
+  nextRole?: TenantRole,
+  nextStatus?: UserStatus,
+): Promise<void> {
+  if (existing.role !== 'ADMIN' || existing.status !== 'ACTIVE') {
+    return;
+  }
+  const leavingAdmin =
+    (nextStatus !== undefined && nextStatus !== 'ACTIVE') ||
+    (nextRole !== undefined && nextRole !== 'ADMIN');
+  if (!leavingAdmin) {
+    return;
+  }
+  const activeAdmins = await countActiveAdmins(organizationId);
+  if (activeAdmins <= 1) {
+    throw new AppError(
+      403,
+      'LAST_ACTIVE_ADMIN',
+      'Organization must keep at least one active admin',
+    );
   }
 }
 
@@ -81,7 +115,10 @@ async function assertCampusesExist(organizationId: string, campusIds: string[]):
   }
 }
 
-async function assertClassroomsExist(organizationId: string, classroomIds: string[]): Promise<void> {
+async function assertClassroomsExist(
+  organizationId: string,
+  classroomIds: string[],
+): Promise<void> {
   for (const classroomId of classroomIds) {
     const classroom = await findClassroomById(organizationId, classroomId);
     if (!classroom) {
@@ -125,7 +162,12 @@ async function loadStaffUser(auth: AuthContext, userId: string) {
   return user;
 }
 
-export async function list(auth: AuthContext, filter: ListUsersFilter, skip: number, limit: number) {
+export async function list(
+  auth: AuthContext,
+  filter: ListUsersFilter,
+  skip: number,
+  limit: number,
+) {
   const result = await listUsers(auth.organizationId, filter, skip, limit);
   return {
     items: result.items.map(toStaffUserJson),
@@ -138,11 +180,7 @@ export async function getById(auth: AuthContext, userId: string) {
   return toStaffUserJson(user);
 }
 
-export async function create(
-  auth: AuthContext,
-  input: CreateInput,
-  req?: Request,
-) {
+export async function create(auth: AuthContext, input: CreateInput, req?: Request) {
   assertSupervisorCanWrite(auth);
   assertCanManageTarget(auth, input.role);
   assertSupervisorCampusSubset(auth, input.campusIds);
@@ -193,29 +231,63 @@ export async function create(
     routeIds: input.routeIds,
   });
 
+  await writeAuditLog({
+    actor: auth,
+    action: 'USER_CREATED',
+    resourceType: 'user',
+    resourceId: user.id,
+    organizationId: auth.organizationId,
+    metadata: { email: user.email, role: user.role },
+    req,
+  });
+
   return toStaffUserJson(user);
 }
 
-export async function patch(auth: AuthContext, userId: string, input: PatchInput) {
+export async function patch(auth: AuthContext, userId: string, input: PatchInput, req?: Request) {
   assertSupervisorCanWrite(auth);
   const existing = await loadStaffUser(auth, userId);
-  assertCanManageTarget(auth, existing.role as TenantRole);
+  const self = auth.userId === userId;
+  const nextRole = input.role;
+  const changingRole = nextRole !== undefined && nextRole !== existing.role;
 
+  if (changingRole) {
+    if (auth.role !== 'ADMIN' || self) {
+      throw new AppError(403, 'FORBIDDEN', 'You do not have permission to perform this action');
+    }
+  }
+
+  if (self) {
+    // own profile: name only — not role, status, or assignment scope
+    if (
+      input.status !== undefined ||
+      input.campusIds !== undefined ||
+      input.classroomIds !== undefined ||
+      input.routeIds !== undefined ||
+      changingRole
+    ) {
+      throw new AppError(403, 'FORBIDDEN', 'You do not have permission to perform this action');
+    }
+  } else {
+    assertCanManageTarget(auth, existing.role as TenantRole);
+    if (nextRole !== undefined) {
+      assertCanManageTarget(auth, nextRole);
+    }
+  }
+
+  await assertNotLastActiveAdmin(auth.organizationId, existing, nextRole, input.status);
+
+  const effectiveRole = (nextRole ?? existing.role) as TenantRole;
   const campusIds = input.campusIds ?? existing.campusIds.map(String);
   const classroomIds = input.classroomIds ?? existing.classroomIds.map(String);
   const routeIds = input.routeIds ?? existing.routeIds.map(String);
 
   assertSupervisorCampusSubset(auth, campusIds);
-  await validateAssignments(
-    auth.organizationId,
-    existing.role as TenantRole,
-    campusIds,
-    classroomIds,
-    routeIds,
-  );
+  await validateAssignments(auth.organizationId, effectiveRole, campusIds, classroomIds, routeIds);
 
   const updated = await updateUserAssignments(auth.organizationId, userId, {
     ...input,
+    role: nextRole,
     campusIds: input.campusIds,
     classroomIds: input.classroomIds,
     routeIds: input.routeIds,
@@ -223,17 +295,43 @@ export async function patch(auth: AuthContext, userId: string, input: PatchInput
   if (!updated) {
     throw notFound();
   }
+
+  if (changingRole) {
+    await writeAuditLog({
+      actor: auth,
+      action: 'USER_ROLE_CHANGED',
+      resourceType: 'user',
+      resourceId: userId,
+      organizationId: auth.organizationId,
+      metadata: { from: existing.role, to: nextRole },
+      req,
+    });
+  }
+
   return toStaffUserJson(updated);
 }
 
-export async function disable(auth: AuthContext, userId: string) {
+export async function disable(auth: AuthContext, userId: string, req?: Request) {
   assertSupervisorCanWrite(auth);
   const existing = await loadStaffUser(auth, userId);
   assertCanManageTarget(auth, existing.role as TenantRole);
+  await assertNotLastActiveAdmin(auth.organizationId, existing, undefined, 'INACTIVE');
+
   const updated = await updateUserAssignments(auth.organizationId, userId, { status: 'INACTIVE' });
   if (!updated) {
     throw notFound();
   }
+
+  await writeAuditLog({
+    actor: auth,
+    action: 'USER_DISABLED',
+    resourceType: 'user',
+    resourceId: userId,
+    organizationId: auth.organizationId,
+    metadata: { email: existing.email, role: existing.role },
+    req,
+  });
+
   return toStaffUserJson(updated);
 }
 

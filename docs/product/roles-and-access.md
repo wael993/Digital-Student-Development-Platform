@@ -40,24 +40,24 @@ Platform Admin uses `/api/v1/platform/*`. Flutter console is PLATFORM-004 (`feat
 
 ### Create tenant
 
-Required: name, country, contact email, plan (`STARTER` / `PROFESSIONAL` / `ENTERPRISE`).
+Required: name, country, contact email, plan (`STARTER` / `PROFESSIONAL` / `ENTERPRISE`), and nested `initialAdmin` (`firstName`, `lastName`, `email`, `password`).
 
-Optional: timezone, language, phone, address, website, notes, logo, nested `admin` invite.
+Optional: timezone, language, phone, address, website, notes, logo.
 
 Server generates `organizationId`, `slug`, timestamps. Client cannot set `organizationId`.
 
 Default status: `TRIAL`. Lifecycle actions: activate → `ACTIVE`, suspend → `SUSPENDED`, deactivate → `INACTIVE`.
 
-### Initial ADMIN invite
+### Owner-created Initial Admin
 
 ```
-PLATFORM_ADMIN → create tenant → admin invitation (hashed token)
-  → email / deliver token → accept → set password → ADMIN ACTIVE
+PLATFORM_ADMIN → create tenant + initial Admin (hashed password)
+  → Admin ACTIVE immediately → Admin logs in → may change password
 ```
 
-Raw invitation tokens are never stored. Accept is public: `POST /api/v1/platform/invitations/:token/accept`.
+No invitation token for the first Admin. Additional admins may still use `POST /organizations/:id/admin-invitation` and public accept.
 
-Invited role is always tenant `ADMIN` with the new `organizationId`. Never `PLATFORM_ADMIN`.
+Invited/created role is always tenant `ADMIN` with the new `organizationId`. Never `PLATFORM_ADMIN`.
 
 ### Seed platform operator (local demos only)
 
@@ -87,6 +87,7 @@ Home in the app: campus list.
 | Guardians     | Linked guardians                    | Add a parent/guardian to a student (creates a `GUARDIAN` login)            |
 | Attendance    | Org attendance                      | Record present/absent, QR scan                                             |
 | Buses         | All buses/routes at a campus        | Create buses/routes/stops, assign students, record progress                |
+| Users         | All staff in org                    | Create/manage ADMIN, SUPERVISOR, TEACHER, DRIVER, GUARDIAN via `/users`. Role changes ADMIN-only. Cannot remove last active ADMIN. |
 | Notifications | Own device/prefs if used            | Inbox UI is parent-focused today                                           |
 | Platform      | —                                   | **Never**                                                                  |
 
@@ -107,7 +108,7 @@ Home in the app: campus list (only assigned campuses). Scope is `users.campusIds
 | Guardians    | Links for those students                       | Add guardian to a student                                                                      |
 | Attendance   | Campus attendance                              | Record attendance / QR                                                                         |
 | Buses        | Buses at that campus                           | Manage routes, boarding, arrivals                                                              |
-| Users        | Permission exists (`users.read/create/update`) | **No staff-user API or UI yet** (Slice 2 / SCHOOL-001)                                         |
+| Users        | Staff in org                                   | Create/manage TEACHER, DRIVER, GUARDIAN only. Cannot create/manage ADMIN or SUPERVISOR. Campus writes require assigned `campusIds`. |
 
 ---
 
@@ -125,10 +126,10 @@ The paying customer is an **organization** (school / nursery). Campuses are bran
 
 Onboarding flow:
 
-1. Platform Admin creates organization (+ optional admin invite).
-2. Invitee accepts and sets password → tenant `ADMIN`.
+1. Platform Admin creates organization with required initial Admin credentials.
+2. Initial Admin logs in immediately and may change password.
 3. Admin creates campuses, classrooms, students, guardians in the school app.
-4. Supervisors / teachers / drivers still need seed/DB or Slice 2 staff APIs.
+4. Additional staff may use invitation / staff APIs where available.
 
 Do **not** give one admin two schools. v1 is one tenant user → one organization.
 
@@ -153,5 +154,5 @@ Flutter platform console (Dashboard, Organizations, Invitations, Account) is imp
 | Student                               | Yes — classroom roster **+**             | ADMIN, SUPERVISOR | `POST /students`                                  |
 | Campus                                | Yes — campus list **+**                  | ADMIN, SUPERVISOR | `POST /campuses`                                  |
 | Classroom                             | Yes — classroom list **+**               | ADMIN, SUPERVISOR | `POST /classrooms`                                |
-| Teacher / Supervisor / Admin / Driver | **No** (Slice 2)                         | —                 | No staff-user route yet                           |
+| Teacher / Supervisor / Admin / Driver | Yes — app bar **Users** → Add user | ADMIN (all roles); SUPERVISOR (TEACHER/DRIVER/GUARDIAN) | `POST/PATCH /api/v1/users` |
 | New organization / tenant             | Yes — Platform Console → Organizations → create | PLATFORM_ADMIN    | `/api/v1/platform/organizations`                  |

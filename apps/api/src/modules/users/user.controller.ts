@@ -11,7 +11,9 @@ import {
 } from './user.validation';
 
 export async function getUsers(req: Request, res: Response): Promise<void> {
-  const { page, limit, skip, ...filter } = parseListUsersQuery(req.query as Record<string, unknown>);
+  const { page, limit, skip, ...filter } = parseListUsersQuery(
+    req.query as Record<string, unknown>,
+  );
   const result = await userService.list(requireAuth(req), filter, skip, limit);
   res.status(200).json(paginated(result.items, page, limit, result.total));
 }
@@ -38,16 +40,23 @@ export async function getUser(req: Request, res: Response): Promise<void> {
 }
 
 export async function patchUser(req: Request, res: Response): Promise<void> {
+  const body = req.body as Record<string, unknown>;
+  if (body.role === 'PLATFORM_ADMIN') {
+    throw new AppError(422, 'USER_ROLE_NOT_ALLOWED', 'Role is not allowed', [
+      { field: 'role', message: 'PLATFORM_ADMIN cannot be assigned via tenant API' },
+    ]);
+  }
   const user = await userService.patch(
     requireAuth(req),
     req.params.userId,
-    parsePatchUser(req.body as Record<string, unknown>),
+    parsePatchUser(body),
+    req,
   );
   res.status(200).json(user);
 }
 
 export async function postDisableUser(req: Request, res: Response): Promise<void> {
-  const user = await userService.disable(requireAuth(req), req.params.userId);
+  const user = await userService.disable(requireAuth(req), req.params.userId, req);
   res.status(200).json(user);
 }
 

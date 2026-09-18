@@ -219,14 +219,14 @@ class AppLocalizationsAr extends AppLocalizations {
   String get organizationCreated => 'تم إنشاء المؤسسة بنجاح';
 
   @override
-  String get organizationCreatedWithInvitation =>
-      'تم إنشاء المؤسسة وإرسال الدعوة';
+  String get organizationCreatedWithInitialAdmin =>
+      'تم إنشاء المؤسسة والمسؤول الأول بنجاح';
 
   @override
   String get organizationUpdated => 'تم تحديث المؤسسة';
 
   @override
-  String get optionalAdminInvitation => 'دعوة المسؤول الأول (اختياري)';
+  String get initialAdminSection => 'المسؤول الأول';
 
   @override
   String get adminFirstName => 'الاسم الأول للمسؤول';
@@ -238,20 +238,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get adminEmail => 'بريد المسؤول';
 
   @override
-  String get adminFirstNameOptional => 'الاسم الأول للمسؤول (اختياري)';
+  String get passwordTooWeak => 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل';
 
   @override
-  String get adminLastNameOptional => 'اسم عائلة المسؤول (اختياري)';
-
-  @override
-  String get adminEmailOptional => 'بريد المسؤول (اختياري)';
-
-  @override
-  String get adminInviteIncomplete =>
-      'أدخل الاسم الأول واسم العائلة والبريد معاً';
-
-  @override
-  String get inviteAdminHint => 'ادعُ المسؤول الأول لمؤسسة موجودة.';
+  String get inviteAdminHint => 'ادعُ مسؤولاً إضافياً لمؤسسة موجودة.';
 
   @override
   String get sendInvitation => 'إرسال الدعوة';
@@ -264,6 +254,100 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get rolePlatformAdmin => 'مسؤول المنصة';
+
+  @override
+  String get roleAdmin => 'مسؤول';
+
+  @override
+  String get roleSupervisor => 'مشرف';
+
+  @override
+  String get roleTeacher => 'معلم';
+
+  @override
+  String get roleDriver => 'سائق';
+
+  @override
+  String get roleGuardian => 'ولي أمر';
+
+  @override
+  String get users => 'المستخدمون';
+
+  @override
+  String get addUser => 'إضافة مستخدم';
+
+  @override
+  String get editUser => 'تعديل مستخدم';
+
+  @override
+  String get userDetails => 'تفاصيل المستخدم';
+
+  @override
+  String get searchUsers => 'ابحث عن المستخدمين...';
+
+  @override
+  String get noUsersYet => 'لا يوجد مستخدمون بعد';
+
+  @override
+  String get userCreated => 'تم إنشاء المستخدم بنجاح';
+
+  @override
+  String get userInvitationCreated => 'تم إنشاء الدعوة بنجاح';
+
+  @override
+  String get userUpdated => 'تم تحديث المستخدم';
+
+  @override
+  String get userDisabled => 'تم تعطيل المستخدم';
+
+  @override
+  String get userEnabled => 'تم تفعيل المستخدم';
+
+  @override
+  String get disableUser => 'تعطيل المستخدم';
+
+  @override
+  String get enableUser => 'تفعيل المستخدم';
+
+  @override
+  String get confirmDisableUser =>
+      'هل تريد تعطيل هذا المستخدم؟ لن يتمكن من تسجيل الدخول حتى يُفعّل مرة أخرى.';
+
+  @override
+  String get userStatusActive => 'نشط';
+
+  @override
+  String get userStatusInactive => 'غير نشط';
+
+  @override
+  String get filterAllStatuses => 'كل الحالات';
+
+  @override
+  String get setPasswordNow => 'تعيين كلمة المرور الآن';
+
+  @override
+  String get setPasswordNowHint =>
+      'إذا كانت معطّلة، يتم إنشاء دعوة بدلاً من ذلك';
+
+  @override
+  String get assignCampuses => 'الحرم المعيّن';
+
+  @override
+  String get assignClassrooms => 'الفصول المعيّنة';
+
+  @override
+  String get assignRoutes => 'المسارات المعيّنة';
+
+  @override
+  String get filterByCampus => 'تصفية حسب الحرم';
+
+  @override
+  String get guardianLinkHint =>
+      'اربط ولي الأمر بالطلاب من صفحة تفاصيل كل طالب.';
+
+  @override
+  String get errorLastActiveAdmin =>
+      'يجب أن تبقى المؤسسة بمسؤول نشط واحد على الأقل';
 
   @override
   String get accountStatus => 'حالة الحساب';

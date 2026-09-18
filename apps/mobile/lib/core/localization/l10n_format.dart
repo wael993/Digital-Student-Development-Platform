@@ -60,6 +60,8 @@ String localizedErrorCode(
       return l10n.errorUserAlreadyExists;
     case 'USER_ROLE_NOT_ALLOWED':
       return l10n.errorUserRoleNotAllowed;
+    case 'LAST_ACTIVE_ADMIN':
+      return l10n.errorLastActiveAdmin;
     case 'INVITATION_EXPIRED':
       return l10n.errorInvitationExpired;
     case 'INVITATION_ALREADY_USED':
@@ -104,6 +106,36 @@ String organizationPlanLabel(AppLocalizations l10n, String plan) {
       return l10n.planEnterprise;
     default:
       return plan;
+  }
+}
+
+String tenantRoleLabel(AppLocalizations l10n, String role) {
+  switch (role) {
+    case 'ADMIN':
+      return l10n.roleAdmin;
+    case 'SUPERVISOR':
+      return l10n.roleSupervisor;
+    case 'TEACHER':
+      return l10n.roleTeacher;
+    case 'DRIVER':
+      return l10n.roleDriver;
+    case 'GUARDIAN':
+      return l10n.roleGuardian;
+    case 'PLATFORM_ADMIN':
+      return l10n.rolePlatformAdmin;
+    default:
+      return role;
+  }
+}
+
+String userStatusLabel(AppLocalizations l10n, String status) {
+  switch (status) {
+    case 'ACTIVE':
+      return l10n.userStatusActive;
+    case 'INACTIVE':
+      return l10n.userStatusInactive;
+    default:
+      return status;
   }
 }
 

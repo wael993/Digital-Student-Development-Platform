@@ -15,10 +15,12 @@ class PlatformDashboard {
       organizations.total == 0 && students == 0 && teachers == 0 && buses == 0;
 
   factory PlatformDashboard.fromJson(Map<String, dynamic> json) {
+    final orgsRaw = json['organizations'];
+    final orgsMap = orgsRaw is Map
+        ? Map<String, dynamic>.from(orgsRaw)
+        : <String, dynamic>{};
     return PlatformDashboard(
-      organizations: PlatformOrganizationCounts.fromJson(
-        json['organizations'] as Map<String, dynamic>? ?? const {},
-      ),
+      organizations: PlatformOrganizationCounts.fromJson(orgsMap),
       students: (json['students'] as num?)?.toInt() ?? 0,
       teachers: (json['teachers'] as num?)?.toInt() ?? 0,
       buses: (json['buses'] as num?)?.toInt() ?? 0,

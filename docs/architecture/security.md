@@ -120,7 +120,7 @@ Neither role crosses `organizationId`.
 | Who uploaded media    | `media.uploadedBy` + `createdAt`. Upload/delete also log org, user, student, media id                                                                                                                     |
 | Corrections           | Event void fields; do not rewrite history silently                                                                                                                                                        |
 | Authz failures        | Log org, user, route, target id — not tokens or passwords                                                                                                                                                 |
-| Platform actions      | `audit_logs` — tenant create/update/lifecycle, subscription changes, admin invites/accepts, platform-admin bootstrap/login/disable/password-change. Never store passwords, JWTs, or raw invitation tokens |
+| Platform actions      | `audit_logs` — tenant create/update/lifecycle, owner-created initial Admin, subscription changes, additional admin invites/accepts, platform-admin bootstrap/login/disable/password-change. Never store passwords, JWTs, or raw invitation tokens |
 
 ## Sensitive data
 

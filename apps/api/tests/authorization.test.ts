@@ -73,6 +73,12 @@ describe('permissions', () => {
     expect(hasPermission('GUARDIAN', 'notifications.read')).toBe(true);
     expect(hasPermission('GUARDIAN', 'notifications.update')).toBe(true);
     expect(hasPermission('TEACHER', 'notifications.read')).toBe(true);
+    expect(hasPermission('SUPERVISOR', 'users.create')).toBe(true);
+    expect(hasPermission('SUPERVISOR', 'users.update')).toBe(true);
+    expect(hasPermission('TEACHER', 'users.create')).toBe(false);
+    expect(hasPermission('TEACHER', 'users.update')).toBe(false);
+    expect(hasPermission('DRIVER', 'users.create')).toBe(false);
+    expect(hasPermission('GUARDIAN', 'users.create')).toBe(false);
   });
 });
 

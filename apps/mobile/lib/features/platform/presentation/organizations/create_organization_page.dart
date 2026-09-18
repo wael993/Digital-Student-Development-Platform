@@ -29,10 +29,12 @@ class _CreateOrganizationPageState extends ConsumerState<CreateOrganizationPage>
   final _adminFirst = TextEditingController();
   final _adminLast = TextEditingController();
   final _adminEmail = TextEditingController();
+  final _adminPassword = TextEditingController();
 
   String _language = 'ar';
   String _plan = 'STARTER';
   bool _saving = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -47,6 +49,7 @@ class _CreateOrganizationPageState extends ConsumerState<CreateOrganizationPage>
     _adminFirst.dispose();
     _adminLast.dispose();
     _adminEmail.dispose();
+    _adminPassword.dispose();
     super.dispose();
   }
 
@@ -137,22 +140,53 @@ class _CreateOrganizationPageState extends ConsumerState<CreateOrganizationPage>
             ),
             const SizedBox(height: 16),
             Text(
-              l10n.optionalAdminInvitation,
+              l10n.initialAdminSection,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             TextFormField(
+              key: const Key('adminFirstNameField'),
               controller: _adminFirst,
-              decoration: InputDecoration(labelText: l10n.adminFirstNameOptional),
+              decoration: InputDecoration(labelText: l10n.adminFirstName),
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null,
             ),
             TextFormField(
+              key: const Key('adminLastNameField'),
               controller: _adminLast,
-              decoration: InputDecoration(labelText: l10n.adminLastNameOptional),
+              decoration: InputDecoration(labelText: l10n.adminLastName),
+              validator: (v) =>
+                  (v == null || v.trim().isEmpty) ? l10n.fieldRequired : null,
             ),
             TextFormField(
+              key: const Key('adminEmailField'),
               controller: _adminEmail,
               keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(labelText: l10n.adminEmailOptional),
+              decoration: InputDecoration(labelText: l10n.adminEmail),
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return l10n.fieldRequired;
+                if (!v.contains('@')) return l10n.invalidEmail;
+                return null;
+              },
+            ),
+            TextFormField(
+              key: const Key('adminPasswordField'),
+              controller: _adminPassword,
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                labelText: l10n.password,
+                suffixIcon: IconButton(
+                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                  ),
+                ),
+              ),
+              validator: (v) {
+                if (v == null || v.isEmpty) return l10n.fieldRequired;
+                if (v.length < 8) return l10n.passwordTooWeak;
+                return null;
+              },
             ),
             const SizedBox(height: 24),
             FilledButton(
@@ -178,18 +212,6 @@ class _CreateOrganizationPageState extends ConsumerState<CreateOrganizationPage>
       return;
     }
 
-    final adminEmail = _adminEmail.text.trim();
-    final adminFirst = _adminFirst.text.trim();
-    final adminLast = _adminLast.text.trim();
-    final anyAdmin = adminEmail.isNotEmpty || adminFirst.isNotEmpty || adminLast.isNotEmpty;
-    if (anyAdmin &&
-        (adminEmail.isEmpty || adminFirst.isEmpty || adminLast.isEmpty)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.adminInviteIncomplete)),
-      );
-      return;
-    }
-
     setState(() => _saving = true);
     try {
       final result = await ref.read(platformRepositoryProvider).createOrganization(
@@ -204,17 +226,19 @@ class _CreateOrganizationPageState extends ConsumerState<CreateOrganizationPage>
               address: _address.text,
               website: _website.text,
               logoUrl: _logoUrl.text,
-              adminFirstName: adminFirst.isEmpty ? null : adminFirst,
-              adminLastName: adminLast.isEmpty ? null : adminLast,
-              adminEmail: adminEmail.isEmpty ? null : adminEmail,
+              adminFirstName: _adminFirst.text,
+              adminLastName: _adminLast.text,
+              adminEmail: _adminEmail.text,
+              adminPassword: _adminPassword.text,
             ),
           );
+      // never persist owner-entered password after submit
+      _adminPassword.clear();
       invalidatePlatformOrgData(ref, organizationId: result.organization.id);
       if (!mounted) return;
-      final message = result.invitation != null
-          ? l10n.organizationCreatedWithInvitation
-          : l10n.organizationCreated;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.organizationCreatedWithInitialAdmin)),
+      );
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute<void>(

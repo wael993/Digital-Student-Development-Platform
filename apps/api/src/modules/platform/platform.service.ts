@@ -12,6 +12,7 @@ import {
   validationError,
 } from '../../utils/validate';
 import { writeAuditLog } from '../audit/audit.service';
+import { hashPassword } from '../auth/auth.service';
 import * as invitationService from '../invitations/invitation.service';
 import {
   DEFAULT_LANGUAGE,
@@ -37,6 +38,7 @@ import {
   updateOrganization,
   type ListOrganizationsFilter,
 } from '../organizations/organization.repository';
+import { createUser, findUserByEmail } from '../users/user.repository';
 import * as subscriptionService from '../subscriptions/subscription.service';
 
 function requireTimezone(value: unknown, field: string): string {
@@ -55,10 +57,37 @@ function requireEmail(value: unknown, field: string): string {
   return email;
 }
 
+function requirePassword(value: unknown, field: string): string {
+  const password = requireString(value, field);
+  if (password.length < 8) {
+    throw new AppError(422, 'PASSWORD_TOO_WEAK', 'Password must be at least 8 characters', [
+      { field, message: 'Must be at least 8 characters' },
+    ]);
+  }
+  return password;
+}
+
+function parseInitialAdmin(value: unknown) {
+  if (value === undefined || value === null) {
+    throw validationError('initialAdmin', 'Required');
+  }
+  if (typeof value !== 'object') {
+    throw validationError('initialAdmin', 'Must be an object');
+  }
+  const admin = value as Record<string, unknown>;
+  return {
+    firstName: requireString(admin.firstName, 'initialAdmin.firstName'),
+    lastName: requireString(admin.lastName, 'initialAdmin.lastName'),
+    email: requireEmail(admin.email, 'initialAdmin.email'),
+    password: requirePassword(admin.password, 'initialAdmin.password'),
+  };
+}
+
 export function parseCreateOrganization(body: Record<string, unknown>) {
   const name = requireString(body.name, 'name');
   const country = requireString(body.country, 'country');
-  const timezone = body.timezone !== undefined ? requireTimezone(body.timezone, 'timezone') : DEFAULT_TIMEZONE;
+  const timezone =
+    body.timezone !== undefined ? requireTimezone(body.timezone, 'timezone') : DEFAULT_TIMEZONE;
   const defaultLanguage =
     optionalString(body.defaultLanguage, 'defaultLanguage') ?? DEFAULT_LANGUAGE;
   const contactEmail = requireEmail(body.contactEmail, 'contactEmail');
@@ -69,22 +98,7 @@ export function parseCreateOrganization(body: Record<string, unknown>) {
   const notes = optionalString(body.notes, 'notes');
   const logoUrl = optionalString(body.logoUrl, 'logoUrl');
   const status = optionalEnum(body.status, 'status', ORGANIZATION_STATUSES) ?? 'TRIAL';
-
-  const admin = body.admin;
-  let adminInvite:
-    | { email: string; firstName: string; lastName: string }
-    | undefined;
-  if (admin !== undefined && admin !== null) {
-    if (typeof admin !== 'object') {
-      throw validationError('admin', 'Must be an object');
-    }
-    const a = admin as Record<string, unknown>;
-    adminInvite = {
-      email: requireEmail(a.email, 'admin.email'),
-      firstName: requireString(a.firstName, 'admin.firstName'),
-      lastName: requireString(a.lastName, 'admin.lastName'),
-    };
-  }
+  const initialAdmin = parseInitialAdmin(body.initialAdmin);
 
   return {
     name,
@@ -99,7 +113,7 @@ export function parseCreateOrganization(body: Record<string, unknown>) {
     notes,
     logoUrl,
     status,
-    adminInvite,
+    initialAdmin,
   };
 }
 
@@ -157,7 +171,13 @@ export function parseSubscriptionBody(body: Record<string, unknown>) {
     'subscriptionStatus',
     SUBSCRIPTION_STATUSES,
   );
-  if (!planCode && !subscriptionStatus && body.subscriptionStartedAt === undefined && body.subscriptionEndsAt === undefined && body.trialEndsAt === undefined) {
+  if (
+    !planCode &&
+    !subscriptionStatus &&
+    body.subscriptionStartedAt === undefined &&
+    body.subscriptionEndsAt === undefined &&
+    body.trialEndsAt === undefined
+  ) {
     throw validationError('planCode', 'At least one subscription field is required');
   }
   return {
@@ -193,15 +213,15 @@ export function parseAdminInvitation(body: Record<string, unknown>) {
 }
 
 export function parseAcceptInvitation(body: Record<string, unknown>) {
-  const password = requireString(body.password, 'password');
-  if (password.length < 8) {
-    throw validationError('password', 'Must be at least 8 characters');
-  }
   return {
-    password,
+    password: requirePassword(body.password, 'password'),
     firstName: asTrimmedString(body.firstName),
     lastName: asTrimmedString(body.lastName),
   };
+}
+
+function isDuplicateKeyError(err: unknown): boolean {
+  return typeof err === 'object' && err !== null && 'code' in err && err.code === 11000;
 }
 
 export async function createTenant(
@@ -210,6 +230,12 @@ export async function createTenant(
   req?: Request,
 ) {
   const parsed = parseCreateOrganization(body);
+
+  const existingUser = await findUserByEmail(parsed.initialAdmin.email);
+  if (existingUser) {
+    throw new AppError(409, 'USER_ALREADY_EXISTS', 'Email is already registered');
+  }
+
   const slug = await uniqueSlugFromName(parsed.name);
   const now = new Date();
   const trialEndsAt = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
@@ -233,6 +259,27 @@ export async function createTenant(
     logoUrl: parsed.logoUrl,
   });
 
+  // note: standalone Mongo has no transactions; delete org if admin create fails. Upgrade: withTransaction on replica set.
+  let adminUser;
+  try {
+    const passwordHash = await hashPassword(parsed.initialAdmin.password);
+    adminUser = await createUser({
+      organizationId: organization.id,
+      email: parsed.initialAdmin.email,
+      passwordHash,
+      firstName: parsed.initialAdmin.firstName,
+      lastName: parsed.initialAdmin.lastName,
+      role: 'ADMIN',
+      status: 'ACTIVE',
+    });
+  } catch (err) {
+    await OrganizationModel.findByIdAndDelete(organization.id);
+    if (isDuplicateKeyError(err)) {
+      throw new AppError(409, 'USER_ALREADY_EXISTS', 'Email is already registered');
+    }
+    throw err;
+  }
+
   await writeAuditLog({
     actor,
     action: 'TENANT_CREATED',
@@ -243,29 +290,28 @@ export async function createTenant(
     req,
   });
 
-  let invitation: Awaited<ReturnType<typeof invitationService.createAdminInvitation>> | undefined;
-  if (parsed.adminInvite) {
-    invitation = await invitationService.createAdminInvitation({
-      actor,
-      organizationId: organization.id,
-      email: parsed.adminInvite.email,
-      firstName: parsed.adminInvite.firstName,
-      lastName: parsed.adminInvite.lastName,
-      req,
-    });
-  }
+  await writeAuditLog({
+    actor,
+    action: 'INITIAL_ADMIN_CREATED',
+    resourceType: 'user',
+    resourceId: adminUser.id,
+    organizationId: organization.id,
+    metadata: {
+      email: adminUser.email,
+      role: 'ADMIN',
+      userId: adminUser.id,
+    },
+    req,
+  });
 
   return {
     organization: toOrganizationJson(organization),
-    invitation: invitation
-      ? {
-          invitationId: invitation.invitationId,
-          email: invitation.email,
-          expiresAt: invitation.expiresAt,
-          // returned once so the platform operator can deliver the link; never stored raw
-          token: invitation.token,
-        }
-      : undefined,
+    initialAdmin: {
+      userId: adminUser.id,
+      email: adminUser.email,
+      firstName: adminUser.firstName,
+      lastName: adminUser.lastName,
+    },
   };
 }
 
@@ -372,10 +418,7 @@ const STATUS_TRANSITIONS: Partial<Record<OrganizationStatus, readonly Organizati
   SUSPENDED: ['ACTIVE'],
 };
 
-function assertStatusTransition(
-  current: OrganizationStatus,
-  next: OrganizationStatus,
-): void {
+function assertStatusTransition(current: OrganizationStatus, next: OrganizationStatus): void {
   if (current === next) {
     return;
   }

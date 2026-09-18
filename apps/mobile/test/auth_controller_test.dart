@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:digital_student/core/storage/token_store.dart';
 import 'package:digital_student/features/auth/data/auth_repository.dart';
 import 'package:digital_student/features/auth/data/auth_api.dart';
+import 'package:digital_student/features/auth/models/user.dart';
 import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -198,5 +199,45 @@ void main() {
     expect(controller.state.status, AuthStatus.unauthenticated);
     expect(await tokens.readAccessToken(), isNull);
     expect(await tokens.readRefreshToken(), isNull);
+  });
+
+  test('AUTH-002 creatable staff roles mirror hierarchy', () {
+    const admin = User(
+      id: 'a1',
+      organizationId: 'o1',
+      firstName: 'A',
+      lastName: 'Admin',
+      email: 'admin@example.com',
+      role: 'ADMIN',
+    );
+    const supervisor = User(
+      id: 's1',
+      organizationId: 'o1',
+      firstName: 'S',
+      lastName: 'Super',
+      email: 'super@example.com',
+      role: 'SUPERVISOR',
+    );
+    const teacher = User(
+      id: 't1',
+      organizationId: 'o1',
+      firstName: 'T',
+      lastName: 'Teach',
+      email: 'teacher@example.com',
+      role: 'TEACHER',
+    );
+
+    expect(admin.creatableStaffRoles, User.tenantRoles);
+    expect(admin.canChangeUserRoles, isTrue);
+    expect(admin.canManageUserWithRole('SUPERVISOR'), isTrue);
+
+    expect(supervisor.creatableStaffRoles, User.supervisorCreatableRoles);
+    expect(supervisor.canChangeUserRoles, isFalse);
+    expect(supervisor.canManageUserWithRole('ADMIN'), isFalse);
+    expect(supervisor.canManageUserWithRole('SUPERVISOR'), isFalse);
+    expect(supervisor.canManageUserWithRole('TEACHER'), isTrue);
+
+    expect(teacher.creatableStaffRoles, isEmpty);
+    expect(teacher.canManageStaffUsers, isFalse);
   });
 }

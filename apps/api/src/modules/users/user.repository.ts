@@ -13,6 +13,7 @@ export type UserAssignmentPatch = {
   firstName?: string;
   lastName?: string;
   status?: UserStatus;
+  role?: TenantRole;
   campusIds?: string[];
   classroomIds?: string[];
   routeIds?: string[];
@@ -49,6 +50,10 @@ export function toPublicUser(user: User & { id: string }): PublicUser {
 
 export async function findUserByEmailWithPassword(email: string) {
   return UserModel.findOne({ email: email.toLowerCase().trim() }).select('+passwordHash');
+}
+
+export async function findUserByIdWithPassword(id: string) {
+  return UserModel.findById(id).select('+passwordHash');
 }
 
 export async function findUserById(id: string, organizationId: string) {
@@ -95,6 +100,14 @@ export async function countUsersByOrganization(organizationId: string, role?: Us
   return UserModel.countDocuments({
     organizationId,
     ...(role ? { role } : {}),
+  });
+}
+
+export async function countActiveAdmins(organizationId: string) {
+  return UserModel.countDocuments({
+    organizationId,
+    role: 'ADMIN',
+    status: 'ACTIVE',
   });
 }
 
@@ -151,11 +164,7 @@ export async function createUser(input: {
   });
 }
 
-export async function updateUser(
-  organizationId: string,
-  id: string,
-  patch: UserAssignmentPatch,
-) {
+export async function updateUser(organizationId: string, id: string, patch: UserAssignmentPatch) {
   return UserModel.findOneAndUpdate(tenantFilter(organizationId, { _id: id }), patch, {
     new: true,
   });

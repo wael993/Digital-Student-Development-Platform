@@ -19,13 +19,7 @@ export function isOrganizationOperational(status: OrganizationStatus): boolean {
 export const PLAN_CODES = ['STARTER', 'PROFESSIONAL', 'ENTERPRISE'] as const;
 export type PlanCode = (typeof PLAN_CODES)[number];
 
-export const SUBSCRIPTION_STATUSES = [
-  'NONE',
-  'TRIAL',
-  'ACTIVE',
-  'PAST_DUE',
-  'CANCELLED',
-] as const;
+export const SUBSCRIPTION_STATUSES = ['NONE', 'TRIAL', 'ACTIVE', 'PAST_DUE', 'CANCELLED'] as const;
 export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUSES)[number];
 
 export const DEFAULT_TIMEZONE = 'UTC';

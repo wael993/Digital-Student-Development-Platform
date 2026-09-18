@@ -3,10 +3,7 @@ import { ClassroomModel } from '../classrooms/classroom.model';
 import { BusModel } from '../buses/bus.model';
 import { StudentModel } from '../students/student.model';
 import { UserModel } from '../users/user.model';
-import {
-  findOrganizationById,
-  updateOrganization,
-} from '../organizations/organization.repository';
+import { findOrganizationById, updateOrganization } from '../organizations/organization.repository';
 import {
   type PlanCode,
   type SubscriptionStatus,

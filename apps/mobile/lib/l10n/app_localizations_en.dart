@@ -218,14 +218,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get organizationCreated => 'Organization created successfully';
 
   @override
-  String get organizationCreatedWithInvitation =>
-      'Organization created and invitation sent';
+  String get organizationCreatedWithInitialAdmin =>
+      'Organization and initial admin created successfully';
 
   @override
   String get organizationUpdated => 'Organization updated';
 
   @override
-  String get optionalAdminInvitation => 'Initial admin invitation (optional)';
+  String get initialAdminSection => 'Initial Admin';
 
   @override
   String get adminFirstName => 'Admin first name';
@@ -237,21 +237,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adminEmail => 'Admin email';
 
   @override
-  String get adminFirstNameOptional => 'Admin first name (optional)';
-
-  @override
-  String get adminLastNameOptional => 'Admin last name (optional)';
-
-  @override
-  String get adminEmailOptional => 'Admin email (optional)';
-
-  @override
-  String get adminInviteIncomplete =>
-      'Provide admin first name, last name, and email together';
+  String get passwordTooWeak => 'Password must be at least 8 characters';
 
   @override
   String get inviteAdminHint =>
-      'Invite the first tenant admin for an existing organization.';
+      'Invite an additional tenant admin for an existing organization.';
 
   @override
   String get sendInvitation => 'Send invitation';
@@ -264,6 +254,99 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rolePlatformAdmin => 'Platform admin';
+
+  @override
+  String get roleAdmin => 'Admin';
+
+  @override
+  String get roleSupervisor => 'Supervisor';
+
+  @override
+  String get roleTeacher => 'Teacher';
+
+  @override
+  String get roleDriver => 'Driver';
+
+  @override
+  String get roleGuardian => 'Guardian';
+
+  @override
+  String get users => 'Users';
+
+  @override
+  String get addUser => 'Add user';
+
+  @override
+  String get editUser => 'Edit user';
+
+  @override
+  String get userDetails => 'User details';
+
+  @override
+  String get searchUsers => 'Search users...';
+
+  @override
+  String get noUsersYet => 'No users yet';
+
+  @override
+  String get userCreated => 'User created successfully';
+
+  @override
+  String get userInvitationCreated => 'Invitation created successfully';
+
+  @override
+  String get userUpdated => 'User updated';
+
+  @override
+  String get userDisabled => 'User disabled';
+
+  @override
+  String get userEnabled => 'User enabled';
+
+  @override
+  String get disableUser => 'Disable user';
+
+  @override
+  String get enableUser => 'Enable user';
+
+  @override
+  String get confirmDisableUser =>
+      'Disable this user? They will not be able to sign in until enabled again.';
+
+  @override
+  String get userStatusActive => 'Active';
+
+  @override
+  String get userStatusInactive => 'Inactive';
+
+  @override
+  String get filterAllStatuses => 'All statuses';
+
+  @override
+  String get setPasswordNow => 'Set password now';
+
+  @override
+  String get setPasswordNowHint => 'If off, an invitation is created instead';
+
+  @override
+  String get assignCampuses => 'Assigned campuses';
+
+  @override
+  String get assignClassrooms => 'Assigned classrooms';
+
+  @override
+  String get assignRoutes => 'Assigned routes';
+
+  @override
+  String get filterByCampus => 'Filter by campus';
+
+  @override
+  String get guardianLinkHint =>
+      'Link this guardian to students from each student\'s details page.';
+
+  @override
+  String get errorLastActiveAdmin =>
+      'The organization must keep at least one active admin';
 
   @override
   String get accountStatus => 'Account status';

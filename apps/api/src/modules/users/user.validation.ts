@@ -72,6 +72,7 @@ export function parsePatchUser(body: Record<string, unknown>) {
   const firstName = asTrimmedString(body.firstName);
   const lastName = asTrimmedString(body.lastName);
   const status = optionalEnum(body.status, 'status', USER_STATUSES);
+  const role = optionalEnum(body.role, 'role', TENANT_ROLES);
   const campusIds = parseIdList(body.campusIds, 'campusIds');
   const classroomIds = parseIdList(body.classroomIds, 'classroomIds');
   const routeIds = parseIdList(body.routeIds, 'routeIds');
@@ -80,6 +81,7 @@ export function parsePatchUser(body: Record<string, unknown>) {
     !firstName &&
     !lastName &&
     !status &&
+    !role &&
     campusIds === undefined &&
     classroomIds === undefined &&
     routeIds === undefined
@@ -91,6 +93,7 @@ export function parsePatchUser(body: Record<string, unknown>) {
     firstName,
     lastName,
     status: status as UserStatus | undefined,
+    role: role as TenantRole | undefined,
     campusIds,
     classroomIds,
     routeIds,

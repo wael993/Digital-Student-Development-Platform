@@ -9,8 +9,9 @@ Dio createApiClient() {
   return Dio(
     BaseOptions(
       baseUrl: AppEnv.apiBaseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      // note: Render free tier can cold-start past 10s; keep retries usable
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
       headers: const {
         'Accept': 'application/json',
         'Content-Type': 'application/json',

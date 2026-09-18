@@ -34,3 +34,12 @@ export async function getMe(req: Request, res: Response): Promise<void> {
   const result = await authService.getMe(auth.userId, auth.organizationId);
   res.status(200).json(result);
 }
+
+export async function postChangePassword(req: Request, res: Response): Promise<void> {
+  if (!req.auth) {
+    throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
+  }
+  const body = req.body as { currentPassword?: unknown; newPassword?: unknown };
+  await authService.changePassword(req.auth.userId, body.currentPassword, body.newPassword);
+  res.status(204).send();
+}

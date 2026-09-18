@@ -506,11 +506,11 @@ abstract class AppLocalizations {
   /// **'Organization created successfully'**
   String get organizationCreated;
 
-  /// No description provided for @organizationCreatedWithInvitation.
+  /// No description provided for @organizationCreatedWithInitialAdmin.
   ///
   /// In en, this message translates to:
-  /// **'Organization created and invitation sent'**
-  String get organizationCreatedWithInvitation;
+  /// **'Organization and initial admin created successfully'**
+  String get organizationCreatedWithInitialAdmin;
 
   /// No description provided for @organizationUpdated.
   ///
@@ -518,11 +518,11 @@ abstract class AppLocalizations {
   /// **'Organization updated'**
   String get organizationUpdated;
 
-  /// No description provided for @optionalAdminInvitation.
+  /// No description provided for @initialAdminSection.
   ///
   /// In en, this message translates to:
-  /// **'Initial admin invitation (optional)'**
-  String get optionalAdminInvitation;
+  /// **'Initial Admin'**
+  String get initialAdminSection;
 
   /// No description provided for @adminFirstName.
   ///
@@ -542,34 +542,16 @@ abstract class AppLocalizations {
   /// **'Admin email'**
   String get adminEmail;
 
-  /// No description provided for @adminFirstNameOptional.
+  /// No description provided for @passwordTooWeak.
   ///
   /// In en, this message translates to:
-  /// **'Admin first name (optional)'**
-  String get adminFirstNameOptional;
-
-  /// No description provided for @adminLastNameOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'Admin last name (optional)'**
-  String get adminLastNameOptional;
-
-  /// No description provided for @adminEmailOptional.
-  ///
-  /// In en, this message translates to:
-  /// **'Admin email (optional)'**
-  String get adminEmailOptional;
-
-  /// No description provided for @adminInviteIncomplete.
-  ///
-  /// In en, this message translates to:
-  /// **'Provide admin first name, last name, and email together'**
-  String get adminInviteIncomplete;
+  /// **'Password must be at least 8 characters'**
+  String get passwordTooWeak;
 
   /// No description provided for @inviteAdminHint.
   ///
   /// In en, this message translates to:
-  /// **'Invite the first tenant admin for an existing organization.'**
+  /// **'Invite an additional tenant admin for an existing organization.'**
   String get inviteAdminHint;
 
   /// No description provided for @sendInvitation.
@@ -595,6 +577,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Platform admin'**
   String get rolePlatformAdmin;
+
+  /// No description provided for @roleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get roleAdmin;
+
+  /// No description provided for @roleSupervisor.
+  ///
+  /// In en, this message translates to:
+  /// **'Supervisor'**
+  String get roleSupervisor;
+
+  /// No description provided for @roleTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get roleTeacher;
+
+  /// No description provided for @roleDriver.
+  ///
+  /// In en, this message translates to:
+  /// **'Driver'**
+  String get roleDriver;
+
+  /// No description provided for @roleGuardian.
+  ///
+  /// In en, this message translates to:
+  /// **'Guardian'**
+  String get roleGuardian;
+
+  /// No description provided for @users.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get users;
+
+  /// No description provided for @addUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Add user'**
+  String get addUser;
+
+  /// No description provided for @editUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit user'**
+  String get editUser;
+
+  /// No description provided for @userDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'User details'**
+  String get userDetails;
+
+  /// No description provided for @searchUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search users...'**
+  String get searchUsers;
+
+  /// No description provided for @noUsersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No users yet'**
+  String get noUsersYet;
+
+  /// No description provided for @userCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'User created successfully'**
+  String get userCreated;
+
+  /// No description provided for @userInvitationCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Invitation created successfully'**
+  String get userInvitationCreated;
+
+  /// No description provided for @userUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'User updated'**
+  String get userUpdated;
+
+  /// No description provided for @userDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'User disabled'**
+  String get userDisabled;
+
+  /// No description provided for @userEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'User enabled'**
+  String get userEnabled;
+
+  /// No description provided for @disableUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable user'**
+  String get disableUser;
+
+  /// No description provided for @enableUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable user'**
+  String get enableUser;
+
+  /// No description provided for @confirmDisableUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable this user? They will not be able to sign in until enabled again.'**
+  String get confirmDisableUser;
+
+  /// No description provided for @userStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get userStatusActive;
+
+  /// No description provided for @userStatusInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get userStatusInactive;
+
+  /// No description provided for @filterAllStatuses.
+  ///
+  /// In en, this message translates to:
+  /// **'All statuses'**
+  String get filterAllStatuses;
+
+  /// No description provided for @setPasswordNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Set password now'**
+  String get setPasswordNow;
+
+  /// No description provided for @setPasswordNowHint.
+  ///
+  /// In en, this message translates to:
+  /// **'If off, an invitation is created instead'**
+  String get setPasswordNowHint;
+
+  /// No description provided for @assignCampuses.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned campuses'**
+  String get assignCampuses;
+
+  /// No description provided for @assignClassrooms.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned classrooms'**
+  String get assignClassrooms;
+
+  /// No description provided for @assignRoutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Assigned routes'**
+  String get assignRoutes;
+
+  /// No description provided for @filterByCampus.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by campus'**
+  String get filterByCampus;
+
+  /// No description provided for @guardianLinkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Link this guardian to students from each student\'s details page.'**
+  String get guardianLinkHint;
+
+  /// No description provided for @errorLastActiveAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'The organization must keep at least one active admin'**
+  String get errorLastActiveAdmin;
 
   /// No description provided for @accountStatus.
   ///

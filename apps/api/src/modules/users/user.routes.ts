@@ -23,4 +23,8 @@ usersRouter.get('/:userId', authorize('users.read'), asyncHandler(getUser));
 usersRouter.patch('/:userId', authorize('users.update'), asyncHandler(patchUser));
 usersRouter.post('/:userId/disable', authorize('users.update'), asyncHandler(postDisableUser));
 usersRouter.post('/:userId/enable', authorize('users.update'), asyncHandler(postEnableUser));
-usersRouter.post('/:userId/invitation', authorize('users.create'), asyncHandler(postUserInvitation));
+usersRouter.post(
+  '/:userId/invitation',
+  authorize('users.create'),
+  asyncHandler(postUserInvitation),
+);

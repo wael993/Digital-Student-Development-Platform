@@ -245,4 +245,57 @@ describe('auth', () => {
     expect(response.status).toBe(401);
     expect(response.body.error.code).toBe('INVALID_REFRESH_TOKEN');
   });
+
+  it('changes password and revokes refresh sessions', async () => {
+    await insertUser({ email: 'teacher@example.com', password: 'Password123!' });
+    const login = await request(app).post('/api/v1/auth/login').send({
+      email: 'teacher@example.com',
+      password: 'Password123!',
+    });
+    expect(login.status).toBe(200);
+
+    const wrong = await request(app)
+      .post('/api/v1/auth/change-password')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .send({ currentPassword: 'wrong', newPassword: 'NewPassword1!' });
+    expect(wrong.status).toBe(401);
+    expect(wrong.body.error.code).toBe('INVALID_CURRENT_PASSWORD');
+
+    const weak = await request(app)
+      .post('/api/v1/auth/change-password')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .send({ currentPassword: 'Password123!', newPassword: 'short' });
+    expect(weak.status).toBe(422);
+    expect(weak.body.error.code).toBe('PASSWORD_TOO_WEAK');
+
+    const same = await request(app)
+      .post('/api/v1/auth/change-password')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .send({ currentPassword: 'Password123!', newPassword: 'Password123!' });
+    expect(same.status).toBe(422);
+    expect(same.body.error.code).toBe('PASSWORD_SAME_AS_CURRENT');
+
+    const changed = await request(app)
+      .post('/api/v1/auth/change-password')
+      .set('Authorization', `Bearer ${login.body.accessToken}`)
+      .send({ currentPassword: 'Password123!', newPassword: 'NewPassword1!' });
+    expect(changed.status).toBe(204);
+
+    const refresh = await request(app).post('/api/v1/auth/refresh').send({
+      refreshToken: login.body.refreshToken,
+    });
+    expect(refresh.status).toBe(401);
+
+    const oldLogin = await request(app).post('/api/v1/auth/login').send({
+      email: 'teacher@example.com',
+      password: 'Password123!',
+    });
+    expect(oldLogin.status).toBe(401);
+
+    const newLogin = await request(app).post('/api/v1/auth/login').send({
+      email: 'teacher@example.com',
+      password: 'NewPassword1!',
+    });
+    expect(newLogin.status).toBe(200);
+  });
 });

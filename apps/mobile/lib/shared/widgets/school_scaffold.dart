@@ -4,6 +4,7 @@ import 'package:digital_student/features/auth/providers/auth_provider.dart';
 import 'package:digital_student/features/notifications/providers/notification_providers.dart';
 import 'package:digital_student/features/notifications/screens/notification_list_screen.dart';
 import 'package:digital_student/features/notifications/screens/settings_screen.dart';
+import 'package:digital_student/features/users/presentation/user_list_page.dart';
 import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,6 +36,15 @@ class SchoolScaffold extends ConsumerWidget {
       appBar: AppBar(
         title: Text(title),
         actions: [
+          if (user?.canManageStaffUsers ?? false)
+            IconButton(
+              key: const Key('usersNavButton'),
+              tooltip: l10n.users,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(builder: (_) => const UserListPage()),
+              ),
+              icon: const Icon(Icons.group_outlined),
+            ),
           if (user?.role == 'GUARDIAN')
             IconButton(
               key: const Key('notificationsButton'),

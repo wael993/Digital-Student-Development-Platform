@@ -6,6 +6,8 @@ import {
   findUserByEmailWithPassword,
   findUserById,
   findUserByIdGlobal,
+  findUserByIdWithPassword,
+  setUserPassword,
   toPublicUser,
 } from '../users/user.repository';
 import { UserModel } from '../users/user.model';
@@ -180,7 +182,12 @@ export async function refresh(refreshTokenRaw: unknown): Promise<{ accessToken: 
 
   if (claims.role === 'PLATFORM_ADMIN') {
     const user = await findUserByIdGlobal(claims.sub);
-    if (!user || user.status !== 'ACTIVE' || user.role !== 'PLATFORM_ADMIN' || user.organizationId) {
+    if (
+      !user ||
+      user.status !== 'ACTIVE' ||
+      user.role !== 'PLATFORM_ADMIN' ||
+      user.organizationId
+    ) {
       throw new AppError(401, 'INVALID_REFRESH_TOKEN', 'Invalid refresh token');
     }
     return {
@@ -246,4 +253,49 @@ export async function getMe(userId: string, organizationId: string | null): Prom
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, BCRYPT_ROUNDS);
+}
+
+export async function changePassword(
+  userId: string,
+  currentPasswordRaw: unknown,
+  newPasswordRaw: unknown,
+): Promise<void> {
+  const currentPassword = typeof currentPasswordRaw === 'string' ? currentPasswordRaw : undefined;
+  const newPassword = typeof newPasswordRaw === 'string' ? newPasswordRaw : undefined;
+
+  if (!currentPassword || !newPassword) {
+    throw new AppError(422, 'VALIDATION_ERROR', 'currentPassword and newPassword are required', [
+      {
+        field: currentPassword ? 'newPassword' : 'currentPassword',
+        message: 'Required',
+      },
+    ]);
+  }
+
+  if (newPassword.length < 8) {
+    throw new AppError(422, 'PASSWORD_TOO_WEAK', 'Password must be at least 8 characters', [
+      { field: 'newPassword', message: 'Must be at least 8 characters' },
+    ]);
+  }
+
+  const user = await findUserByIdWithPassword(userId);
+  if (!user || user.status !== 'ACTIVE') {
+    throw new AppError(401, 'UNAUTHORIZED', 'Authentication required');
+  }
+
+  const currentMatches = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!currentMatches) {
+    throw new AppError(401, 'INVALID_CURRENT_PASSWORD', 'Current password is incorrect');
+  }
+
+  if (await bcrypt.compare(newPassword, user.passwordHash)) {
+    throw new AppError(422, 'PASSWORD_SAME_AS_CURRENT', 'New password must be different');
+  }
+
+  const passwordHash = await hashPassword(newPassword);
+  await setUserPassword(user.id, passwordHash);
+  await RefreshTokenModel.updateMany(
+    { userId: user._id, revokedAt: null },
+    { revokedAt: new Date() },
+  );
 }

@@ -139,13 +139,14 @@ class CreateOrganizationRequest {
     required this.defaultLanguage,
     required this.contactEmail,
     required this.planCode,
+    required this.adminFirstName,
+    required this.adminLastName,
+    required this.adminEmail,
+    required this.adminPassword,
     this.contactPhone,
     this.address,
     this.website,
     this.logoUrl,
-    this.adminFirstName,
-    this.adminLastName,
-    this.adminEmail,
   });
 
   final String name;
@@ -158,19 +159,13 @@ class CreateOrganizationRequest {
   final String? address;
   final String? website;
   final String? logoUrl;
-  final String? adminFirstName;
-  final String? adminLastName;
-  final String? adminEmail;
-
-  bool get hasAdminInvite {
-    final email = adminEmail?.trim() ?? '';
-    final first = adminFirstName?.trim() ?? '';
-    final last = adminLastName?.trim() ?? '';
-    return email.isNotEmpty && first.isNotEmpty && last.isNotEmpty;
-  }
+  final String adminFirstName;
+  final String adminLastName;
+  final String adminEmail;
+  final String adminPassword;
 
   Map<String, dynamic> toJson() {
-    final body = <String, dynamic>{
+    return <String, dynamic>{
       'name': name.trim(),
       'country': country.trim(),
       'timezone': timezone.trim(),
@@ -182,15 +177,13 @@ class CreateOrganizationRequest {
       if (address != null && address!.trim().isNotEmpty) 'address': address!.trim(),
       if (website != null && website!.trim().isNotEmpty) 'website': website!.trim(),
       if (logoUrl != null && logoUrl!.trim().isNotEmpty) 'logoUrl': logoUrl!.trim(),
+      'initialAdmin': {
+        'email': adminEmail.trim(),
+        'firstName': adminFirstName.trim(),
+        'lastName': adminLastName.trim(),
+        'password': adminPassword,
+      },
     };
-    if (hasAdminInvite) {
-      body['admin'] = {
-        'email': adminEmail!.trim(),
-        'firstName': adminFirstName!.trim(),
-        'lastName': adminLastName!.trim(),
-      };
-    }
-    return body;
   }
 }
 
@@ -217,12 +210,35 @@ class PlatformInvitationResult {
   }
 }
 
+class InitialAdminResult {
+  const InitialAdminResult({
+    required this.userId,
+    required this.email,
+    required this.firstName,
+    required this.lastName,
+  });
+
+  final String userId;
+  final String email;
+  final String firstName;
+  final String lastName;
+
+  factory InitialAdminResult.fromJson(Map<String, dynamic> json) {
+    return InitialAdminResult(
+      userId: json['userId'] as String,
+      email: json['email'] as String,
+      firstName: json['firstName'] as String? ?? '',
+      lastName: json['lastName'] as String? ?? '',
+    );
+  }
+}
+
 class CreateTenantResult {
   const CreateTenantResult({
     required this.organization,
-    this.invitation,
+    this.initialAdmin,
   });
 
   final PlatformOrganization organization;
-  final PlatformInvitationResult? invitation;
+  final InitialAdminResult? initialAdmin;
 }

@@ -6,10 +6,11 @@ import 'package:digital_student/features/platform/data/platform_repository.dart'
 import 'package:digital_student/shared/models/page_result.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final platformDashboardProvider =
-    FutureProvider.autoDispose<PlatformDashboard>((ref) {
-  return ref.watch(platformRepositoryProvider).getDashboard();
-});
+final platformDashboardProvider = FutureProvider.autoDispose<PlatformDashboard>(
+  (ref) {
+    return ref.watch(platformRepositoryProvider).getDashboard();
+  },
+);
 
 class OrganizationListFilter {
   const OrganizationListFilter({this.q = '', this.status});
@@ -17,7 +18,11 @@ class OrganizationListFilter {
   final String q;
   final String? status;
 
-  OrganizationListFilter copyWith({String? q, String? status, bool clearStatus = false}) {
+  OrganizationListFilter copyWith({
+    String? q,
+    String? status,
+    bool clearStatus = false,
+  }) {
     return OrganizationListFilter(
       q: q ?? this.q,
       status: clearStatus ? null : (status ?? this.status),
@@ -25,7 +30,8 @@ class OrganizationListFilter {
   }
 }
 
-class OrganizationListFilterController extends StateNotifier<OrganizationListFilter> {
+class OrganizationListFilterController
+    extends StateNotifier<OrganizationListFilter> {
   OrganizationListFilterController() : super(const OrganizationListFilter());
 
   Timer? _debounce;
@@ -52,24 +58,24 @@ class OrganizationListFilterController extends StateNotifier<OrganizationListFil
   }
 }
 
-final organizationListFilterProvider = StateNotifierProvider.autoDispose<
-    OrganizationListFilterController, OrganizationListFilter>(
-  (ref) => OrganizationListFilterController(),
-);
+final organizationListFilterProvider =
+    StateNotifierProvider.autoDispose<
+      OrganizationListFilterController,
+      OrganizationListFilter
+    >((ref) => OrganizationListFilterController());
 
 final platformOrganizationsProvider =
     FutureProvider.autoDispose<PageResult<PlatformOrganization>>((ref) {
-  final filter = ref.watch(organizationListFilterProvider);
-  return ref.watch(platformRepositoryProvider).listOrganizations(
-        q: filter.q,
-        status: filter.status,
-      );
-});
+      final filter = ref.watch(organizationListFilterProvider);
+      return ref
+          .watch(platformRepositoryProvider)
+          .listOrganizations(q: filter.q, status: filter.status);
+    });
 
-final platformOrganizationProvider =
-    FutureProvider.autoDispose.family<PlatformOrganization, String>((ref, id) {
-  return ref.watch(platformRepositoryProvider).getOrganization(id);
-});
+final platformOrganizationProvider = FutureProvider.autoDispose
+    .family<PlatformOrganization, String>((ref, id) {
+      return ref.watch(platformRepositoryProvider).getOrganization(id);
+    });
 
 void invalidatePlatformOrgData(WidgetRef ref, {String? organizationId}) {
   ref.invalidate(platformDashboardProvider);

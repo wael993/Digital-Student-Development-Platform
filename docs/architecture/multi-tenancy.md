@@ -86,7 +86,7 @@ From the authenticated user after AUTH-001. Not from:
 
 Writes use `withTenant(input, auth.organizationId)`, which discards any client `organizationId`.
 
-Invite/accept and login establish the tenant, then issue a token that already contains it. Login also refuses users whose organization is missing or not operational.
+Owner-created initial Admin, invite/accept for later users, and login establish the tenant, then issue a token that already contains it. Login also refuses users whose organization is missing or not operational.
 
 ### How it is validated
 

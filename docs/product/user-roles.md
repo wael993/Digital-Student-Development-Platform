@@ -31,7 +31,7 @@ R = read, W = create/update in scope, — = no.
 | Organization profile | R/W | R | R | R | R |
 | Campuses | R/W | R (assigned) | R (own campus) | R (own campus) | — |
 | Classrooms | R/W | R (campus) | R (assigned) | — | — |
-| Users / invites | R/W | R (campus staff) | — | — | — |
+| Users / invites | R/W all tenant roles | R/W TEACHER, DRIVER, GUARDIAN only | — | — | — |
 | Students | R/W org | R/W campus | R/W class | R route students | R own children |
 | Guardian links | R/W | R/W campus | R class | — | R own links |
 | Attendance | R/W org | R/W campus | R/W class | — | R own children |

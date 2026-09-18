@@ -4,7 +4,11 @@ import { requireAuth } from '../../utils/requireAuth';
 import { isValidTimeZone } from '../../utils/timezone';
 import { asTrimmedString } from '../../utils/validate';
 import { DEFAULT_TIMEZONE } from './organization.model';
-import { findOrganizationById, toOrganizationJson, updateOrganization } from './organization.repository';
+import {
+  findOrganizationById,
+  toOrganizationJson,
+  updateOrganization,
+} from './organization.repository';
 
 function asName(value: unknown): string | undefined {
   return asTrimmedString(value);

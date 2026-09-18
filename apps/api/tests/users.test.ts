@@ -82,9 +82,7 @@ describe('tenant users API', () => {
     expect(supervisor.status).toBe(201);
     expect(supervisor.body.campusIds).toEqual([campus.id]);
 
-    const list = await request(app)
-      .get('/api/v1/users')
-      .set('Authorization', `Bearer ${token}`);
+    const list = await request(app).get('/api/v1/users').set('Authorization', `Bearer ${token}`);
     expect(list.status).toBe(200);
     expect(list.body.meta.total).toBeGreaterThanOrEqual(2);
 
@@ -259,5 +257,157 @@ describe('tenant users API', () => {
       .set('Authorization', `Bearer ${token}`);
     expect(response.status).toBe(403);
     expect(response.body.error.code).toBe('TENANT_SUSPENDED');
+  });
+
+  it('enforces AUTH-002 creator role matrix for SUPERVISOR', async () => {
+    const org = await insertOrganization({ name: 'Hierarchy School' });
+    const campus = await insertCampus(org.id, 'Main');
+    await insertUser({
+      email: 'admin@hierarchy.example',
+      password,
+      role: 'ADMIN',
+      organizationId: org.id,
+    });
+    await insertUser({
+      email: 'super@hierarchy.example',
+      password,
+      role: 'SUPERVISOR',
+      organizationId: org.id,
+      campusIds: [campus.id],
+    });
+    const otherSuper = await insertUser({
+      email: 'super2@hierarchy.example',
+      password,
+      role: 'SUPERVISOR',
+      organizationId: org.id,
+      campusIds: [campus.id],
+    });
+    const adminTarget = await insertUser({
+      email: 'admin2@hierarchy.example',
+      password,
+      role: 'ADMIN',
+      organizationId: org.id,
+    });
+    const token = await login('super@hierarchy.example');
+
+    for (const role of ['TEACHER', 'DRIVER', 'GUARDIAN'] as const) {
+      const created = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          email: `${role.toLowerCase()}@hierarchy.example`,
+          firstName: 'Ops',
+          lastName: role,
+          role,
+          password: 'StaffPass1!',
+          invite: false,
+        });
+      expect(created.status).toBe(201);
+      expect(created.body.role).toBe(role);
+    }
+
+    for (const role of ['ADMIN', 'SUPERVISOR'] as const) {
+      const denied = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          email: `denied-${role.toLowerCase()}@hierarchy.example`,
+          firstName: 'No',
+          lastName: role,
+          role,
+          password: 'StaffPass1!',
+          invite: false,
+          campusIds: role === 'SUPERVISOR' ? [campus.id] : undefined,
+        });
+      expect(denied.status).toBe(403);
+      expect(denied.body.error.code).toBe('FORBIDDEN');
+    }
+
+    const disableSuper = await request(app)
+      .post(`/api/v1/users/${otherSuper.id}/disable`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(disableSuper.status).toBe(403);
+
+    const disableAdmin = await request(app)
+      .post(`/api/v1/users/${adminTarget.id}/disable`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(disableAdmin.status).toBe(403);
+
+    const roleChange = await request(app)
+      .patch(`/api/v1/users/${otherSuper.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ role: 'TEACHER' });
+    expect(roleChange.status).toBe(403);
+  });
+
+  it('allows only ADMIN to change roles and blocks last active admin removal', async () => {
+    const org = await insertOrganization({ name: 'Admin Guard School' });
+    const soleAdmin = await insertUser({
+      email: 'sole@admin-guard.example',
+      password,
+      role: 'ADMIN',
+      organizationId: org.id,
+    });
+    const teacher = await insertUser({
+      email: 'teacher@admin-guard.example',
+      password,
+      role: 'TEACHER',
+      organizationId: org.id,
+    });
+    const token = await login('sole@admin-guard.example');
+
+    const lastDisable = await request(app)
+      .post(`/api/v1/users/${soleAdmin.id}/disable`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(lastDisable.status).toBe(403);
+    expect(lastDisable.body.error.code).toBe('LAST_ACTIVE_ADMIN');
+
+    const selfRole = await request(app)
+      .patch(`/api/v1/users/${soleAdmin.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ role: 'TEACHER' });
+    expect(selfRole.status).toBe(403);
+    expect(selfRole.body.error.code).toBe('FORBIDDEN');
+
+    const second = await insertUser({
+      email: 'second@admin-guard.example',
+      password,
+      role: 'ADMIN',
+      organizationId: org.id,
+    });
+
+    const demoteOther = await request(app)
+      .patch(`/api/v1/users/${second.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ role: 'TEACHER' });
+    expect(demoteOther.status).toBe(200);
+    expect(demoteOther.body.role).toBe('TEACHER');
+
+    const lastDemote = await request(app)
+      .patch(`/api/v1/users/${soleAdmin.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ firstName: 'Still' });
+    expect(lastDemote.status).toBe(200);
+
+    // only one active ADMIN left — cannot disable them
+    const cannotDisableSole = await request(app)
+      .post(`/api/v1/users/${soleAdmin.id}/disable`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(cannotDisableSole.status).toBe(403);
+    expect(cannotDisableSole.body.error.code).toBe('LAST_ACTIVE_ADMIN');
+
+    const promoted = await request(app)
+      .patch(`/api/v1/users/${teacher.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ role: 'SUPERVISOR' });
+    expect(promoted.status).toBe(200);
+    expect(promoted.body.role).toBe('SUPERVISOR');
+
+    const platformRole = await request(app)
+      .patch(`/api/v1/users/${teacher.id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ role: 'PLATFORM_ADMIN' });
+    expect(platformRole.status).toBe(422);
+    expect(platformRole.body.error.code).toBe('USER_ROLE_NOT_ALLOWED');
   });
 });

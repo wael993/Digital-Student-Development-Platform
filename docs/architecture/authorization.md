@@ -72,7 +72,17 @@ Platform:
 
 Stored as a single `users.role`. Platform users must not have an `organizationId`. Tenant users must not be `PLATFORM_ADMIN`.
 
-Do not branch on string literals in controllers. Call `authorize('students.read')` (or `hasPermission`) for tenant routes, and `requirePlatformAdmin()` for platform routes.
+Do **not** branch on string literals in controllers. Call `authorize('students.read')` (or `hasPermission`) for tenant routes, and `requirePlatformAdmin()` for platform routes.
+
+### Staff hierarchy (AUTH-002)
+
+| Actor | May create / manage |
+| --- | --- |
+| `ADMIN` | `ADMIN`, `SUPERVISOR`, `TEACHER`, `DRIVER`, `GUARDIAN` |
+| `SUPERVISOR` | `TEACHER`, `DRIVER`, `GUARDIAN` only |
+| Others | none |
+
+Only `ADMIN` may change a user's `role`. Users cannot change their own role or assignment scope via `/users`. Disabling or demoting the last active `ADMIN` returns `403 LAST_ACTIVE_ADMIN`.
 
 ## Permissions
 
@@ -82,7 +92,7 @@ Defined in `apps/api/src/authorization/permissions.ts`. Add a permission when th
 | --- | --- |
 | `organizations.read` | Read current org profile |
 | `organizations.update` | Update current org profile |
-| `users.read` / `users.create` / `users.update` | Staff user administration (HTTP surface deferred to Slice 2 / SCHOOL-001) |
+| `users.read` / `users.create` / `users.update` | Staff user administration. Hierarchy enforced in `user.service` (SUPERVISOR → TEACHER/DRIVER/GUARDIAN only; only ADMIN changes roles; `LAST_ACTIVE_ADMIN` on disable/demote). |
 | `campuses.read` / `campuses.manage` | Campuses |
 | `classrooms.read` / `classrooms.manage` | Classrooms |
 | `students.read` / `create` / `update` / `delete` | Student records |
@@ -101,7 +111,7 @@ Defined in `apps/api/src/authorization/permissions.ts`. Add a permission when th
 | --- | --- | --- | --- | --- | --- |
 | Organization management (`organizations.update`) | yes | no | no | no | no |
 | Read organization (`organizations.read`) | yes | yes | yes | yes | yes |
-| User management | yes | yes (limited later by campus) | no | no | no |
+| User management | yes (all tenant roles; last active ADMIN protected) | yes (TEACHER / DRIVER / GUARDIAN only) | no | no | no |
 | View students | yes | yes | assigned class | assigned route | own children |
 | Create / update / delete students | yes | yes | no | no | no |
 | Manage classrooms | yes | yes | assigned (read) | no | no |
@@ -120,7 +130,8 @@ Defined in `apps/api/src/authorization/permissions.ts`. Add a permission when th
 | Create / list / edit tenants | yes | no (own profile only via `/organizations/current`) |
 | Activate / suspend / deactivate | yes | no |
 | Manage subscription fields | yes | view own later (Slice 2 UI) |
-| Invite initial ADMIN | yes | — |
+| Create owner initial ADMIN | yes | — |
+| Invite additional ADMIN | yes | — |
 | Create PLATFORM_ADMIN | `npm run bootstrap:platform-admin` (one-time; idempotent) | no |
 | Daily school operations | no | yes |
 
@@ -129,7 +140,7 @@ Platform capabilities (enforced by `requirePlatformAdmin()` on `/api/v1/platform
 - organizations: read / create / update / activate / suspend / deactivate
 - subscriptions: read / manage
 - usage: read
-- invitations: create (first tenant ADMIN)
+- invitations: create (additional tenant ADMIN after owner-created initial Admin)
 - audit: read
 
 Do **not** grant `PLATFORM_ADMIN` tenant school-ops permissions (`students.write`, `attendance.write`, `journey.write`, `media.write`, `bus_operations.write`).

@@ -15,7 +15,6 @@ import 'package:digital_student/features/platform/data/platform_repository.dart'
 import 'package:digital_student/features/platform/presentation/dashboard/platform_dashboard_page.dart';
 import 'package:digital_student/features/platform/presentation/organizations/organizations_page.dart';
 import 'package:digital_student/features/platform/presentation/platform_shell.dart';
-import 'package:digital_student/features/platform/providers/platform_providers.dart';
 import 'package:digital_student/l10n/app_localizations.dart';
 import 'package:digital_student/shared/models/page_result.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +50,10 @@ Dio _dioThat(Map<String, Response<dynamic> Function(RequestOptions)> routes) {
         final build = routes[key];
         if (build == null) {
           handler.reject(
-            DioException(requestOptions: options, type: DioExceptionType.badResponse),
+            DioException(
+              requestOptions: options,
+              type: DioExceptionType.badResponse,
+            ),
           );
           return;
         }
@@ -92,11 +94,7 @@ Map<String, dynamic> _orgJson({
     'subscriptionStatus': 'TRIAL',
     'createdAt': '2026-01-01T00:00:00.000Z',
     'updatedAt': '2026-01-01T00:00:00.000Z',
-    'usage': {
-      'campusCount': 1,
-      'studentCount': 10,
-      'userCount': 3,
-    },
+    'usage': {'campusCount': 1, 'studentCount': 10, 'userCount': 3},
   };
 }
 
@@ -118,12 +116,12 @@ Widget _localized({
 
 class _FixedAuth extends AuthController {
   _FixedAuth(User user)
-      : super(
-          AuthRepository(
-            AuthApi(Dio(BaseOptions(baseUrl: 'http://test'))),
-            TokenStore(const FlutterSecureStorage()),
-          ),
-        ) {
+    : super(
+        AuthRepository(
+          AuthApi(Dio(BaseOptions(baseUrl: 'http://test'))),
+          TokenStore(const FlutterSecureStorage()),
+        ),
+      ) {
     state = AuthState(status: AuthStatus.authenticated, user: user);
   }
 
@@ -151,30 +149,30 @@ void main() {
                 PlatformApi(
                   _dioThat({
                     'GET /platform/dashboard': (options) => Response(
-                          requestOptions: options,
-                          statusCode: 200,
-                          data: {
-                            'organizations': {
-                              'total': 0,
-                              'active': 0,
-                              'trial': 0,
-                              'suspended': 0,
-                              'inactive': 0,
-                              'cancelled': 0,
-                            },
-                            'students': 0,
-                            'teachers': 0,
-                            'buses': 0,
-                          },
-                        ),
+                      requestOptions: options,
+                      statusCode: 200,
+                      data: {
+                        'organizations': {
+                          'total': 0,
+                          'active': 0,
+                          'trial': 0,
+                          'suspended': 0,
+                          'inactive': 0,
+                          'cancelled': 0,
+                        },
+                        'students': 0,
+                        'teachers': 0,
+                        'buses': 0,
+                      },
+                    ),
                     'GET /platform/organizations': (options) => Response(
-                          requestOptions: options,
-                          statusCode: 200,
-                          data: {
-                            'data': <dynamic>[],
-                            'meta': {'page': 1, 'limit': 20, 'total': 0},
-                          },
-                        ),
+                      requestOptions: options,
+                      statusCode: 200,
+                      data: {
+                        'data': <dynamic>[],
+                        'meta': {'page': 1, 'limit': 20, 'total': 0},
+                      },
+                    ),
                   }),
                 ),
               ),
@@ -189,7 +187,9 @@ void main() {
       expect(find.text('Campuses'), findsNothing);
     });
 
-    testWidgets('tenant ADMIN does not route to Platform Dashboard', (tester) async {
+    testWidgets('tenant ADMIN does not route to Platform Dashboard', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _localized(
           home: const HomePage(),
@@ -224,22 +224,22 @@ void main() {
         PlatformApi(
           _dioThat({
             'GET /platform/dashboard': (options) => Response(
-                  requestOptions: options,
-                  statusCode: 200,
-                  data: {
-                    'organizations': {
-                      'total': 5,
-                      'active': 2,
-                      'trial': 1,
-                      'suspended': 1,
-                      'inactive': 1,
-                      'cancelled': 0,
-                    },
-                    'students': 40,
-                    'teachers': 8,
-                    'buses': 3,
-                  },
-                ),
+              requestOptions: options,
+              statusCode: 200,
+              data: {
+                'organizations': {
+                  'total': 5,
+                  'active': 2,
+                  'trial': 1,
+                  'suspended': 1,
+                  'inactive': 1,
+                  'cancelled': 0,
+                },
+                'students': 40,
+                'teachers': 8,
+                'buses': 3,
+              },
+            ),
           }),
         ),
       );
@@ -263,12 +263,12 @@ void main() {
         PlatformApi(
           _dioThat({
             'GET /platform/dashboard': (options) => Response(
-                  requestOptions: options,
-                  statusCode: 500,
-                  data: {
-                    'error': {'code': 'INTERNAL_ERROR', 'message': 'boom'},
-                  },
-                ),
+              requestOptions: options,
+              statusCode: 500,
+              data: {
+                'error': {'code': 'INTERNAL_ERROR', 'message': 'boom'},
+              },
+            ),
           }),
         ),
       );
@@ -292,13 +292,13 @@ void main() {
         PlatformApi(
           _dioThat({
             'GET /platform/organizations': (options) => Response(
-                  requestOptions: options,
-                  statusCode: 200,
-                  data: {
-                    'data': <dynamic>[],
-                    'meta': {'page': 1, 'limit': 20, 'total': 0},
-                  },
-                ),
+              requestOptions: options,
+              statusCode: 200,
+              data: {
+                'data': <dynamic>[],
+                'meta': {'page': 1, 'limit': 20, 'total': 0},
+              },
+            ),
           }),
         ),
       );
@@ -313,7 +313,9 @@ void main() {
       expect(find.text('No organizations yet'), findsOneWidget);
     });
 
-    testWidgets('search and status filter call repository query params', (tester) async {
+    testWidgets('search and status filter call repository query params', (
+      tester,
+    ) async {
       String? lastQ;
       String? lastStatus;
       final repo = PlatformRepository(
@@ -344,7 +346,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Al Noor'), findsOneWidget);
 
-      await tester.enterText(find.byKey(const Key('organizationSearchField')), 'noor');
+      await tester.enterText(
+        find.byKey(const Key('organizationSearchField')),
+        'noor',
+      );
       await tester.pump(const Duration(milliseconds: 450));
       await tester.pumpAndSettle();
       expect(lastQ, 'noor');
@@ -354,87 +359,102 @@ void main() {
       expect(lastStatus, 'ACTIVE');
     });
 
-    test('create organization and invite strip invitation tokens', () async {
-      final repo = PlatformRepository(
-        PlatformApi(
-          _dioThat({
-            'POST /platform/organizations': (options) => Response(
+    test(
+      'create organization returns initial admin without password',
+      () async {
+        final repo = PlatformRepository(
+          PlatformApi(
+            _dioThat({
+              'POST /platform/organizations': (options) {
+                final data = options.data as Map<String, dynamic>;
+                expect(data['initialAdmin'], isA<Map>());
+                expect(
+                  (data['initialAdmin'] as Map)['password'],
+                  'AdminPass1!',
+                );
+                return Response(
                   requestOptions: options,
                   statusCode: 201,
                   data: {
                     'organization': _orgJson(),
-                    'invitation': {
-                      'invitationId': 'inv1',
+                    'initialAdmin': {
+                      'userId': 'user1',
                       'email': 'admin@alnoor.example',
+                      'firstName': 'Ahmed',
+                      'lastName': 'Ali',
+                    },
+                  },
+                );
+              },
+              'POST /platform/organizations/org1/admin-invitation': (options) =>
+                  Response(
+                    requestOptions: options,
+                    statusCode: 201,
+                    data: {
+                      'invitationId': 'inv2',
+                      'email': 'admin2@alnoor.example',
                       'expiresAt': '2026-02-01T00:00:00.000Z',
-                      'token': 'raw-secret-token',
+                      'token': 'another-secret',
                     },
-                  },
-                ),
-            'POST /platform/organizations/org1/admin-invitation': (options) =>
-                Response(
-                  requestOptions: options,
-                  statusCode: 201,
-                  data: {
-                    'invitationId': 'inv2',
-                    'email': 'admin2@alnoor.example',
-                    'expiresAt': '2026-02-01T00:00:00.000Z',
-                    'token': 'another-secret',
-                  },
-                ),
-            'POST /platform/organizations/org1/activate': (options) => Response(
-                  requestOptions: options,
-                  statusCode: 200,
-                  data: _orgJson(status: 'ACTIVE'),
-                ),
-            'POST /platform/organizations/org1/suspend': (options) => Response(
-                  requestOptions: options,
-                  statusCode: 422,
-                  data: {
-                    'error': {
-                      'code': 'VALIDATION_ERROR',
-                      'message': 'Cannot transition',
+                  ),
+              'POST /platform/organizations/org1/activate': (options) =>
+                  Response(
+                    requestOptions: options,
+                    statusCode: 200,
+                    data: _orgJson(status: 'ACTIVE'),
+                  ),
+              'POST /platform/organizations/org1/suspend': (options) =>
+                  Response(
+                    requestOptions: options,
+                    statusCode: 422,
+                    data: {
+                      'error': {
+                        'code': 'VALIDATION_ERROR',
+                        'message': 'Cannot transition',
+                      },
                     },
-                  },
-                ),
-          }),
-        ),
-      );
+                  ),
+            }),
+          ),
+        );
 
-      final created = await repo.createOrganization(
-        const CreateOrganizationRequest(
-          name: 'Al Noor',
-          country: 'SA',
-          timezone: 'Asia/Riyadh',
-          defaultLanguage: 'ar',
-          contactEmail: 'contact@alnoor.example',
-          planCode: 'STARTER',
-          adminEmail: 'admin@alnoor.example',
-          adminFirstName: 'Ahmed',
-          adminLastName: 'Ali',
-        ),
-      );
-      expect(created.organization.name, 'Al Noor');
-      expect(created.invitation?.email, 'admin@alnoor.example');
-      expect(created.invitation?.toString().contains('raw-secret-token'), isFalse);
+        final created = await repo.createOrganization(
+          const CreateOrganizationRequest(
+            name: 'Al Noor',
+            country: 'SA',
+            timezone: 'Asia/Riyadh',
+            defaultLanguage: 'ar',
+            contactEmail: 'contact@alnoor.example',
+            planCode: 'STARTER',
+            adminEmail: 'admin@alnoor.example',
+            adminFirstName: 'Ahmed',
+            adminLastName: 'Ali',
+            adminPassword: 'AdminPass1!',
+          ),
+        );
+        expect(created.organization.name, 'Al Noor');
+        expect(created.initialAdmin?.email, 'admin@alnoor.example');
+        expect(created.initialAdmin?.userId, 'user1');
+        expect(created.toString().contains('AdminPass1!'), isFalse);
 
-      final invite = await repo.inviteAdmin(
-        organizationId: 'org1',
-        email: 'admin2@alnoor.example',
-        firstName: 'Omar',
-        lastName: 'Hassan',
-      );
-      expect(invite.email, 'admin2@alnoor.example');
-      expect(invite.toString().contains('another-secret'), isFalse);
+        final invite = await repo.inviteAdmin(
+          organizationId: 'org1',
+          email: 'admin2@alnoor.example',
+          firstName: 'Omar',
+          lastName: 'Hassan',
+        );
+        expect(invite.email, 'admin2@alnoor.example');
+        expect(invite.toString().contains('another-secret'), isFalse);
 
-      final activated = await repo.activateOrganization('org1');
-      expect(activated.status, 'ACTIVE');
+        final activated = await repo.activateOrganization('org1');
+        expect(activated.status, 'ACTIVE');
 
-      await expectLater(
-        repo.suspendOrganization('org1'),
-        throwsA(isA<ApiException>()),
-      );
-    });
+        await expectLater(
+          repo.suspendOrganization('org1'),
+          throwsA(isA<ApiException>()),
+        );
+      },
+    );
 
     test('organization details parse usage and lifecycle flags', () {
       final org = PlatformOrganization.fromJson(_orgJson(status: 'ACTIVE'));
@@ -485,6 +505,25 @@ void main() {
       expect(dash.students, 9);
       expect(dash.isEmpty, isFalse);
     });
+
+    test('dashboard tolerates untyped nested maps from Dio', () {
+      final raw = <dynamic, dynamic>{
+        'organizations': <dynamic, dynamic>{
+          'total': 4,
+          'active': 4,
+          'trial': 0,
+          'suspended': 0,
+          'inactive': 0,
+          'cancelled': 0,
+        },
+        'students': 69,
+        'teachers': 5,
+        'buses': 4,
+      };
+      final dash = PlatformDashboard.fromJson(Map<String, dynamic>.from(raw));
+      expect(dash.organizations.total, 4);
+      expect(dash.students, 69);
+    });
   });
 
   group('localization', () {
@@ -499,30 +538,30 @@ void main() {
                 PlatformApi(
                   _dioThat({
                     'GET /platform/dashboard': (options) => Response(
-                          requestOptions: options,
-                          statusCode: 200,
-                          data: {
-                            'organizations': {
-                              'total': 0,
-                              'active': 0,
-                              'trial': 0,
-                              'suspended': 0,
-                              'inactive': 0,
-                              'cancelled': 0,
-                            },
-                            'students': 0,
-                            'teachers': 0,
-                            'buses': 0,
-                          },
-                        ),
+                      requestOptions: options,
+                      statusCode: 200,
+                      data: {
+                        'organizations': {
+                          'total': 0,
+                          'active': 0,
+                          'trial': 0,
+                          'suspended': 0,
+                          'inactive': 0,
+                          'cancelled': 0,
+                        },
+                        'students': 0,
+                        'teachers': 0,
+                        'buses': 0,
+                      },
+                    ),
                     'GET /platform/organizations': (options) => Response(
-                          requestOptions: options,
-                          statusCode: 200,
-                          data: {
-                            'data': <dynamic>[],
-                            'meta': {'page': 1, 'limit': 20, 'total': 0},
-                          },
-                        ),
+                      requestOptions: options,
+                      statusCode: 200,
+                      data: {
+                        'data': <dynamic>[],
+                        'meta': {'page': 1, 'limit': 20, 'total': 0},
+                      },
+                    ),
                   }),
                 ),
               ),

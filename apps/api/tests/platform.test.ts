@@ -1,9 +1,9 @@
+import jwt from 'jsonwebtoken';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app';
 import { AuditLogModel } from '../src/modules/audit/audit.model';
 import { UserInvitationModel } from '../src/modules/invitations/invitation.model';
-import { hashInviteToken } from '../src/modules/invitations/invitation.service';
 import { OrganizationModel } from '../src/modules/organizations/organization.model';
 import { UserModel } from '../src/modules/users/user.model';
 import * as subscriptionService from '../src/modules/subscriptions/subscription.service';
@@ -21,8 +21,25 @@ import {
 const app = createApp();
 const password = 'Password123!';
 
-async function login(email: string): Promise<string> {
-  const response = await request(app).post('/api/v1/auth/login').send({ email, password });
+function initialAdmin(overrides?: {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  password?: string;
+}) {
+  return {
+    firstName: 'Ahmed',
+    lastName: 'Ali',
+    email: 'admin@alnoor.example',
+    password: 'AdminPass1!',
+    ...overrides,
+  };
+}
+
+async function login(email: string, loginPassword = password): Promise<string> {
+  const response = await request(app)
+    .post('/api/v1/auth/login')
+    .send({ email, password: loginPassword });
   expect(response.status).toBe(200);
   return response.body.accessToken as string;
 }
@@ -62,7 +79,7 @@ describe('platform SaaS layer', () => {
     expect(me.body.organizationId).toBeNull();
   });
 
-  it('creates a tenant with slug, plan fields, invitation, and audit log', async () => {
+  it('creates a tenant with owner-created initial admin and audit logs', async () => {
     await insertPlatformAdmin({ email: 'ops@example.com', password });
     const token = await login('ops@example.com');
 
@@ -77,11 +94,7 @@ describe('platform SaaS layer', () => {
         contactEmail: 'contact@alnoor.example',
         contactPhone: '+966511111111',
         planCode: 'STARTER',
-        admin: {
-          email: 'admin@alnoor.example',
-          firstName: 'Ahmed',
-          lastName: 'Ali',
-        },
+        initialAdmin: initialAdmin(),
       });
 
     expect(response.status).toBe(201);
@@ -94,24 +107,48 @@ describe('platform SaaS layer', () => {
       contactEmail: 'contact@alnoor.example',
     });
     expect(response.body.organization.slug).toMatch(/al-noor/);
-    expect(response.body.invitation).toMatchObject({
+    expect(response.body.initialAdmin).toMatchObject({
       email: 'admin@alnoor.example',
-      token: expect.any(String),
+      firstName: 'Ahmed',
+      lastName: 'Ali',
+      userId: expect.any(String),
     });
+    expect(response.body.invitation).toBeUndefined();
+    expect(JSON.stringify(response.body)).not.toMatch(/AdminPass1!/);
+    expect(response.body.initialAdmin.password).toBeUndefined();
+    expect(response.body.initialAdmin.passwordHash).toBeUndefined();
+
+    const user = await UserModel.findById(response.body.initialAdmin.userId).select(
+      '+passwordHash',
+    );
+    expect(user).toMatchObject({
+      email: 'admin@alnoor.example',
+      role: 'ADMIN',
+      status: 'ACTIVE',
+    });
+    expect(String(user?.organizationId)).toBe(response.body.organization.id);
+    expect(user?.passwordHash).toBeTruthy();
+    expect(user?.passwordHash).not.toBe('AdminPass1!');
+
+    const invites = await UserInvitationModel.countDocuments({});
+    expect(invites).toBe(0);
 
     const audits = await AuditLogModel.find({ action: 'TENANT_CREATED' });
     expect(audits).toHaveLength(1);
     expect(String(audits[0].organizationId)).toBe(response.body.organization.id);
 
-    const inviteAudits = await AuditLogModel.find({ action: 'USER_INVITED' });
-    expect(inviteAudits).toHaveLength(1);
-
-    const stored = await UserInvitationModel.findById(response.body.invitation.invitationId);
-    expect(stored?.tokenHash).toBe(hashInviteToken(response.body.invitation.token));
-    expect(stored?.tokenHash).not.toBe(response.body.invitation.token);
+    const adminAudits = await AuditLogModel.find({ action: 'INITIAL_ADMIN_CREATED' });
+    expect(adminAudits).toHaveLength(1);
+    expect(adminAudits[0].metadata).toMatchObject({
+      email: 'admin@alnoor.example',
+      role: 'ADMIN',
+    });
+    expect(JSON.stringify(adminAudits[0].metadata ?? {})).not.toMatch(
+      /AdminPass1!|passwordHash|\$2/,
+    );
   });
 
-  it('accepts an invitation once, then rejects reuse and expired tokens', async () => {
+  it('lets initial admin log in immediately and change password', async () => {
     await insertPlatformAdmin({ email: 'ops@example.com', password });
     const token = await login('ops@example.com');
 
@@ -123,52 +160,160 @@ describe('platform SaaS layer', () => {
         country: 'SA',
         contactEmail: 'hello@future.example',
         planCode: 'PROFESSIONAL',
-        admin: {
-          email: 'admin@future.example',
-          firstName: 'Sara',
-          lastName: 'Nasser',
-        },
+        status: 'ACTIVE',
+        initialAdmin: initialAdmin({ email: 'admin@future.example' }),
       });
     expect(created.status).toBe(201);
-    const inviteToken = created.body.invitation.token as string;
     const organizationId = created.body.organization.id as string;
 
-    const accepted = await request(app)
-      .post(`/api/v1/platform/invitations/${inviteToken}/accept`)
-      .send({ password: 'AdminPass1!' });
-    expect(accepted.status).toBe(200);
-    expect(accepted.body).toMatchObject({
+    const adminLogin = await request(app).post('/api/v1/auth/login').send({
       email: 'admin@future.example',
+      password: 'AdminPass1!',
+    });
+    expect(adminLogin.status).toBe(200);
+    expect(adminLogin.body.user).toMatchObject({
+      email: 'admin@future.example',
+      role: 'ADMIN',
       organizationId,
     });
+    const jwtPayload = jwt.decode(adminLogin.body.accessToken) as jwt.JwtPayload;
+    expect(jwtPayload.organizationId).toBe(organizationId);
+    expect(jwtPayload.role).toBe('ADMIN');
 
-    const user = await UserModel.findById(accepted.body.userId);
-    expect(user?.role).toBe('ADMIN');
-    expect(String(user?.organizationId)).toBe(organizationId);
+    const campuses = await request(app)
+      .get('/api/v1/campuses')
+      .set('Authorization', `Bearer ${adminLogin.body.accessToken}`);
+    expect(campuses.status).toBe(200);
 
-    const reuse = await request(app)
-      .post(`/api/v1/platform/invitations/${inviteToken}/accept`)
-      .send({ password: 'AdminPass1!' });
-    expect(reuse.status).toBe(409);
-    expect(reuse.body.error.code).toBe('INVITATION_ALREADY_USED');
+    const changed = await request(app)
+      .post('/api/v1/auth/change-password')
+      .set('Authorization', `Bearer ${adminLogin.body.accessToken}`)
+      .send({
+        currentPassword: 'AdminPass1!',
+        newPassword: 'NewAdminPass2!',
+      });
+    expect(changed.status).toBe(204);
+
+    const oldLogin = await request(app).post('/api/v1/auth/login').send({
+      email: 'admin@future.example',
+      password: 'AdminPass1!',
+    });
+    expect(oldLogin.status).toBe(401);
+
+    await login('admin@future.example', 'NewAdminPass2!');
+  });
+
+  it('rejects create without initial admin fields and duplicate emails', async () => {
+    await insertPlatformAdmin({ email: 'ops@example.com', password });
+    const token = await login('ops@example.com');
+
+    const missing = await request(app)
+      .post('/api/v1/platform/organizations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'No Admin School',
+        country: 'SA',
+        contactEmail: 'noadmin@example.com',
+        planCode: 'STARTER',
+      });
+    expect(missing.status).toBe(422);
+    expect(missing.body.error.code).toBe('VALIDATION_ERROR');
+
+    const weak = await request(app)
+      .post('/api/v1/platform/organizations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'Weak Pass School',
+        country: 'SA',
+        contactEmail: 'weak@example.com',
+        planCode: 'STARTER',
+        initialAdmin: initialAdmin({ email: 'weak@admin.example', password: 'short' }),
+      });
+    expect(weak.status).toBe(422);
+    expect(weak.body.error.code).toBe('PASSWORD_TOO_WEAK');
+
+    await request(app)
+      .post('/api/v1/platform/organizations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'First School',
+        country: 'SA',
+        contactEmail: 'first@example.com',
+        planCode: 'STARTER',
+        initialAdmin: initialAdmin({ email: 'dup@example.com' }),
+      });
+
+    const before = await OrganizationModel.countDocuments({});
+    const dup = await request(app)
+      .post('/api/v1/platform/organizations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'Second School',
+        country: 'SA',
+        contactEmail: 'second@example.com',
+        planCode: 'STARTER',
+        initialAdmin: initialAdmin({ email: 'dup@example.com' }),
+      });
+    expect(dup.status).toBe(409);
+    expect(dup.body.error.code).toBe('USER_ALREADY_EXISTS');
+    expect(await OrganizationModel.countDocuments({})).toBe(before);
+  });
+
+  it('keeps subsequent admin invitation flow for existing organizations', async () => {
+    await insertPlatformAdmin({ email: 'ops@example.com', password });
+    const token = await login('ops@example.com');
+
+    const created = await request(app)
+      .post('/api/v1/platform/organizations')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        name: 'Invite Later School',
+        country: 'SA',
+        contactEmail: 'later@example.com',
+        planCode: 'PROFESSIONAL',
+        initialAdmin: initialAdmin({ email: 'first@later.example' }),
+      });
+    expect(created.status).toBe(201);
+    const organizationId = created.body.organization.id as string;
 
     const secondInvite = await request(app)
       .post(`/api/v1/platform/organizations/${organizationId}/admin-invitation`)
       .set('Authorization', `Bearer ${token}`)
       .send({
-        email: 'admin2@future.example',
+        email: 'admin2@later.example',
         firstName: 'Omar',
         lastName: 'Hassan',
       });
     expect(secondInvite.status).toBe(201);
 
+    const accepted = await request(app)
+      .post(`/api/v1/platform/invitations/${secondInvite.body.token}/accept`)
+      .send({ password: 'AdminPass1!' });
+    expect(accepted.status).toBe(200);
+
+    const reuse = await request(app)
+      .post(`/api/v1/platform/invitations/${secondInvite.body.token}/accept`)
+      .send({ password: 'AdminPass1!' });
+    expect(reuse.status).toBe(409);
+    expect(reuse.body.error.code).toBe('INVITATION_ALREADY_USED');
+
+    const expiredInvite = await request(app)
+      .post(`/api/v1/platform/organizations/${organizationId}/admin-invitation`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        email: 'admin3@later.example',
+        firstName: 'Lina',
+        lastName: 'Said',
+      });
+    expect(expiredInvite.status).toBe(201);
+
     await UserInvitationModel.updateOne(
-      { _id: secondInvite.body.invitationId },
+      { _id: expiredInvite.body.invitationId },
       { expiresAt: new Date(Date.now() - 60_000) },
     );
 
     const expired = await request(app)
-      .post(`/api/v1/platform/invitations/${secondInvite.body.token}/accept`)
+      .post(`/api/v1/platform/invitations/${expiredInvite.body.token}/accept`)
       .send({ password: 'AdminPass1!' });
     expect(expired.status).toBe(410);
     expect(expired.body.error.code).toBe('INVITATION_EXPIRED');
@@ -209,6 +354,7 @@ describe('platform SaaS layer', () => {
         country: 'SA',
         contactEmail: 'life@example.com',
         planCode: 'STARTER',
+        initialAdmin: initialAdmin({ email: 'admin@life.example' }),
       });
     const organizationId = created.body.organization.id as string;
 
@@ -297,6 +443,7 @@ describe('platform SaaS layer', () => {
         contactEmail: 'limit@example.com',
         planCode: 'STARTER',
         status: 'ACTIVE',
+        initialAdmin: initialAdmin({ email: 'owner@limit.example' }),
       });
     const organizationId = created.body.organization.id as string;
 
@@ -338,6 +485,7 @@ describe('platform SaaS layer', () => {
         country: 'SA',
         contactEmail: 'sub@example.com',
         planCode: 'STARTER',
+        initialAdmin: initialAdmin({ email: 'admin@sub.example' }),
       });
     const organizationId = created.body.organization.id as string;
 
@@ -370,6 +518,7 @@ describe('platform SaaS layer', () => {
         contactEmail: 'alpha@filter.example',
         planCode: 'STARTER',
         status: 'TRIAL',
+        initialAdmin: initialAdmin({ email: 'admin@alpha.example' }),
       });
     await request(app)
       .post('/api/v1/platform/organizations')
@@ -380,6 +529,7 @@ describe('platform SaaS layer', () => {
         contactEmail: 'beta@other.example',
         planCode: 'STARTER',
         status: 'ACTIVE',
+        initialAdmin: initialAdmin({ email: 'admin@beta.example' }),
       });
 
     const filtered = await request(app)
@@ -420,6 +570,7 @@ describe('platform SaaS layer', () => {
         contactEmail: 'trans@example.com',
         planCode: 'STARTER',
         status: 'INACTIVE',
+        initialAdmin: initialAdmin({ email: 'admin@trans.example' }),
       });
     const organizationId = created.body.organization.id as string;
 
